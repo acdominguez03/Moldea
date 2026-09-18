@@ -2,17 +2,19 @@
 
 Paquete de la feature **Estadísticas**: la pestaña de métricas y progreso de Moldea.
 
-Recién creado: de momento solo contiene la infraestructura de textos localizados. Las capas
-`Data` y `Domain` están vacías, y aún no hay vistas.
+De momento contiene la infraestructura de textos localizados y la pantalla raíz
+`StatisticsView`, todavía sin contenido. Las capas `Data` y `Domain` están vacías.
 
-No depende de ningún otro paquete. Si necesita textos o utilidades compartidas, la dependencia
-a añadir es `Core` (`.package(path: "../Core")`), como hace `Navigation`.
+Depende de `Core` (`.package(path: "../Core")`), de donde saldrán los modelos y utilidades
+compartidas (`LoadableViewModel`, los `@Model` de SwiftData). Hoy la vista todavía no consume
+nada de `Core`.
 
 ## Configuración
 
 - `swift-tools-version: 6.4`
 - Plataforma mínima: `.iOS(.v26)`
 - `swiftSettings`: `.enableUpcomingFeature("ApproachableConcurrency")` en target y test target
+- Dependencia: `.package(path: "../Core")`
 
 ## Estructura
 
@@ -21,6 +23,7 @@ Sources/Statistics/
 ├── Data/           # repositorios y fuentes de datos (vacía por ahora)
 ├── Domain/         # modelos y casos de uso (vacía por ahora)
 └── Presentation/
+    ├── StatisticsView.swift
     ├── Enums/
     │   └── StatisticsTextsEnum.swift
     └── Resources/
@@ -31,10 +34,17 @@ Tests/StatisticsTests/
 Es la misma estructura de tres capas que `Core` y que el resto de paquetes de feature
 (`Today`, `Habits`, `Settings`). Las vistas y los modelos de vista van en `Presentation`.
 
+## Pantalla
+
+`StatisticsView` es el punto de entrada público del paquete: un `NavigationStack` con un
+`ScrollView` vacío y el título de pantalla en grande. Es la misma forma que `TodayView`,
+`HabitsView` y `SettingsView`; la compone el target `Moldea` en el caso `.statistics` de
+`MainTab`.
+
 ## Textos y localización
 
 Un único catálogo por paquete —`Presentation/Resources/Localizable.xcstrings`— y un único
-punto de acceso —`StatisticsTexts`—, que expone constantes `LocalizedStringResource`:
+punto de acceso —`StatisticsTextsEnum`—, que expone constantes `LocalizedStringResource`:
 
 ```swift
 private static func resource(_ key: String) -> LocalizedStringResource {
@@ -58,11 +68,11 @@ Claves actuales:
 | `statistics_empty_state` | There is no data to display yet | Todavía no hay datos que mostrar |
 
 Para añadir un texto: añade la entrada al `Localizable.xcstrings` (en `en` y `es`, con
-`"extractionState": "manual"`) y expón la constante en `StatisticsTexts`. Las claves van en
+`"extractionState": "manual"`) y expón la constante en `StatisticsTextsEnum`. Las claves van en
 `snake_case` con el prefijo `statistics_`; las constantes, en `camelCase`.
 
-Los textos que acaben usándose desde más de un módulo se mueven a `CoreTexts`. Ojo: el título
-de la pestaña ya vive en `Core` como `statistics_title` —lo consume `MainTab`—;
+Los textos que acaben usándose desde más de un módulo se mueven a `CoreTextsEnum`. Ojo: el
+título de la pestaña ya vive en `Core` como `statistics_title` —lo consume `MainTab`—;
 `statistics_screen_title` es el título de la pantalla, no el de la pestaña.
 
 Al formatear números, porcentajes o rangos de fechas, usa `.formatted(...)` con los estilos de

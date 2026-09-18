@@ -8,12 +8,16 @@
 import SwiftUI
 import SwiftData
 import Navigation
+import Today
+import Statistics
+import Habits
+import Settings
 
 @main
 struct MoldeaApp: App {
     @State private var tabRouter = TabRouter()
     @State private var router = AppRouter(initialFlow: .tabView)
-
+    
     var body: some Scene {
         WindowGroup {
             RootView(router: router) { flow in
@@ -36,13 +40,13 @@ struct MoldeaApp: App {
     private func tabContent(for tab: MainTab) -> some View {
         switch tab {
         case .today:
-            EmptyView()
+            TodayView()
         case .statistics:
-            EmptyView()
+            StatisticsView()
         case .habits:
-            EmptyView()
+            HabitsView()
         case .settings:
-            EmptyView()
+            SettingsView()
         case .microphone:
             EmptyView()
         }

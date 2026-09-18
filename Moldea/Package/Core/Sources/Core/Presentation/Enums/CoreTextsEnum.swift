@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum CoreTexts {
+public enum CoreTextsEnum {
     private static func resource(_ key: String) -> LocalizedStringResource {
         LocalizedStringResource(
             String.LocalizationValue(key),
@@ -23,4 +23,7 @@ public enum CoreTexts {
 
     // MARK: TabBar Accessory Texts
     public static let voiceInputButton = resource("voice_input_button")
+
+    // MARK: Error Texts
+    public static let genericError = resource("generic_error")
 }

@@ -1,6 +1,24 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "generic_error" : {
+      "comment" : "Mensaje de error por defecto cuando el error no sabe describirse al usuario.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong. Please try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo ha salido mal. Inténtalo de nuevo."
+          }
+        }
+      }
+    },
     "habits_title" : {
       "extractionState" : "manual",
       "localizations" : {

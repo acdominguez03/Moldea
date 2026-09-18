@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum HabitsTexts {
+public enum HabitsTextsEnum {
     private static func resource(_ key: String) -> LocalizedStringResource {
         LocalizedStringResource(
             String.LocalizationValue(key),

@@ -2,17 +2,19 @@
 
 Paquete de la feature **Configuración**: la pestaña de ajustes y preferencias de Moldea.
 
-Recién creado: de momento solo contiene la infraestructura de textos localizados. Las capas
-`Data` y `Domain` están vacías, y aún no hay vistas.
+De momento contiene la infraestructura de textos localizados y la pantalla raíz `SettingsView`,
+todavía sin contenido. Las capas `Data` y `Domain` están vacías.
 
-No depende de ningún otro paquete. Si necesita textos o utilidades compartidas, la dependencia
-a añadir es `Core` (`.package(path: "../Core")`), como hace `Navigation`.
+Depende de `Core` (`.package(path: "../Core")`), de donde saldrán los modelos y utilidades
+compartidas (`LoadableViewModel`, los `@Model` de SwiftData). Hoy la vista todavía no consume
+nada de `Core`.
 
 ## Configuración
 
 - `swift-tools-version: 6.4`
 - Plataforma mínima: `.iOS(.v26)`
 - `swiftSettings`: `.enableUpcomingFeature("ApproachableConcurrency")` en target y test target
+- Dependencia: `.package(path: "../Core")`
 
 ## Estructura
 
@@ -21,6 +23,7 @@ Sources/Settings/
 ├── Data/           # persistencia de preferencias (vacía por ahora)
 ├── Domain/         # modelos y casos de uso (vacía por ahora)
 └── Presentation/
+    ├── SettingsView.swift
     ├── Enums/
     │   └── SettingsTextsEnum.swift
     └── Resources/
@@ -31,10 +34,17 @@ Tests/SettingsTests/
 Es la misma estructura de tres capas que `Core` y que el resto de paquetes de feature
 (`Today`, `Statistics`, `Habits`). Las vistas y los modelos de vista van en `Presentation`.
 
+## Pantalla
+
+`SettingsView` es el punto de entrada público del paquete: un `NavigationStack` con un
+`ScrollView` vacío y el título de pantalla en grande. Es la misma forma que `TodayView`,
+`StatisticsView` y `HabitsView`; la compone el target `Moldea` en el caso `.settings` de
+`MainTab`.
+
 ## Textos y localización
 
 Un único catálogo por paquete —`Presentation/Resources/Localizable.xcstrings`— y un único
-punto de acceso —`SettingsTexts`—, que expone constantes `LocalizedStringResource`:
+punto de acceso —`SettingsTextsEnum`—, que expone constantes `LocalizedStringResource`:
 
 ```swift
 private static func resource(_ key: String) -> LocalizedStringResource {
@@ -58,11 +68,11 @@ Claves actuales:
 | `settings_general_section` | General | General |
 
 Para añadir un texto: añade la entrada al `Localizable.xcstrings` (en `en` y `es`, con
-`"extractionState": "manual"`) y expón la constante en `SettingsTexts`. Las claves van en
+`"extractionState": "manual"`) y expón la constante en `SettingsTextsEnum`. Las claves van en
 `snake_case` con el prefijo `settings_`; las constantes, en `camelCase`.
 
-Los textos que acaben usándose desde más de un módulo se mueven a `CoreTexts`. Ojo: el título
-de la pestaña ya vive en `Core` como `settings_title` —lo consume `MainTab`—;
+Los textos que acaben usándose desde más de un módulo se mueven a `CoreTextsEnum`. Ojo: el
+título de la pestaña ya vive en `Core` como `settings_title` —lo consume `MainTab`—;
 `settings_screen_title` es el título de la pantalla, no el de la pestaña.
 
 Este paquete acumulará muchas etiquetas cortas (secciones, filas, pies de ayuda). Mantén el

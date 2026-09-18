@@ -34,15 +34,15 @@ public enum MainTab: Hashable, CaseIterable {
     public var description: LocalizedStringResource {
         switch self {
         case .today:
-            return CoreTexts.todayTitle
+            return CoreTextsEnum.todayTitle
         case .statistics:
-            return CoreTexts.statisticsTitle
+            return CoreTextsEnum.statisticsTitle
         case .habits:
-            return CoreTexts.habitsTitle
+            return CoreTextsEnum.habitsTitle
         case .settings:
-            return CoreTexts.settingsTitle
+            return CoreTextsEnum.settingsTitle
         case .microphone:
-            return CoreTexts.voiceInputButton
+            return CoreTextsEnum.voiceInputButton
         }
     }
 }

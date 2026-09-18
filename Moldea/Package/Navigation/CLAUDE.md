@@ -43,7 +43,7 @@ flujo activo y publica el router con `.environment(router)`.
 
 `MainTab` es el enum de pestañas (`today`, `statistics`, `habits`, `settings`). Cada caso
 aporta su `icon` (SF Symbol, `internal`) y su `description` (`LocalizedStringResource`,
-`public`), que viene de `CoreTexts`. El orden de las pestañas en pantalla lo fija el array
+`public`), que viene de `CoreTextsEnum`. El orden de las pestañas en pantalla lo fija el array
 `tabs` de `MainTabsView`, no `CaseIterable`.
 
 `TabRouter` es un `@Observable` con la pestaña seleccionada y `present(tab:)`.

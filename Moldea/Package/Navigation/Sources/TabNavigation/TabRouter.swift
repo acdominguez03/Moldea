@@ -17,5 +17,4 @@ public class TabRouter {
     public func present(tab: MainTab) {
         selectedTab = tab
     }
-    
 }

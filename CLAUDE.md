@@ -259,9 +259,9 @@ entorno) y decide el nivel de composición.
 ### Textos
 
 Cada paquete tiene **un** `Localizable.xcstrings` en `Presentation/Resources/` y **un** enum
-`<Paquete>Texts` en `Presentation/Enums/` como único punto de acceso. Todos resuelven
+`<Paquete>TextsEnum` en `Presentation/Enums/` como único punto de acceso. Todos resuelven
 contra `Bundle.module`; sin eso el string se buscaría en el bundle de la app. Idiomas: `en`
-(origen) y `es`. Un texto que use más de un módulo se mueve a `CoreTexts`.
+(origen) y `es`. Un texto que use más de un módulo se mueve a `CoreTextsEnum`.
 
 ### Tests
 
