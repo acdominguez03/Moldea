@@ -1,0 +1,632 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7EB9EBCF305D87C000520D21 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 7EB9EBCE305D87C000520D21 /* Core */; };
+		7EB9EBD1305D87C000520D21 /* Navigation in Frameworks */ = {isa = PBXBuildFile; productRef = 7EB9EBD0305D87C000520D21 /* Navigation */; };
+		7EB9EBE1305D87C000520D21 /* Today in Frameworks */ = {isa = PBXBuildFile; productRef = 7EB9EBE0305D87C000520D21 /* Today */; };
+		7EB9EBE3305D87C000520D21 /* Statistics in Frameworks */ = {isa = PBXBuildFile; productRef = 7EB9EBE2305D87C000520D21 /* Statistics */; };
+		7EB9EBE5305D87C000520D21 /* Habits in Frameworks */ = {isa = PBXBuildFile; productRef = 7EB9EBE4305D87C000520D21 /* Habits */; };
+		7EB9EBE7305D87C000520D21 /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 7EB9EBE6305D87C000520D21 /* Settings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7EB9EB96305D853E00520D21 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EB9EB7E305D853D00520D21 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7EB9EB85305D853D00520D21;
+			remoteInfo = Moldea;
+		};
+		7EB9EBA0305D853E00520D21 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EB9EB7E305D853D00520D21 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7EB9EB85305D853D00520D21;
+			remoteInfo = Moldea;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		7EB9EB86305D853D00520D21 /* Moldea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Moldea.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EB9EB95305D853E00520D21 /* MoldeaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoldeaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EB9EB9F305D853E00520D21 /* MoldeaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoldeaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7EB9EBCB305D85EE00520D21 /* Exceptions for "Moldea" folder in "Moldea" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Package/Core,
+				Package/Habits,
+				Package/Navigation,
+				Package/Settings,
+				Package/Statistics,
+				Package/Today,
+			);
+			target = 7EB9EB85305D853D00520D21 /* Moldea */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		7EB9EB88305D853D00520D21 /* Moldea */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				7EB9EBCB305D85EE00520D21 /* Exceptions for "Moldea" folder in "Moldea" target */,
+			);
+			path = Moldea;
+			sourceTree = "<group>";
+		};
+		7EB9EB98305D853E00520D21 /* MoldeaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MoldeaTests;
+			sourceTree = "<group>";
+		};
+		7EB9EBA2305D853E00520D21 /* MoldeaUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MoldeaUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7EB9EB83305D853D00520D21 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				7EB9EBD1305D87C000520D21 /* Navigation in Frameworks */,
+				7EB9EBCF305D87C000520D21 /* Core in Frameworks */,
+				7EB9EBE1305D87C000520D21 /* Today in Frameworks */,
+				7EB9EBE3305D87C000520D21 /* Statistics in Frameworks */,
+				7EB9EBE5305D87C000520D21 /* Habits in Frameworks */,
+				7EB9EBE7305D87C000520D21 /* Settings in Frameworks */,
+			);
+		};
+		7EB9EB92305D853E00520D21 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		7EB9EB9C305D853E00520D21 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7EB9EB7D305D853D00520D21 = {
+			isa = PBXGroup;
+			children = (
+				7EB9EB88305D853D00520D21 /* Moldea */,
+				7EB9EB98305D853E00520D21 /* MoldeaTests */,
+				7EB9EBA2305D853E00520D21 /* MoldeaUITests */,
+				7EB9EBCD305D87C000520D21 /* Frameworks */,
+				7EB9EB87305D853D00520D21 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7EB9EB87305D853D00520D21 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7EB9EB86305D853D00520D21 /* Moldea.app */,
+				7EB9EB95305D853E00520D21 /* MoldeaTests.xctest */,
+				7EB9EB9F305D853E00520D21 /* MoldeaUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7EB9EBCD305D87C000520D21 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7EB9EB85305D853D00520D21 /* Moldea */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EB9EBA7305D853E00520D21 /* Build configuration list for PBXNativeTarget "Moldea" */;
+			buildPhases = (
+				7EB9EB82305D853D00520D21 /* Sources */,
+				7EB9EB83305D853D00520D21 /* Frameworks */,
+				7EB9EB84305D853D00520D21 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				7EB9EB88305D853D00520D21 /* Moldea */,
+			);
+			name = Moldea;
+			packageProductDependencies = (
+				7EB9EBCE305D87C000520D21 /* Core */,
+				7EB9EBD0305D87C000520D21 /* Navigation */,
+				7EB9EBE0305D87C000520D21 /* Today */,
+				7EB9EBE2305D87C000520D21 /* Statistics */,
+				7EB9EBE4305D87C000520D21 /* Habits */,
+				7EB9EBE6305D87C000520D21 /* Settings */,
+			);
+			productName = Moldea;
+			productReference = 7EB9EB86305D853D00520D21 /* Moldea.app */;
+			productType = "com.apple.product-type.application";
+		};
+		7EB9EB94305D853E00520D21 /* MoldeaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EB9EBAA305D853E00520D21 /* Build configuration list for PBXNativeTarget "MoldeaTests" */;
+			buildPhases = (
+				7EB9EB91305D853E00520D21 /* Sources */,
+				7EB9EB92305D853E00520D21 /* Frameworks */,
+				7EB9EB93305D853E00520D21 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7EB9EB97305D853E00520D21 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				7EB9EB98305D853E00520D21 /* MoldeaTests */,
+			);
+			name = MoldeaTests;
+			productName = MoldeaTests;
+			productReference = 7EB9EB95305D853E00520D21 /* MoldeaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		7EB9EB9E305D853E00520D21 /* MoldeaUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EB9EBAD305D853E00520D21 /* Build configuration list for PBXNativeTarget "MoldeaUITests" */;
+			buildPhases = (
+				7EB9EB9B305D853E00520D21 /* Sources */,
+				7EB9EB9C305D853E00520D21 /* Frameworks */,
+				7EB9EB9D305D853E00520D21 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7EB9EBA1305D853E00520D21 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				7EB9EBA2305D853E00520D21 /* MoldeaUITests */,
+			);
+			name = MoldeaUITests;
+			productName = MoldeaUITests;
+			productReference = 7EB9EB9F305D853E00520D21 /* MoldeaUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7EB9EB7E305D853D00520D21 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					7EB9EB85305D853D00520D21 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					7EB9EB94305D853E00520D21 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 7EB9EB85305D853D00520D21;
+					};
+					7EB9EB9E305D853E00520D21 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 7EB9EB85305D853D00520D21;
+					};
+				};
+			};
+			buildConfigurationList = 7EB9EB81305D853D00520D21 /* Build configuration list for PBXProject "Moldea" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 7EB9EB7D305D853D00520D21;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7EB9EB87305D853D00520D21 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7EB9EB85305D853D00520D21 /* Moldea */,
+				7EB9EB94305D853E00520D21 /* MoldeaTests */,
+				7EB9EB9E305D853E00520D21 /* MoldeaUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7EB9EB84305D853D00520D21 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		7EB9EB93305D853E00520D21 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		7EB9EB9D305D853E00520D21 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7EB9EB82305D853D00520D21 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		7EB9EB91305D853E00520D21 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		7EB9EB9B305D853E00520D21 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7EB9EB97305D853E00520D21 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7EB9EB85305D853D00520D21 /* Moldea */;
+			targetProxy = 7EB9EB96305D853E00520D21 /* PBXContainerItemProxy */;
+		};
+		7EB9EBA1305D853E00520D21 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7EB9EB85305D853D00520D21 /* Moldea */;
+			targetProxy = 7EB9EBA0305D853E00520D21 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		7EB9EBA5305D853E00520D21 /* Debug configuration for PBXProject "Moldea" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4LP75YDTX4;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		7EB9EBA6305D853E00520D21 /* Release configuration for PBXProject "Moldea" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4LP75YDTX4;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		7EB9EBA8305D853E00520D21 /* Debug configuration for PBXNativeTarget "Moldea" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4LP75YDTX4;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.Moldea;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7EB9EBA9305D853E00520D21 /* Release configuration for PBXNativeTarget "Moldea" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4LP75YDTX4;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.Moldea;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		7EB9EBAB305D853E00520D21 /* Debug configuration for PBXNativeTarget "MoldeaTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4LP75YDTX4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.MoldeaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moldea.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Moldea";
+			};
+			name = Debug;
+		};
+		7EB9EBAC305D853E00520D21 /* Release configuration for PBXNativeTarget "MoldeaTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4LP75YDTX4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.MoldeaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moldea.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Moldea";
+			};
+			name = Release;
+		};
+		7EB9EBAE305D853E00520D21 /* Debug configuration for PBXNativeTarget "MoldeaUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4LP75YDTX4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.MoldeaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Moldea;
+			};
+			name = Debug;
+		};
+		7EB9EBAF305D853E00520D21 /* Release configuration for PBXNativeTarget "MoldeaUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4LP75YDTX4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.MoldeaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Moldea;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7EB9EB81305D853D00520D21 /* Build configuration list for PBXProject "Moldea" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EB9EBA5305D853E00520D21 /* Debug configuration for PBXProject "Moldea" */,
+				7EB9EBA6305D853E00520D21 /* Release configuration for PBXProject "Moldea" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		7EB9EBA7305D853E00520D21 /* Build configuration list for PBXNativeTarget "Moldea" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EB9EBA8305D853E00520D21 /* Debug configuration for PBXNativeTarget "Moldea" */,
+				7EB9EBA9305D853E00520D21 /* Release configuration for PBXNativeTarget "Moldea" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		7EB9EBAA305D853E00520D21 /* Build configuration list for PBXNativeTarget "MoldeaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EB9EBAB305D853E00520D21 /* Debug configuration for PBXNativeTarget "MoldeaTests" */,
+				7EB9EBAC305D853E00520D21 /* Release configuration for PBXNativeTarget "MoldeaTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		7EB9EBAD305D853E00520D21 /* Build configuration list for PBXNativeTarget "MoldeaUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EB9EBAE305D853E00520D21 /* Debug configuration for PBXNativeTarget "MoldeaUITests" */,
+				7EB9EBAF305D853E00520D21 /* Release configuration for PBXNativeTarget "MoldeaUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7EB9EBCE305D87C000520D21 /* Core */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Core;
+		};
+		7EB9EBD0305D87C000520D21 /* Navigation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Navigation;
+		};
+		7EB9EBE0305D87C000520D21 /* Today */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Today;
+		};
+		7EB9EBE2305D87C000520D21 /* Statistics */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Statistics;
+		};
+		7EB9EBE4305D87C000520D21 /* Habits */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Habits;
+		};
+		7EB9EBE6305D87C000520D21 /* Settings */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Settings;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 7EB9EB7E305D853D00520D21 /* Project object */;
+	validationLevel = 1;
+}
