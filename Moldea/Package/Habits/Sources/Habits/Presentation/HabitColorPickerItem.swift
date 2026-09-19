@@ -1,0 +1,46 @@
+//
+//  SwiftUIView.swift
+//  Habits
+//
+//  Created by Ismael Cordón Domínguez on 19/9/26.
+//
+
+import SwiftUI
+
+struct HabitColorPickerItem: View {
+    let color: Color
+    let name: LocalizedStringResource
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Circle()
+                .fill(color)
+                .overlay(Circle().strokeBorder(Color.primary.opacity(0.15), lineWidth: 1))
+                .padding(5)
+                .overlay {
+                    if isSelected {
+                        Circle().strokeBorder(Color.primary, lineWidth: 2)
+                    }
+                }
+                .frame(width: 48, height: 48)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(name)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
+#Preview("Unselected") {
+    HabitColorPickerItem(
+        color: HabitPaletteColor.red.color,
+        name: "Red",
+        isSelected: false,
+        action: {}
+    )
+}
+
+#Preview("Selected") {
+    HabitColorPickerItem(color: HabitPaletteColor.red.color, name: "Red", isSelected: true, action: {})
+}
