@@ -55,11 +55,15 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
     }
 
     private var prominentRole: TabRole {
+        #if compiler(>=6.4)
         if #available(iOS 27.0, *) {
             return .prominent
         } else {
             return .search
         }
+        #else
+        return .search
+        #endif
     }
 
     private var tabSelection: Binding<MainTab> {

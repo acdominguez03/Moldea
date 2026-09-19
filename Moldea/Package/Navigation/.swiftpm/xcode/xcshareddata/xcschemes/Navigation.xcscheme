@@ -17,6 +17,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "Navigation"
                BuildableName = "Navigation"
+               BlueprintName = "Navigation"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -35,6 +36,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "NavigationTests"
                BuildableName = "NavigationTests"
+               BlueprintName = "NavigationTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
@@ -63,6 +65,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "Navigation"
             BuildableName = "Navigation"
+            BlueprintName = "Navigation"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>
