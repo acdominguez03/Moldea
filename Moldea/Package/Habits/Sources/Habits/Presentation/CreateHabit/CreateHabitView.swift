@@ -22,7 +22,16 @@ struct CreateHabitView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 12) {
+                HabitSummaryView(
+                    color: createHabitViewModel.selectedColor,
+                    icon: createHabitViewModel.selectedIcon,
+                    name: createHabitViewModel.name,
+                    onHabitNameChanged: {
+                        createHabitViewModel.onHabitNameChanged($0)
+                    }
+                )
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text(HabitsTextsEnum.iconTitle)
                         .textCase(.uppercase)
@@ -31,7 +40,7 @@ struct CreateHabitView: View {
 
                     HabitIconPicker(
                         selectedIcon: createHabitViewModel.selectedIcon,
-                        tint: createHabitViewModel.selectedColor ?? .accentColor,
+                        tint: createHabitViewModel.selectedColor,
                         onIconSelected: { createHabitViewModel.selectIcon($0) },
                         onMoreTapped: { isShowingIconChooser = true }
                     )
@@ -57,7 +66,7 @@ struct CreateHabitView: View {
                 ChooseHabitIconView(
                     catalog: iconCatalog,
                     selectedIcon: createHabitViewModel.selectedIcon,
-                    tint: createHabitViewModel.selectedColor ?? .accentColor,
+                    tint: createHabitViewModel.selectedColor,
                     onIconSelected: { createHabitViewModel.selectIcon($0) }
                 )
             }

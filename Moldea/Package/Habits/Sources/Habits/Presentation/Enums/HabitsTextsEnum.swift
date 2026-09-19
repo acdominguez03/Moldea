@@ -74,4 +74,6 @@ public enum HabitsTextsEnum {
     public static let iconFamilyGaming = resource("habits_icon_family_gaming")
     public static let iconFamilyCameraAndPhotos = resource("habits_icon_family_camera_and_photos")
     public static let iconFamilyOther = resource("habits_icon_family_other")
+    
+    public static let habitNamePlaceholder = resource("habit_name_placeholder")
 }
