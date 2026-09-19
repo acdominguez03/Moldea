@@ -35,7 +35,7 @@ public enum HabitsTextsEnum {
     public static let colorPink = resource("habits_color_pink")
     public static let colorBrown = resource("habits_color_brown")
     public static let colorGray = resource("habits_color_gray")
-    public static let colorBlack = resource("habits_color_black")
+    public static let colorStone = resource("habits_color_stone")
     public static let colorCustom = resource("habits_color_custom")
 
     // MARK: Icon Picker Texts

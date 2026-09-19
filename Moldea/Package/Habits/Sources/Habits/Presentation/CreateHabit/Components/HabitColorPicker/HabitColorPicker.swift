@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import Core
 
 struct HabitColorPicker: View {
-    let selectedColor: Color?
-    let onColorSelected: (Color) -> Void
+    @Environment(\.self) private var environment
+
+    /// Hex `#RRGGBB` del color seleccionado.
+    let selectedHex: String
+    let onColorSelected: (String) -> Void
 
     private let itemsPerRow = 7
 
@@ -21,11 +25,12 @@ struct HabitColorPicker: View {
         Array(HabitPaletteColor.allCases.dropFirst(itemsPerRow))
     }
 
+    /// El color elegido con el selector nativo; `nil` si es uno de la paleta.
     private var customColor: Color? {
-        guard let selectedColor,
-              !HabitPaletteColor.allCases.contains(where: { $0.color == selectedColor })
-        else { return nil }
-        return selectedColor
+        guard !HabitPaletteColor.allCases.contains(where: { $0.hex == selectedHex }) else {
+            return nil
+        }
+        return HexColorConverter.color(fromHex: selectedHex)
     }
 
     var body: some View {
@@ -44,8 +49,8 @@ struct HabitColorPicker: View {
         HabitColorPickerItem(
             color: paletteColor.color,
             name: paletteColor.name,
-            isSelected: selectedColor == paletteColor.color,
-            action: { onColorSelected(paletteColor.color) }
+            isSelected: selectedHex == paletteColor.hex,
+            action: { onColorSelected(paletteColor.hex) }
         )
         .frame(maxWidth: .infinity)
     }
@@ -54,7 +59,7 @@ struct HabitColorPicker: View {
         ColorPicker(
             selection: Binding(
                 get: { customColor ?? .white },
-                set: { onColorSelected($0) }
+                set: { onColorSelected(HexColorConverter.hex(from: $0, in: environment)) }
             ),
             supportsOpacity: false
         ) {
@@ -75,11 +80,11 @@ struct HabitColorPicker: View {
 }
 
 #Preview {
-    @Previewable @State var selectedColor: Color? = nil
+    @Previewable @State var selectedHex = HabitPaletteColor.gray.hex
 
     HabitColorPicker(
-        selectedColor: selectedColor,
-        onColorSelected: { selectedColor = $0 }
+        selectedHex: selectedHex,
+        onColorSelected: { selectedHex = $0 }
     )
     .padding()
 }

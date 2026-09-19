@@ -86,23 +86,6 @@
         }
       }
     },
-    "habits_color_black" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Black"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Negro"
-          }
-        }
-      }
-    },
     "habits_color_blue" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -286,6 +269,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rojo"
+          }
+        }
+      }
+    },
+    "habits_color_stone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stone"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Piedra"
           }
         }
       }

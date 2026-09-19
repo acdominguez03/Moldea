@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Core
 
 struct WeekDayPicker: View {
     let weekdays: [WeekdayItem]
@@ -26,7 +27,13 @@ struct WeekDayPicker: View {
 }
 
 #Preview {
-    @Previewable @State var createHabitViewModel = CreateHabitViewModel()
+    @Previewable @State var createHabitViewModel = CreateHabitViewModel(
+        createHabitUseCase: DefaultCreateHabitUseCase(
+            repository: SwiftDataHabitRepository(
+                modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
+            )
+        )
+    )
     
     WeekDayPicker(
         weekdays: createHabitViewModel.weekdayItems,
