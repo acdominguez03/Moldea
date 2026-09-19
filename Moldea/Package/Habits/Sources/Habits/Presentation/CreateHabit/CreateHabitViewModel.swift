@@ -11,8 +11,9 @@ import SwiftUI
 @Observable
 @MainActor
 final class CreateHabitViewModel {
-    private(set) var selectedColor: Color? = nil
+    private(set) var selectedColor: Color = Color.accentColor
     private(set) var selectedIcon: String = HabitPaletteIcon.drop.systemName
+    private(set) var name: String = ""
 
     func selectColor(_ color: Color) {
         selectedColor = color
@@ -20,5 +21,9 @@ final class CreateHabitViewModel {
 
     func selectIcon(_ systemName: String) {
         selectedIcon = systemName
+    }
+    
+    func onHabitNameChanged(_ newHabitName: String) {
+        name = newHabitName
     }
 }
