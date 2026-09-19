@@ -10,14 +10,27 @@ import Core
 
 struct CreateHabitView: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var createHabitViewModel: CreateHabitViewModel
     
-    init() {}
+    init(createHabitViewModel: CreateHabitViewModel) {
+        self.createHabitViewModel = createHabitViewModel
+    }
     
     var body: some View {
         NavigationStack {
-            VStack {
-                Text(HabitsTextsEnum.newHabit)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(HabitsTextsEnum.colorTitle)
+                    .textCase(.uppercase)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+
+                HabitColorPicker(
+                    selectedColor: createHabitViewModel.selectedColor,
+                    onColorSelected: { createHabitViewModel.selectColor($0) }
+                )
             }
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .navigationTitle(HabitsTextsEnum.newHabit)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -47,5 +60,5 @@ struct CreateHabitView: View {
 }
 
 #Preview {
-    CreateHabitView()
+    CreateHabitView(createHabitViewModel: CreateHabitViewModel())
 }
