@@ -14,18 +14,15 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
     private let tabContent: (MainTab) -> Content
     private let sheetContent: () -> SheetContent
     private let selection: Binding<MainTab>
-    private let accessoryAction: () -> Void
 
     @State private var isSheetPresented = false
 
     public init(
         selection: Binding<MainTab>,
-        accessoryAction: @escaping () -> Void = {},
         @ViewBuilder tabContent: @escaping (MainTab) -> Content,
         @ViewBuilder sheetContent: @escaping () -> SheetContent
     ) {
         self.selection = selection
-        self.accessoryAction = accessoryAction
         self.tabContent = tabContent
         self.sheetContent = sheetContent
     }
@@ -50,9 +47,10 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $isSheetPresented) {
-            sheetContent()
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+            NavigationStack {
+                sheetContent()
+            }
+            .presentationDragIndicator(.visible)
         }
     }
 

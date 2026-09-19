@@ -1,6 +1,40 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "close" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar"
+          }
+        }
+      }
+    },
+    "finish" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finish"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminar"
+          }
+        }
+      }
+    },
     "generic_error" : {
       "comment" : "Mensaje de error por defecto cuando el error no sabe describirse al usuario.",
       "extractionState" : "manual",
@@ -36,6 +70,23 @@
         }
       }
     },
+    "listening" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listening"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escuchando"
+          }
+        }
+      }
+    },
     "settings_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -49,6 +100,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajustes"
+          }
+        }
+      }
+    },
+    "speech_to_text_description" : {
+      "comment" : "Pie de la pantalla de voz. La frase entre comillas es un ejemplo de varios hábitos dictados de una vez: adáptala al idioma en vez de traducirla literalmente.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can list several habits in a single sentence: “I’ve drunk water, I’ve read, and I’ve gone for a run.”"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes nombrar varios hábitos en una sola frase: “He bebido agua, he leído y he corrido”."
           }
         }
       }

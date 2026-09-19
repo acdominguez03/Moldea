@@ -26,4 +26,10 @@ public enum CoreTextsEnum {
 
     // MARK: Error Texts
     public static let genericError = resource("generic_error")
+    
+    //MARK: Speech to text Texts
+    public static let close = resource("close")
+    public static let listening = resource("listening")
+    public static let finish = resource("finish")
+    public static let speechToTextDescription = resource("speech_to_text_description")
 }
