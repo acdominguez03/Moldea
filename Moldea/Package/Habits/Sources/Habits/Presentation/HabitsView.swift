@@ -30,7 +30,10 @@ public struct HabitsView: View {
                 }
             }
             .sheet(isPresented: $isSheetPresented) {
-                CreateHabitView(createHabitViewModel: CreateHabitViewModel())
+                CreateHabitView(
+                    createHabitViewModel: CreateHabitViewModel(),
+                    iconCatalog: BundleHabitIconCatalog()
+                )
             }
         }
     }
