@@ -26,6 +26,9 @@ let package = Package(
             dependencies: [
                 .product(name: "Core", package: "Core")
             ],
+            resources: [
+                .process("Data/Resources/habit-icon-families.json"),
+            ],
             swiftSettings: [
                 .enableUpcomingFeature("ApproachableConcurrency"),
             ],

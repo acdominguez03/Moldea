@@ -12,8 +12,13 @@ import SwiftUI
 @MainActor
 final class CreateHabitViewModel {
     private(set) var selectedColor: Color? = nil
+    private(set) var selectedIcon: String = HabitPaletteIcon.drop.systemName
 
     func selectColor(_ color: Color) {
         selectedColor = color
+    }
+
+    func selectIcon(_ systemName: String) {
+        selectedIcon = systemName
     }
 }
