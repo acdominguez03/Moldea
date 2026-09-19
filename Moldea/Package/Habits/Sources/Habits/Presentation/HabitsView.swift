@@ -9,6 +9,7 @@ import SwiftUI
 import Core
 
 public struct HabitsView: View {
+    @State private var isSheetPresented: Bool = false
     
     public init() {}
     
@@ -18,7 +19,19 @@ public struct HabitsView: View {
                 
             }
             .navigationTitle(HabitsTextsEnum.screenTitle)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.automatic)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        isSheetPresented = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $isSheetPresented) {
+                CreateHabitView()
+            }
         }
     }
 }

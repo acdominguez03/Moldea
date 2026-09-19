@@ -17,6 +17,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7EB9EB85305D853D00520D21"
                BuildableName = "Moldea.app"
+               BlueprintName = "Moldea"
                ReferencedContainer = "container:Moldea.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -36,6 +37,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7EB9EB94305D853E00520D21"
                BuildableName = "MoldeaTests.xctest"
+               BlueprintName = "MoldeaTests"
                ReferencedContainer = "container:Moldea.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -46,6 +48,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7EB9EB9E305D853E00520D21"
                BuildableName = "MoldeaUITests.xctest"
+               BlueprintName = "MoldeaUITests"
                ReferencedContainer = "container:Moldea.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -68,6 +71,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7EB9EB85305D853D00520D21"
             BuildableName = "Moldea.app"
+            BlueprintName = "Moldea"
             ReferencedContainer = "container:Moldea.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -84,6 +88,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7EB9EB85305D853D00520D21"
             BuildableName = "Moldea.app"
+            BlueprintName = "Moldea"
             ReferencedContainer = "container:Moldea.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

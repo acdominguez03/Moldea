@@ -18,4 +18,6 @@ public enum HabitsTextsEnum {
     // MARK: Screen Texts
     public static let screenTitle = resource("habits_screen_title")
     public static let emptyState = resource("habits_empty_state")
+    
+    public static let newHabit = resource("new_habit")
 }

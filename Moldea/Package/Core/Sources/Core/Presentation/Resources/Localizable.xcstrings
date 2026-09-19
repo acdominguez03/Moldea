@@ -35,6 +35,23 @@
         }
       }
     },
+    "cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
     "generic_error" : {
       "comment" : "Mensaje de error por defecto cuando el error no sabe describirse al usuario.",
       "extractionState" : "manual",
@@ -83,6 +100,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escuchando"
+          }
+        }
+      }
+    },
+    "save" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar"
           }
         }
       }
