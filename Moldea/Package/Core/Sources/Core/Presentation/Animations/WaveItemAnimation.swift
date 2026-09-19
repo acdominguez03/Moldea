@@ -14,7 +14,11 @@ struct WaveItemAnimation: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    let isActive: Bool
+
     @State private var height: CGFloat = WaveItemAnimation.restingHeight
+
+    private var isAnimating: Bool { isActive && !reduceMotion }
 
     var body: some View {
         RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -25,8 +29,8 @@ struct WaveItemAnimation: View {
                 reduceMotion ? nil : .spring(response: 0.2, dampingFraction: 0.6),
                 value: height
             )
-            .task(id: reduceMotion) {
-                guard !reduceMotion else {
+            .task(id: isAnimating) {
+                guard isAnimating else {
                     height = Self.restingHeight
                     return
                 }
@@ -55,5 +59,9 @@ struct WaveItemAnimation: View {
 }
 
 #Preview {
-    WaveItemAnimation()
+    WaveItemAnimation(isActive: true)
+}
+
+#Preview("Inactive") {
+    WaveItemAnimation(isActive: false)
 }

@@ -122,6 +122,42 @@
         }
       }
     },
+    "speech_to_text_placeholder" : {
+      "comment" : "Texto que ocupa el hueco de la transcripción mientras el usuario todavía no ha dicho nada.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start speaking"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza a hablar"
+          }
+        }
+      }
+    },
+    "speech_to_text_preparing" : {
+      "comment" : "Etiqueta del indicador de progreso mientras se prepara o descarga el modelo de voz.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing the speech model…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparando el modelo de voz…"
+          }
+        }
+      }
+    },
     "statistics_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -152,6 +188,258 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hoy"
+          }
+        }
+      }
+    },
+    "transcription_error_conversion_failed" : {
+      "comment" : "Error cuando el audio del micrófono no se puede convertir al formato que admite el analizador.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The microphone audio can’t be converted for the analyzer."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El audio del micrófono no se puede convertir para el analizador."
+          }
+        }
+      }
+    },
+    "transcription_error_invalid_audio_format" : {
+      "comment" : "Error cuando el micrófono no devuelve un formato de audio utilizable.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The microphone didn’t return a valid audio format."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El micrófono no devolvió un formato de audio válido."
+          }
+        }
+      }
+    },
+    "transcription_error_locale_not_supported" : {
+      "comment" : "Error cuando ningún transcriptor admite el idioma del usuario.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live transcription isn’t available for this language."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La transcripción en directo no está disponible para este idioma."
+          }
+        }
+      }
+    },
+    "transcription_error_microphone_not_authorized" : {
+      "comment" : "Error cuando el usuario no ha concedido permiso de micrófono.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone access is needed to transcribe speech."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se necesita acceso al micrófono para transcribir la voz."
+          }
+        }
+      }
+    },
+    "transcription_error_microphone_unavailable" : {
+      "comment" : "Error cuando el sistema no expone ningún dispositivo de captura de audio.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No microphone is available."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay micrófono disponible."
+          }
+        }
+      }
+    },
+    "transcription_error_no_compatible_format" : {
+      "comment" : "Error cuando ningún modelo instalado admite un formato de audio compatible con el micrófono.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No installed model supports a compatible audio format."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ningún modelo instalado admite un formato de audio compatible."
+          }
+        }
+      }
+    },
+    "transcription_error_stage_failed %@" : {
+      "comment" : "Error cuando falla una etapa de la sesión de voz. La variable es el nombre de la etapa (permiso, motor de audio, etc.).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t start listening: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha podido empezar a escuchar: %@"
+          }
+        }
+      }
+    },
+    "transcription_stage_analysis" : {
+      "comment" : "Nombre de la etapa de análisis de voz de la sesión de transcripción.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speech analysis"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Análisis de voz"
+          }
+        }
+      }
+    },
+    "transcription_stage_assets" : {
+      "comment" : "Nombre de la etapa de descarga del modelo de voz.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speech model download"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descarga del modelo de voz"
+          }
+        }
+      }
+    },
+    "transcription_stage_audio_engine" : {
+      "comment" : "Nombre de la etapa de arranque del motor de audio.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio engine"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor de audio"
+          }
+        }
+      }
+    },
+    "transcription_stage_audio_format" : {
+      "comment" : "Nombre de la etapa de negociación del formato de audio del analizador.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyzer audio format"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formato de audio del analizador"
+          }
+        }
+      }
+    },
+    "transcription_stage_device_support" : {
+      "comment" : "Nombre de la etapa que comprueba si el dispositivo admite la transcripción.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device support"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compatibilidad del dispositivo"
+          }
+        }
+      }
+    },
+    "transcription_stage_permission" : {
+      "comment" : "Nombre de la etapa de permiso del micrófono.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone permission"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permiso del micrófono"
+          }
+        }
+      }
+    },
+    "transcription_error_unavailable" : {
+      "comment" : "Error cuando el dispositivo no admite la transcripción en directo.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device doesn’t support live transcription."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo no admite la transcripción en directo."
           }
         }
       }

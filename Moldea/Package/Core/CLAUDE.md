@@ -25,8 +25,14 @@ Sources/Core/
     │   ├── WaveAnimation.swift
     │   └── WaveItemAnimation.swift
     ├── Enums/
-    │   └── CoreTextsEnum.swift
-    ├── SpeechToTextViews/
+    │   ├── CoreTextsEnum.swift
+    │   ├── StageEnum.swift
+    │   ├── TranscriberEnum.swift
+    │   ├── TranscriptionErrorEnum.swift
+    │   └── TranscriptionPhaseEnum.swift
+    ├── SpeechToTextCore/
+    │   └── LiveTranscriptionModel.swift
+    ├── SpeechToTextView/
     │   └── SpeechToTextView.swift
     ├── ViewModel/
     │   └── BaseViewModel.swift
@@ -66,23 +72,51 @@ pulsa el tab destacado `.microphone`. Vive en `Core` —y no en una feature— p
 es que desde ella se puedan registrar hábitos de cualquier módulo: si viviera en `Habits` o en
 `Today`, `Navigation` o el punto de composición acabarían acoplados a una feature concreta.
 
-Estado actual: **maqueta**. Todavía no hay reconocimiento de voz; el texto transcrito es un
-`@State` con un valor de ejemplo y el botón *Terminar* no hace nada. La integración real con
-`SpeechAnalyzer`/`SpeechTranscriber` es el siguiente paso.
-
 Composición de la pantalla:
 
-- El texto transcrito, la `WaveAnimation` y el botón *Terminar* (`.buttonStyle(.glass)` +
-  `.buttonSizing(.flexible)`, para que ocupe el ancho disponible).
+- El texto transcrito, el estado de la sesión, la `WaveAnimation` y el botón *Terminar*
+  (`.buttonStyle(.glass)` + `.buttonSizing(.flexible)`, para que ocupe el ancho disponible).
 - Un pie explicativo (`speech_to_text_description`) que enseña que se pueden nombrar varios
   hábitos en una sola frase.
 - `navigationTitle(CoreTextsEnum.listening)` con `.inline` y un botón de cierre en
-  `ToolbarItem(placement: .cancellationAction)` que llama a `@Environment(\.dismiss)`. El
-  `NavigationStack` que hace de contenedor lo pone `MainTabsView`, no esta vista.
+  `ToolbarItem(placement: .cancellationAction)`. El `NavigationStack` que hace de contenedor
+  lo pone `MainTabsView`, no esta vista.
+
+La escucha arranca en un `.task` al presentarse la hoja. Tanto el botón de cierre como
+*Terminar* paran la sesión **antes** de llamar a `@Environment(\.dismiss)`: si solo se
+descartara la vista, el micrófono se quedaría abierto.
 
 La vista **no** fija `presentationDetents`: los decide quien la presenta (hoy `MoldeaApp`, con
-`[.medium, .large]`). El `#Preview` sí la envuelve en un `.sheet` para poder comprobar cómo se
-ve presentada.
+`[.medium, .large]`).
+
+### Transcripción: `LiveTranscriptionModel`
+
+`LiveTranscriptionModel` es la clase `@Observable @MainActor` que posee la sesión de voz.
+Publica `finalizedText`/`volatileText` (dos `AttributedString`: la vista las concatena y pinta
+la volátil atenuada), la `phase` y el `downloadProgress` de la descarga del modelo.
+
+`runSession()` es común a todas las versiones —permiso, transcriptor, assets, analizador,
+`prepareToAnalyze(in:)` y consumo de `results`— y solo la **fuente de audio** se bifurca:
+
+- **iOS 27+** → `CaptureInputSequenceProvider.providerWithSession(from:compatibleWith:)`. Monta
+  la sesión de captura, la conversión y la `AsyncSequence<AnalyzerInput>`, así que no hay motor
+  de audio, ni tap, ni `AVAudioConverter`, ni configuración manual de `AVAudioSession`. Se crea
+  en una función `@concurrent` porque `AVCaptureDevice` no es `Sendable` y montar la sesión
+  tarda. El provider se guarda como `AnyObject?` (una propiedad almacenada no admite
+  `@available`) y soltarlo es lo que termina la secuencia y devuelve el control a
+  `analyzeSequence(_:)`.
+- **iOS 26** → `AVAudioEngine` + `installTap` + `AVAudioConverter` a mano.
+
+`startEngine(...)` es **`nonisolated static` a propósito, no por casualidad**:
+`AVAudioNodeTapBlock` está importado como no `Sendable`, así que un closure escrito dentro de
+un contexto `@MainActor` heredaría ese aislamiento y Swift 6 le insertaría una comprobación
+dinámica de aislamiento; el motor de audio lo invoca desde su hilo de render y la comprobación
+revienta con `EXC_BREAKPOINT`. Escribiéndolo en contexto `nonisolated` el closure no hereda
+nada. Si algún día se vuelve a mover ese código dentro del actor, el crash vuelve.
+
+Los errores viven en `TranscriptionErrorEnum`, que expone `message: LocalizedStringResource`
+—no conforma `LocalizedError`— y `StageEnum`, que da el nombre traducido de la etapa que ha
+fallado. El error subyacente nunca se publica: se queda en el `print` de `run(_:_:)`.
 
 ### `WaveAnimation` / `WaveItemAnimation`
 
@@ -137,6 +171,22 @@ Claves actuales:
 | `listening` | Listening | Escuchando |
 | `finish` | Finish | Terminar |
 | `speech_to_text_description` | You can list several habits in a single sentence: … | Puedes nombrar varios hábitos en una sola frase: … |
+| `speech_to_text_placeholder` | Start speaking | Empieza a hablar |
+| `speech_to_text_preparing` | Preparing the speech model… | Preparando el modelo de voz… |
+| `transcription_error_microphone_not_authorized` | Microphone access is needed to transcribe speech. | Se necesita acceso al micrófono para transcribir la voz. |
+| `transcription_error_microphone_unavailable` | No microphone is available. | No hay micrófono disponible. |
+| `transcription_error_unavailable` | This device doesn't support live transcription. | Este dispositivo no admite la transcripción en directo. |
+| `transcription_error_locale_not_supported` | Live transcription isn't available for this language. | La transcripción en directo no está disponible para este idioma. |
+| `transcription_error_invalid_audio_format` | The microphone didn't return a valid audio format. | El micrófono no devolvió un formato de audio válido. |
+| `transcription_error_no_compatible_format` | No installed model supports a compatible audio format. | Ningún modelo instalado admite un formato de audio compatible. |
+| `transcription_error_conversion_failed` | The microphone audio can't be converted for the analyzer. | El audio del micrófono no se puede convertir para el analizador. |
+| `transcription_error_stage_failed %@` | Couldn't start listening: %@ | No se ha podido empezar a escuchar: %@ |
+| `transcription_stage_permission` | Microphone permission | Permiso del micrófono |
+| `transcription_stage_device_support` | Device support | Compatibilidad del dispositivo |
+| `transcription_stage_assets` | Speech model download | Descarga del modelo de voz |
+| `transcription_stage_audio_format` | Analyzer audio format | Formato de audio del analizador |
+| `transcription_stage_audio_engine` | Audio engine | Motor de audio |
+| `transcription_stage_analysis` | Speech analysis | Análisis de voz |
 
 Para añadir un texto: añade la entrada al `Localizable.xcstrings` (en `en` y `es`, con
 `"extractionState": "manual"`) y expón la constante en `CoreTextsEnum`. Las claves van en

@@ -42,6 +42,7 @@
 		7EB9EBCB305D85EE00520D21 /* Exceptions for "Moldea" folder in "Moldea" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Info.plist,
 				Package/Core,
 				Package/Habits,
 				Package/Navigation,
@@ -423,6 +424,9 @@
 				DEVELOPMENT_TEAM = 4JHW2UJ2DM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Moldea/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Permisos de audio";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Permisos de reconocimiento de texto";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -460,6 +464,9 @@
 				DEVELOPMENT_TEAM = 4JHW2UJ2DM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Moldea/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Permisos de audio";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Permisos de reconocimiento de texto";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

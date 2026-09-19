@@ -10,15 +10,21 @@ import SwiftUI
 struct WaveAnimation: View {
     private static let barCount = 11
 
+    let isActive: Bool
+
     var body: some View {
         HStack {
             ForEach(0 ..< Self.barCount, id: \.self) { _ in
-                WaveItemAnimation()
+                WaveItemAnimation(isActive: isActive)
             }
         }
     }
 }
 
 #Preview {
-    WaveAnimation()
+    WaveAnimation(isActive: true)
+}
+
+#Preview("Inactive") {
+    WaveAnimation(isActive: false)
 }
