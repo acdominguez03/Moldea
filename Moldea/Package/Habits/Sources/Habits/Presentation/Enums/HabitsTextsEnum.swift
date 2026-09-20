@@ -76,4 +76,12 @@ public enum HabitsTextsEnum {
     public static let iconFamilyOther = resource("habits_icon_family_other")
     
     public static let habitNamePlaceholder = resource("habit_name_placeholder")
+    
+    // MARK: Habit frequency
+    public static let frequency = resource("frequency")
+    public static let everyDayFrequency = resource("every_day_frequency")
+    public static let timesPerWeekFrequency = resource("times_per_week_frequency")
+    public static let fixedDaysFrequency = resource("fixed_days_frequency")
+    public static let timesADay = resource("times_a_day")
+    public static let timesAWeek = resource("times_a_week")
 }

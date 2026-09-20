@@ -57,6 +57,37 @@ struct CreateHabitView: View {
                         onColorSelected: { createHabitViewModel.selectColor($0) }
                     )
                 }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(HabitsTextsEnum.frequency)
+                        .textCase(.uppercase)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    
+                    HabitFrequencyPicker(
+                        selectedHabitFrequency: createHabitViewModel.selectedFrequency,
+                        onFrequencyChanged: {
+                            createHabitViewModel.onFrequencyChanged($0)
+                        }
+                    )
+                    
+                    TimesADayPicker(
+                        range: createHabitViewModel.timesADayRange,
+                        selectedTimesADay: createHabitViewModel.selectedTimesADay,
+                        onIncrementTimesADay: {
+                            createHabitViewModel.onIncrementTimeADayClicked()
+                        },
+                        onDecrementTimesADay: {
+                            createHabitViewModel.onDecrementTimeADayClicked()
+                        }
+                    )
+                    
+                    frequencyDetail
+                }
+                .animation(
+                    .snappy,
+                    value: createHabitViewModel.selectedFrequency
+                )
             }
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -92,6 +123,33 @@ struct CreateHabitView: View {
                     }
                 )
             }
+        }
+    }
+    
+    @ViewBuilder
+    private var frequencyDetail: some View {
+        switch createHabitViewModel.selectedFrequency {
+        case .everyDay:
+            EmptyView()
+        case .timesPerWeek:
+            TimesAWeekPicker(
+                range: createHabitViewModel.timesAWeekRange,
+                selectedTimesAWeek: createHabitViewModel.selectedTimesAWeek,
+                onIncrementTimesAWeek: {
+                    createHabitViewModel.onIncrementTimesAWeekClicked()
+                },
+                onDecrementTimesAWeek: {
+                    createHabitViewModel.onDecrementTimesAWeekClicked()
+                }
+            )
+        case .fixedDays:
+            WeekDayPicker(
+                weekdays: createHabitViewModel.weekdayItems,
+                selectedWeekdays: createHabitViewModel.selectedWeekdays,
+                onWeekDayItemToggled: {
+                    createHabitViewModel.onWeekdayToggled($0)
+                }
+            )
         }
     }
 }
