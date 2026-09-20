@@ -1,6 +1,57 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "every_day_frequency" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Cada día"
+          }
+        }
+      }
+    },
+    "fixed_days_frequency" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixed days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días fijos"
+          }
+        }
+      }
+    },
+    "frequency" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frequency"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Frecuencia"
+          }
+        }
+      }
+    },
     "habit_name_placeholder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -398,12 +449,12 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dumbbell"
+            "value" : "Frequency"
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Mancuerna"
           }
         }
@@ -881,6 +932,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nuevo hábito"
+          }
+        }
+      }
+    },
+    "times_a_day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Times a day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Veces al día"
+          }
+        }
+      }
+    },
+    "times_a_week" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Times a week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Veces a la semana"
+          }
+        }
+      }
+    },
+    "times_per_week_frequency" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Times/Week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Veces/Semana"
           }
         }
       }
