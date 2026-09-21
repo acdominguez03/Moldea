@@ -5,7 +5,6 @@
 //  Created by Ismael Cordón Domínguez on 20/9/26.
 //
 
-/// Etiqueta de persistencia de la frecuencia. El dominio usa `HabitFrequency`.
 enum FrequencyType: String, Codable {
     case daily
     case weeklyCount

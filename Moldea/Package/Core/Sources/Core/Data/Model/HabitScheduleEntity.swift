@@ -11,9 +11,7 @@ import SwiftData
 final class HabitScheduleEntity {
     var habit: HabitEntity?
     var frequencyType: FrequencyType
-    /// Solo con `.weeklyCount`.
     var timesPerWeek: Int?
-    /// Solo con `.fixedDays`. Valores de `Calendar.weekday` (1 = domingo ... 7 = sábado).
     var fixedWeekdays: [Int]?
     var repetitionsPerDay: Int
 

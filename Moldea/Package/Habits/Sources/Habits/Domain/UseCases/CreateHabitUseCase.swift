@@ -9,9 +9,6 @@ import Foundation
 import Core
 
 protocol CreateHabitUseCase: Sendable {
-    /// - Parameters:
-    ///   - color: Hex `#RRGGBB`.
-    ///   - icon: Nombre del SF Symbol.
     func execute(
         name: String,
         color: String,
@@ -100,7 +97,6 @@ struct DefaultCreateHabitUseCase: CreateHabitUseCase {
         }
     }
 
-    /// `#` seguido de 6 dígitos hexadecimales ASCII (`isHexDigit` también acepta los de ancho completo).
     private static func isHexColor(_ value: String) -> Bool {
         value.count == 7
             && value.hasPrefix("#")

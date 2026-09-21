@@ -15,7 +15,6 @@ final class CreateHabitViewModel: BaseViewModel {
     let timesADayRange = 1...20
     let timesAWeekRange = 1...7
     
-    /// Hex `#RRGGBB`: es lo que se guardará en el hábito.
     private(set) var selectedColorHex: String = HabitPaletteColor.gray.hex
     private(set) var selectedIcon: String = HabitPaletteIcon.drop.systemName
     private(set) var name: String = ""

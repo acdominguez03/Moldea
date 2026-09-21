@@ -19,13 +19,8 @@ struct HabitSummaryView: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: icon)
-                  .font(.title2)
-                  .foregroundStyle(color)
-                  .frame(width: 52, height: 52)
-                  .background(color.opacity(0.2), in: Circle())
-                  .accessibilityHidden(true)
-                      
+            HabitIconBadge(color: color, icon: icon)
+
             VStack {
                 TextField(
                     text: nameBinding,

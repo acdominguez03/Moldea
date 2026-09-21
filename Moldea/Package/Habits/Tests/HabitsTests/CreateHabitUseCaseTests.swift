@@ -15,6 +15,8 @@ private actor FakeHabitRepository: HabitRepository {
         if let error { throw error }
         created.append(habit)
     }
+
+    func delete(id: Habit.ID) async throws {}
 }
 
 private struct RepositoryFailure: Error, Equatable {}

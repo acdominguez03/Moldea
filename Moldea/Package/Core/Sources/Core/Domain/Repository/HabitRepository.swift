@@ -7,4 +7,5 @@
 
 public protocol HabitRepository: Sendable {
     func create(_ habit: Habit) async throws
+    func delete(id: Habit.ID) async throws
 }
