@@ -12,6 +12,7 @@ import Today
 import Statistics
 import Habits
 import Settings
+import Core
 
 @main
 struct MoldeaApp: App {
@@ -29,7 +30,8 @@ struct MoldeaApp: App {
                     MainTabsView(selection: $tabRouter.selectedTab) { tab in
                         tabContent(for: tab)
                     } sheetContent: {
-                        Text("Entrada de voz")
+                        SpeechToTextView()
+                            .presentationDetents([.medium, .large])
                     }
                 }
             }

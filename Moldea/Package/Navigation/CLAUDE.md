@@ -54,9 +54,6 @@ dos tipos: `Content` (el contenido de cada pestaña) y `SheetContent` (el conten
 inferior). Usa estas APIs de la tab bar:
 
 - `.tabBarMinimizeBehavior(.onScrollDown)` — la barra se minimiza al hacer scroll hacia abajo.
-- `.tabViewBottomAccessory { ... }` — coloca el botón de entrada de voz sobre la tab bar y,
-  cuando esta se minimiza, en línea a su lado. La acción se inyecta con el parámetro
-  `accessoryAction`.
 - `Tab(value:role:content:label:)` con `TabRole.prominent` — el caso `.microphone` se pinta como
   una cápsula separada al final de la barra, con el mismo tratamiento que el tab de búsqueda del
   sistema. `.prominent` es de iOS 27, así que hay un `#available` que cae a `.search` en iOS 26
@@ -67,9 +64,12 @@ inferior). Usa estas APIs de la tab bar:
 `.microphone` no tiene pantalla: su contenido es `EmptyView`. La selección del `TabView` pasa por
 un `Binding` intermedio (`tabSelection`) que, cuando el valor entrante es `.microphone`, activa
 `isSheetPresented` en vez de escribir en el binding externo; así la pestaña anterior sigue activa
-y se presenta la hoja inferior (`.sheet` con `presentationDetents([.medium, .large])`). El
+y se presenta la hoja inferior (`.sheet` con `NavigationStack` y `presentationDragIndicator`). El
 contenido de esa hoja lo inyecta quien compone la vista con el `@ViewBuilder sheetContent`, para
-que `Navigation` no conozca la feature de entrada de voz.
+que `Navigation` no conozca la feature de entrada de voz. Los `presentationDetents` **no** se
+fijan aquí: un `presentationDetents` aplicado por encima gana sobre el que declare el contenido
+inyectado, así que es `sheetContent` quien decide el tamaño. Hoy lo hace `MoldeaApp`, que pasa
+`SpeechToTextView()` de `Core` con `.presentationDetents([.medium, .large])`.
 
 ## Convenciones
 

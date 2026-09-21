@@ -112,9 +112,7 @@ Moldea/
 ├── CLAUDE.md                  # este fichero
 ├── Moldea.xcodeproj
 ├── Moldea/                    # target de la app
-│   ├── MoldeaApp.swift        # @main: ModelContainer + composición de la navegación
-│   ├── ContentView.swift      # plantilla de Xcode, pendiente de sustituir
-│   ├── Item.swift             # @Model de plantilla, pendiente de sustituir
+│   ├── MoldeaApp.swift        # @main: composición de la navegación (el ModelContainer aún no está)
 │   ├── Assets.xcassets
 │   └── Package/               # todos los paquetes locales
 │       ├── Core/
@@ -187,8 +185,10 @@ target `Moldea`.
   `Content: View`, así que no conoce las pantallas que pinta.
 - Las features dependen como mucho de `Core`. **Nunca entre ellas.** Si dos necesitan lo mismo,
   eso pertenece a `Core`.
-- Solo el target `Moldea` importa features. `MoldeaApp` es el punto de composición: crea el
-  `ModelContainer`, instancia los routers y decide qué vista va en cada `MainTab`.
+- Solo el target `Moldea` importa features. `MoldeaApp` es el punto de composición: instancia
+  los routers, decide qué vista va en cada `MainTab` y qué contenido va en la hoja inferior de
+  la tab bar (hoy `SpeechToTextView` de `Core`, con sus `presentationDetents`). El
+  `ModelContainer` se creará aquí cuando entre SwiftData.
 
 ### Las tres capas de un paquete de feature
 
@@ -242,8 +242,8 @@ Reglas:
 - Las dependencias entran por el `init`, siempre como protocolo. Nada de *singletons*.
 - En la vista, `@State private var viewModel = ...` cuando la vista lo posee; por parámetro
   cuando lo posee quien la presenta.
-- Vistas pequeñas y privadas dentro del mismo fichero cuando son de un solo uso (mira
-  `VoiceInputButton` en `MainTabsView`).
+- Vistas pequeñas y privadas dentro del mismo fichero cuando son de un solo uso; `internal`
+  dentro del paquete cuando se comparten entre ficheros del módulo (`WaveAnimation` en `Core`).
 - Nada de `@MainActor` a mano en la vista: ya lo es. Sí en el view model.
 
 ### Navegación
