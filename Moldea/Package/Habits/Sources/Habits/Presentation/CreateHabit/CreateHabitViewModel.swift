@@ -7,14 +7,16 @@
 
 import Observation
 import SwiftUI
+import Core
 
 @Observable
 @MainActor
-final class CreateHabitViewModel {
+final class CreateHabitViewModel: BaseViewModel {
     let timesADayRange = 1...20
     let timesAWeekRange = 1...7
     
-    private(set) var selectedColor: Color = Color.accentColor
+    /// Hex `#RRGGBB`: es lo que se guardará en el hábito.
+    private(set) var selectedColorHex: String = HabitPaletteColor.gray.hex
     private(set) var selectedIcon: String = HabitPaletteIcon.drop.systemName
     private(set) var name: String = ""
     private(set) var selectedFrequency: HabitFrequencyEnum = .everyDay
@@ -24,8 +26,44 @@ final class CreateHabitViewModel {
     let weekdayItems: [WeekdayItem]
     private(set) var selectedWeekdays: Set<Int> = []
     
-    init(calendar: Calendar = .current) {
+    private(set) var isLoading = false
+    private(set) var errorMessage: LocalizedStringResource?
+    /// Pasa a `true` cuando el hábito se ha guardado; la vista se cierra al observarlo.
+    private(set) var didSave = false
+    
+    private let createHabitUseCase: any CreateHabitUseCase
+    
+    init(createHabitUseCase: any CreateHabitUseCase, calendar: Calendar = .current) {
+        self.createHabitUseCase = createHabitUseCase
         self.weekdayItems = Self.makeWeekdays(calendar: calendar)
+    }
+    
+    /// Comodidad de la interfaz; las reglas de verdad las valida el caso de uso.
+    var canSave: Bool {
+        let hasName = !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let hasDays = selectedFrequency != .fixedDays || !selectedWeekdays.isEmpty
+        return hasName && hasDays && !isLoading
+    }
+    
+    func save() async {
+        await perform {
+            try await createHabitUseCase.execute(
+                name: name,
+                color: selectedColorHex,
+                icon: selectedIcon,
+                frequency: makeFrequency(),
+                repetitionsPerDay: selectedTimesADay
+            )
+            didSave = true
+        }
+    }
+    
+    func setLoading(_ isLoading: Bool) {
+        self.isLoading = isLoading
+    }
+    
+    func setError(_ message: LocalizedStringResource?) {
+        errorMessage = message
     }
     
     func onWeekdayToggled(_ weekday: WeekdayItem) {
@@ -36,8 +74,12 @@ final class CreateHabitViewModel {
         }
     }
     
-    func selectColor(_ color: Color) {
-        selectedColor = color
+    var selectedColor: Color {
+        HexColorConverter.color(fromHex: selectedColorHex) ?? HabitPaletteColor.gray.color
+    }
+
+    func selectColor(hex: String) {
+        selectedColorHex = hex
     }
     
     func selectIcon(_ systemName: String) {
@@ -66,6 +108,14 @@ final class CreateHabitViewModel {
     
     func onDecrementTimesAWeekClicked() {
         selectedTimesAWeek = selectedTimesAWeek - 1
+    }
+    
+    private func makeFrequency() -> HabitFrequency {
+        switch selectedFrequency {
+        case .everyDay: .daily
+        case .timesPerWeek: .weeklyCount(timesPerWeek: selectedTimesAWeek)
+        case .fixedDays: .fixedDays(weekdays: selectedWeekdays)
+        }
     }
     
     private static func makeWeekdays(calendar: Calendar) -> [WeekdayItem] {

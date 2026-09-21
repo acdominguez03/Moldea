@@ -11,7 +11,11 @@ import Core
 public struct HabitsView: View {
     @State private var isSheetPresented: Bool = false
     
-    public init() {}
+    private let createHabitUseCase: any CreateHabitUseCase
+    
+    public init(habitRepository: any HabitRepository) {
+        self.createHabitUseCase = DefaultCreateHabitUseCase(repository: habitRepository)
+    }
     
     public var body: some View {
         NavigationStack {
@@ -31,7 +35,7 @@ public struct HabitsView: View {
             }
             .sheet(isPresented: $isSheetPresented) {
                 CreateHabitView(
-                    createHabitViewModel: CreateHabitViewModel(),
+                    createHabitViewModel: CreateHabitViewModel(createHabitUseCase: createHabitUseCase),
                     iconCatalog: BundleHabitIconCatalog()
                 )
             }
@@ -40,5 +44,9 @@ public struct HabitsView: View {
 }
 
 #Preview {
-    HabitsView()
+    HabitsView(
+        habitRepository: SwiftDataHabitRepository(
+            modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
+        )
+    )
 }

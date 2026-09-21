@@ -35,7 +35,10 @@ let package = Package(
         ),
         .testTarget(
             name: "HabitsTests",
-            dependencies: ["Habits"],
+            dependencies: [
+                "Habits",
+                .product(name: "Core", package: "Core"),
+            ],
             swiftSettings: [
                 .enableUpcomingFeature("ApproachableConcurrency"),
             ],

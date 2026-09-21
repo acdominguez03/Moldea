@@ -53,8 +53,8 @@ struct CreateHabitView: View {
                         .foregroundStyle(.secondary)
 
                     HabitColorPicker(
-                        selectedColor: createHabitViewModel.selectedColor,
-                        onColorSelected: { createHabitViewModel.selectColor($0) }
+                        selectedHex: createHabitViewModel.selectedColorHex,
+                        onColorSelected: { createHabitViewModel.selectColor(hex: $0) }
                     )
                 }
                 
@@ -88,6 +88,12 @@ struct CreateHabitView: View {
                     .snappy,
                     value: createHabitViewModel.selectedFrequency
                 )
+                
+                if let errorMessage = createHabitViewModel.errorMessage {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
             }
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -101,15 +107,19 @@ struct CreateHabitView: View {
                     onIconSelected: { createHabitViewModel.selectIcon($0) }
                 )
             }
+            .onChange(of: createHabitViewModel.didSave) { _, didSave in
+                if didSave { dismiss() }
+            }
             .toolbar {
                 ToolbarItem(
                     placement: .confirmationAction,
                     content: {
                         Button {
-                            dismiss()
+                            Task { await createHabitViewModel.save() }
                         } label: {
                             Text(CoreTextsEnum.save)
                         }
+                        .disabled(!createHabitViewModel.canSave)
                     }
                 )
                 ToolbarItem(
@@ -156,7 +166,13 @@ struct CreateHabitView: View {
 
 #Preview {
     CreateHabitView(
-        createHabitViewModel: CreateHabitViewModel(),
+        createHabitViewModel: CreateHabitViewModel(
+            createHabitUseCase: DefaultCreateHabitUseCase(
+                repository: SwiftDataHabitRepository(
+                    modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
+                )
+            )
+        ),
         iconCatalog: BundleHabitIconCatalog()
     )
 }

@@ -1,16 +1,19 @@
 # Core
 
-Paquete transversal de Moldea. Contiene lo que comparten el resto de módulos: los textos
-localizados comunes a toda la app (títulos de la tab bar, accesorio de la tab bar y pantalla
-de voz), `BaseViewModel` —el protocolo de estado de carga y error de los view models— y la
-pantalla de entrada de voz (`SpeechToTextView`) con su animación de onda.
+Paquete transversal de Moldea. Contiene lo que comparten el resto de módulos: de momento, los
+textos localizados comunes a toda la app (títulos de la tab bar y del accesorio de la tab bar)
+y `LoadableViewModel`, el protocolo de estado de carga y error de los view models.
 
 No depende de ningún otro paquete. Es la base de la cadena de dependencias: cualquier módulo
 puede importar `Core`, pero `Core` no importa a nadie.
 
+La arquitectura que sigue (entidades de dominio puras, `@Model` internos, repositorio como
+`@ModelActor`) y su porqué están en el `CLAUDE.md` raíz, en _Persistencia y dominio_. Léelo
+antes de tocar `Domain` o `Data`.
+
 ## Configuración
 
-- `swift-tools-version: 6.4`
+- `swift-tools-version: 6.2`
 - Plataforma mínima: `.iOS(.v26)`
 - `swiftSettings`: `.enableUpcomingFeature("ApproachableConcurrency")` en target y test target
 
@@ -18,12 +21,24 @@ puede importar `Core`, pero `Core` no importa a nadie.
 
 ```
 Sources/Core/
-├── Data/           # capa de datos (vacía por ahora)
-├── Domain/         # modelos y casos de uso (vacía por ahora)
+├── Domain/
+│   ├── Entities/
+│   │   ├── Habit.swift
+│   │   ├── HabitSchedule.swift
+│   │   └── HabitFrequency.swift
+│   └── Repository/
+│       └── HabitRepository.swift
+├── Data/
+│   ├── Model/
+│   │   ├── HabitEntity.swift
+│   │   ├── HabitScheduleEntity.swift
+│   │   ├── HabitCompletionEntity.swift
+│   │   └── FrequencyType.swift
+│   ├── Mappers/
+│   │   └── HabitMapper.swift
+│   ├── MoldeaSchema.swift
+│   └── SwiftDataHabitRepository.swift
 └── Presentation/
-    ├── Animations/
-    │   ├── WaveAnimation.swift
-    │   └── WaveItemAnimation.swift
     ├── Enums/
     │   ├── CoreTextsEnum.swift
     │   ├── StageEnum.swift
@@ -42,103 +57,81 @@ Tests/CoreTests/
 ```
 
 Las tres capas (`Data`, `Domain`, `Presentation`) son la convención que siguen todos los
-paquetes de feature del proyecto.
+paquetes del proyecto.
 
 Aún no hay contenedores de UI genéricos compartidos: las pantallas raíz de las features usan
 `ScrollView` de SwiftUI directamente. Cuando un contenedor se repita de verdad en dos
 features, es aquí —en `Presentation/Components/`— donde baja.
 
+## Domain
+
+**Entidades** (`Domain/Entities`): structs `public`, inmutables (`let`), `Sendable`, con `init`
+explícito, que solo importan `Foundation`. Sin validación: solo transportan datos; las reglas
+las valida el caso de uso.
+
+- `Habit`: `id`, `name`, `color` (hex `#RRGGBB`), `icon` (SF Symbol), `isActive`, `createdAt`,
+  `updatedAt` y `schedule`. No lleva las completions: se consultarán por separado.
+- `HabitSchedule`: `frequency` y `repetitionsPerDay`.
+- `HabitFrequency`: `.daily`, `.weeklyCount(timesPerWeek:)` o `.fixedDays(weekdays:)`, con los
+  días como `Set<Int>` de `Calendar.weekday` (1 = domingo … 7 = sábado).
+
+**Repositorio** (`Domain/Repository`): `HabitRepository` es un protocolo `public` y `Sendable`.
+Recibe y devuelve solo tipos de dominio. Hoy solo tiene `create(_:)`; `fetch` se añadirá cuando
+`Today` y `Statistics` lo necesiten, y con él habrá que decidir qué hacer con una fila corrupta
+al listar (saltarla y registrarla, o propagar el error).
+
+## Data
+
+Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
+
+- **Entidades de SwiftData**: `HabitEntity` (`id` único, `active`, fechas, relaciones en
+  cascada con el schedule y las completions), `HabitScheduleEntity` (guarda `frequencyType`,
+  `timesPerWeek?`, `fixedWeekdays: [Int]?` y `repetitionsPerDay`) y `HabitCompletionEntity`
+  (`id` único, `day` con `#Index`). `FrequencyType` es la etiqueta de persistencia de la
+  frecuencia; el dominio usa `HabitFrequency`.
+- **`HabitMapper`**: `makeEntity(from:)` (dominio → entidad, con `fixedWeekdays` ordenado para
+  que lo persistido sea determinista) y `toDomain(_:) throws`, que lanza `HabitMappingError`
+  (`missingSchedule`, `missingTimesPerWeek`, `missingFixedWeekdays`, todos con el `habitID`) si
+  los datos son incoherentes. No rellena valores por defecto: ocultaría la corrupción.
+- **`MoldeaSchema`** (`public`): lista de modelos, `schema` y
+  `makeModelContainer(inMemory:)`. Es el único punto de verdad del esquema; cuando lleguen los
+  widgets y el App Group, la configuración compartida se añadirá aquí.
+- **`SwiftDataHabitRepository`** (`public`, `@ModelActor`): `@ModelActor` genera un
+  `public init(modelContainer:)` cuando el actor es `public`, que es lo que usa `MoldeaApp`.
+  `create` inserta y guarda; si `save()` falla hace `rollback()` y relanza el error, para que la
+  entidad no quede pendiente y se guarde con el siguiente `create`.
+
+## Colores: `HexColorConverter`
+
+Namespace `public` en `Presentation/Converters` (usa `Color`, así que no puede estar en
+`Domain`). El contrato de color de los hábitos es hex `#RRGGBB`; el razonamiento completo está
+en el `CLAUDE.md` raíz, en _Colores de los hábitos_.
+
+- `color(fromHex:) -> Color?`: acepta `#RRGGBB` (el `#` es opcional; mayúsculas o minúsculas) y
+  devuelve `nil` si no es válido. Comprueba `allSatisfy(\.isHexDigit)` antes de
+  `UInt32(_, radix: 16)`, porque este acepta un signo (`+12345` pasaría el `count == 6`).
+- `hex(from:in:) -> String`: `#RRGGBB` en mayúsculas, resuelto en el `EnvironmentValues`
+  dado (`Color.resolve(in:)`). Recorta a 0...1 porque `Color.Resolved` es sRGB de rango
+  extendido.
+
 ## Estado de carga: `BaseViewModel`
 
-`BaseViewModel` es el protocolo que comparten los view models que ejecutan trabajo
-asíncrono. Expone `isLoading` y `errorMessage` **de solo lectura** —la regla del proyecto es
-que el estado publicado sea `private(set)`— y la mutación pasa por `setLoading(_:)` y
-`setError(_:)`, que implementa cada conformer.
+`BaseViewModel` (`Presentation/ViewModel/BaseViewModel.swift`) es el protocolo `@MainActor` que
+comparten los view models que ejecutan trabajo asíncrono. Expone `isLoading` y `errorMessage`
+**de solo lectura** —la regla del proyecto es que el estado publicado sea `private(set)`— y la
+mutación pasa por `setLoading(_:)` y `setError(_:)`, que implementa cada conformer.
 
 La extensión aporta `perform(_:)`, que envuelve la operación: limpia el error, enciende y
 apaga el `isLoading` con un `defer`, ignora las cancelaciones (`CancellationError` y
-`Task.isCancelled`) y traduce el resto de errores a texto de usuario.
+`Task.isCancelled`) y traduce **cualquier otro error** a `CoreTextsEnum.genericError`.
 
 `errorMessage` es un `LocalizedStringResource`, no un `String`: nunca se publica
-`error.localizedDescription`, que no está traducido y lleva dentro el nombre del módulo. Hoy
-todos los errores que atrapa `perform(_:)` caen en `CoreTextsEnum.genericError`; si un error
-necesita mensaje propio, el view model lo distingue antes y llama a `setError(_:)` con el
-texto de su `<Feature>TextsEnum`.
+`error.localizedDescription`, que no está traducido y lleva dentro el nombre del módulo. Hoy no
+hay mensajes propios por tipo de error: todo cae en el genérico. Si hicieran falta, habría que
+introducir un protocolo para que un error aporte su propio texto.
 
-## Entrada de voz: `SpeechToTextView`
-
-`SpeechToTextView` es la pantalla que se presenta en la hoja inferior de la tab bar cuando se
-pulsa el tab destacado `.microphone`. Vive en `Core` —y no en una feature— porque el objetivo
-es que desde ella se puedan registrar hábitos de cualquier módulo: si viviera en `Habits` o en
-`Today`, `Navigation` o el punto de composición acabarían acoplados a una feature concreta.
-
-Composición de la pantalla:
-
-- El texto transcrito, el estado de la sesión, la `WaveAnimation` y el botón *Terminar*
-  (`.buttonStyle(.glass)` + `.buttonSizing(.flexible)`, para que ocupe el ancho disponible).
-- Un pie explicativo (`speech_to_text_description`) que enseña que se pueden nombrar varios
-  hábitos en una sola frase.
-- `navigationTitle(CoreTextsEnum.listening)` con `.inline` y un botón de cierre en
-  `ToolbarItem(placement: .cancellationAction)`. El `NavigationStack` que hace de contenedor
-  lo pone `MainTabsView`, no esta vista.
-
-La escucha arranca en un `.task` al presentarse la hoja. Tanto el botón de cierre como
-*Terminar* paran la sesión **antes** de llamar a `@Environment(\.dismiss)`: si solo se
-descartara la vista, el micrófono se quedaría abierto.
-
-La vista **no** fija `presentationDetents`: los decide quien la presenta (hoy `MoldeaApp`, con
-`[.medium, .large]`).
-
-### Transcripción: `LiveTranscriptionModel`
-
-`LiveTranscriptionModel` es la clase `@Observable @MainActor` que posee la sesión de voz.
-Publica `finalizedText`/`volatileText` (dos `AttributedString`: la vista las concatena y pinta
-la volátil atenuada), la `phase` y el `downloadProgress` de la descarga del modelo.
-
-`runSession()` es común a todas las versiones —permiso, transcriptor, assets, analizador,
-`prepareToAnalyze(in:)` y consumo de `results`— y solo la **fuente de audio** se bifurca:
-
-- **iOS 27+** → `CaptureInputSequenceProvider.providerWithSession(from:compatibleWith:)`. Monta
-  la sesión de captura, la conversión y la `AsyncSequence<AnalyzerInput>`, así que no hay motor
-  de audio, ni tap, ni `AVAudioConverter`, ni configuración manual de `AVAudioSession`. Se crea
-  en una función `@concurrent` porque `AVCaptureDevice` no es `Sendable` y montar la sesión
-  tarda. El provider se guarda como `AnyObject?` (una propiedad almacenada no admite
-  `@available`) y soltarlo es lo que termina la secuencia y devuelve el control a
-  `analyzeSequence(_:)`.
-- **iOS 26** → `AVAudioEngine` + `installTap` + `AVAudioConverter` a mano.
-
-`startEngine(...)` es **`nonisolated static` a propósito, no por casualidad**:
-`AVAudioNodeTapBlock` está importado como no `Sendable`, así que un closure escrito dentro de
-un contexto `@MainActor` heredaría ese aislamiento y Swift 6 le insertaría una comprobación
-dinámica de aislamiento; el motor de audio lo invoca desde su hilo de render y la comprobación
-revienta con `EXC_BREAKPOINT`. Escribiéndolo en contexto `nonisolated` el closure no hereda
-nada. Si algún día se vuelve a mover ese código dentro del actor, el crash vuelve.
-
-Los errores viven en `TranscriptionErrorEnum`, que expone `message: LocalizedStringResource`
-—no conforma `LocalizedError`— y `StageEnum`, que da el nombre traducido de la etapa que ha
-fallado. El error subyacente nunca se publica: se queda en el `print` de `run(_:_:)`.
-
-### `WaveAnimation` / `WaveItemAnimation`
-
-`WaveAnimation` es la barra de nivel de audio: un `HStack` con `barCount` (11)
-`WaveItemAnimation`. Las dos son `internal` —solo las usa `SpeechToTextView`, dentro del
-propio paquete—; se abrirán a `public` el día que alguien de fuera las necesite.
-
-`WaveItemAnimation` anima una `RoundedRectangle` cuya altura cambia cada 200 ms a un valor
-aleatorio del rango `20...60`, con `.animation(.spring(...), value: height)` y un color que se
-aclara según la altura. El bucle vive en un `.task(id:) { while !Task.isCancelled { try await
-Task.sleep(...) } }`, no en un `Timer` ni en Combine: así se cancela solo cuando la vista
-desaparece.
-
-Respeta *Reducir movimiento*: con `accessibilityReduceMotion` activo la barra se queda a
-`restingHeight` y el bucle ni arranca, y la animación pasa a `nil` para que tampoco haya
-transición al cambiar el ajuste. El `id:` del `.task` es el propio `reduceMotion`, así que
-activar o desactivar el ajuste con la pantalla abierta reinicia el bucle en vez de dejarlo en
-el estado anterior.
-
-Es una animación decorativa y sintética —marcada con `.accessibilityHidden(true)` en la
-pantalla, porque el estado de escucha ya lo comunica el título—. Cuando entre el audio real,
-la altura debe venir del nivel de la señal en vez de `CGFloat.random(in:)`.
+(El comentario de cabecera del fichero dice `LoadableViewModel.swift`; es un resto de un nombre
+anterior.)
 
 ## Textos y localización
 
@@ -159,34 +152,14 @@ bundle principal de la app y no en el del paquete.
 
 Claves actuales:
 
-| Clave | en | es |
-|---|---|---|
-| `today_title` | Today | Hoy |
-| `statistics_title` | Statistics | Datos |
-| `habits_title` | Habits | Hábitos |
-| `settings_title` | Settings | Ajustes |
-| `voice_input_button` | Voice input | Entrada de voz |
-| `generic_error` | Something went wrong. Please try again. | Algo ha salido mal. Inténtalo de nuevo. |
-| `close` | Close | Cerrar |
-| `listening` | Listening | Escuchando |
-| `finish` | Finish | Terminar |
-| `speech_to_text_description` | You can list several habits in a single sentence: … | Puedes nombrar varios hábitos en una sola frase: … |
-| `speech_to_text_placeholder` | Start speaking | Empieza a hablar |
-| `speech_to_text_preparing` | Preparing the speech model… | Preparando el modelo de voz… |
-| `transcription_error_microphone_not_authorized` | Microphone access is needed to transcribe speech. | Se necesita acceso al micrófono para transcribir la voz. |
-| `transcription_error_microphone_unavailable` | No microphone is available. | No hay micrófono disponible. |
-| `transcription_error_unavailable` | This device doesn't support live transcription. | Este dispositivo no admite la transcripción en directo. |
-| `transcription_error_locale_not_supported` | Live transcription isn't available for this language. | La transcripción en directo no está disponible para este idioma. |
-| `transcription_error_invalid_audio_format` | The microphone didn't return a valid audio format. | El micrófono no devolvió un formato de audio válido. |
-| `transcription_error_no_compatible_format` | No installed model supports a compatible audio format. | Ningún modelo instalado admite un formato de audio compatible. |
-| `transcription_error_conversion_failed` | The microphone audio can't be converted for the analyzer. | El audio del micrófono no se puede convertir para el analizador. |
-| `transcription_error_stage_failed %@` | Couldn't start listening: %@ | No se ha podido empezar a escuchar: %@ |
-| `transcription_stage_permission` | Microphone permission | Permiso del micrófono |
-| `transcription_stage_device_support` | Device support | Compatibilidad del dispositivo |
-| `transcription_stage_assets` | Speech model download | Descarga del modelo de voz |
-| `transcription_stage_audio_format` | Analyzer audio format | Formato de audio del analizador |
-| `transcription_stage_audio_engine` | Audio engine | Motor de audio |
-| `transcription_stage_analysis` | Speech analysis | Análisis de voz |
+| Clave                | en                                      | es                                      |
+| -------------------- | --------------------------------------- | --------------------------------------- |
+| `today_title`        | Today                                   | Hoy                                     |
+| `statistics_title`   | Statistics                              | Datos                                   |
+| `habits_title`       | Habits                                  | Hábitos                                 |
+| `settings_title`     | Settings                                | Ajustes                                 |
+| `voice_input_button` | Voice input                             | Entrada de voz                          |
+| `generic_error`      | Something went wrong. Please try again. | Algo ha salido mal. Inténtalo de nuevo. |
 
 Para añadir un texto: añade la entrada al `Localizable.xcstrings` (en `en` y `es`, con
 `"extractionState": "manual"`) y expón la constante en `CoreTextsEnum`. Las claves van en
@@ -197,5 +170,18 @@ van en el `<Feature>TextsEnum` de su propio paquete.
 
 ## Tests
 
-Swift Testing (`import Testing`, `@Test`). `Tests/CoreTests/CoreTests.swift` es todavía la
-plantilla generada.
+Swift Testing (`import Testing`, `@Test`). Los tests de persistencia usan un contenedor en
+memoria (`MoldeaSchema.makeModelContainer(inMemory: true)`) y leen lo guardado con otro
+`ModelContext`. **Hay que conservar el contenedor en una variable** mientras se use su
+contexto, o el proceso de tests se cae. Los `*Entity` se ven con `@testable import Core`.
+
+- `MoldeaSchemaTests`: el esquema tiene las tres entidades, guardado con relaciones inversas
+  bien enlazadas y borrado en cascada.
+- `HabitMapperTests`: ida y vuelta con las tres frecuencias, `fixedWeekdays` ordenado, solo se
+  rellenan los campos de la frecuencia, y los tres errores de datos incoherentes.
+- `SwiftDataHabitRepositoryTests`: `create` persiste con las tres frecuencias y dos `create`
+  dejan dos hábitos. No cubre el `rollback()` de un `save()` fallido.
+- `HexColorConverterTests`: parseo, entradas inválidas, ida y vuelta con los 13 hex de la
+  paleta, mayúsculas y recorte de rango.
+
+`CoreTests.swift` es todavía la plantilla generada.
