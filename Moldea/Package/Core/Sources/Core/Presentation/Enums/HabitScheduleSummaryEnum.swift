@@ -1,23 +1,22 @@
 //
-//  HabitScheduleSummary.swift
-//  Habits
+//  HabitScheduleSummaryEnum.swift
+//  Core
 //
 //  Created by Ismael Cordón Domínguez on 21/9/26.
 //
 
 import Foundation
-import Core
 
-/// Lo que se muestra bajo el nombre del hábito en la lista. Se separa de la vista para poder
+/// Lo que se muestra bajo el nombre del hábito en una tarjeta. Se separa de la vista para poder
 /// testear las reglas sin renderizar nada.
-enum HabitScheduleSummary: Equatable {
+public enum HabitScheduleSummaryEnum: Equatable {
     case everyDay
     case timesPerDay(Int)
     /// Símbolos de los días, en el orden de la semana del calendario.
     case weekdays([String])
     case timesPerWeek(Int)
 
-    init(schedule: HabitSchedule, calendar: Calendar = .current) {
+    public init(schedule: HabitSchedule, calendar: Calendar = .current) {
         switch schedule.frequency {
         case .daily:
             self = schedule.repetitionsPerDay > 1

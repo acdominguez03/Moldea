@@ -12,31 +12,11 @@ struct HabitView: View {
     let habit: Habit
     let onToggleActive: () -> Void
     let onDelete: () -> Void
-    
-    private var color: Color {
-        HexColorConverter.color(fromHex: habit.color) ?? HabitPaletteColor.gray.color
-    }
-    
-    private var summary: HabitScheduleSummary {
-        HabitScheduleSummary(schedule: habit.schedule)
-    }
-    
+
     var body: some View {
         HStack(spacing: 8) {
-            HabitIconBadge(color: color, icon: habit.icon)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(habit.name)
-                    .font(.body)
-                    .bold()
-                
-                subtitle
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            
-            Spacer()
-            
+            HabitCardView(habit: habit)
+
             Image(systemName: "chevron.right")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(.tertiary)
@@ -56,19 +36,6 @@ struct HabitView: View {
             Button(role: .destructive, action: onDelete) {
                 Label(HabitsTextsEnum.delete, systemImage: "trash")
             }
-        }
-    }
-    
-    private var subtitle: Text {
-        switch summary {
-        case .everyDay:
-            Text(HabitsTextsEnum.summaryEveryDay)
-        case .timesPerDay(let count):
-            Text(HabitsTextsEnum.summaryTimesPerDay(count))
-        case .weekdays(let symbols):
-            Text("\(HabitsTextsEnum.days): \(symbols.joined(separator: ", "))")
-        case .timesPerWeek(let count):
-            Text(HabitsTextsEnum.summaryTimesPerWeek(count))
         }
     }
 }

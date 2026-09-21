@@ -63,7 +63,7 @@ public struct HabitsView: View {
                         } label: {
                             Text(CoreTextsEnum.cancel)
                         }
-                        Button(role: .destructive) {
+                        Button {
                             Task { await habitsViewModel.onDeleteHabitConfirmed(habit.id) }
                         } label: {
                             Text(HabitsTextsEnum.confirm)

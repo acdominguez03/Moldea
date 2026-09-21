@@ -8,7 +8,7 @@ Depende de `Core` (de donde salen los títulos localizados de las pestañas).
 
 ## Configuración
 
-- `swift-tools-version: 6.4`
+- `swift-tools-version: 6.2`
 - Plataforma mínima: `.iOS(.v26)`
 - `swiftSettings`: `.enableUpcomingFeature("ApproachableConcurrency")` en target y test target
 - Dependencia: `.package(path: "../Core")`

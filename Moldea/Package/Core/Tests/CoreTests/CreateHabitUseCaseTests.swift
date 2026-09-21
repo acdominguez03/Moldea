@@ -1,28 +1,9 @@
 import Testing
 import Foundation
-import Core
-@testable import Habits
-
-private actor FakeHabitRepository: HabitRepository {
-    private(set) var created: [Habit] = []
-    private let error: (any Error)?
-
-    init(error: (any Error)? = nil) {
-        self.error = error
-    }
-
-    func create(_ habit: Habit) async throws {
-        if let error { throw error }
-        created.append(habit)
-    }
-
-    func delete(id: Habit.ID) async throws {}
-}
-
-private struct RepositoryFailure: Error, Equatable {}
+@testable import Core
 
 /// Parámetros de `execute`, con valores válidos por defecto para que cada caso cambie solo lo que prueba.
-private struct Input: Sendable {
+struct CreateHabitInput: Sendable {
     var name = "Leer"
     var color = "#007AFF"
     var icon = "drop"
@@ -40,7 +21,10 @@ struct CreateHabitUseCaseTests {
         return DefaultCreateHabitUseCase(repository: repository, makeID: { id }, now: { date })
     }
 
-    private func execute(_ input: Input, with useCase: DefaultCreateHabitUseCase) async throws {
+    private func execute(
+        _ input: CreateHabitInput,
+        with useCase: DefaultCreateHabitUseCase
+    ) async throws {
         try await useCase.execute(
             name: input.name,
             color: input.color,
@@ -57,12 +41,14 @@ struct CreateHabitUseCaseTests {
         .weeklyCount(timesPerWeek: 3),
         .fixedDays(weekdays: [2, 4, 6]),
     ])
-    func createsTheHabitWithGeneratedIDAndDates(frequency: HabitFrequency) async throws {
+    func `Creates the habit with the generated id and dates`(
+        frequency: HabitFrequency
+    ) async throws {
         let repository = FakeHabitRepository()
         let useCase = makeUseCase(repository: repository)
 
         try await execute(
-            Input(name: "Beber agua", frequency: frequency, repetitionsPerDay: 2),
+            CreateHabitInput(name: "Beber agua", frequency: frequency, repetitionsPerDay: 2),
             with: useCase
         )
 
@@ -79,11 +65,11 @@ struct CreateHabitUseCaseTests {
         #expect(await repository.created == [expected])
     }
 
-    @Test func trimsTheName() async throws {
+    @Test func `Trims the name`() async throws {
         let repository = FakeHabitRepository()
         let useCase = makeUseCase(repository: repository)
 
-        try await execute(Input(name: "  Leer \n"), with: useCase)
+        try await execute(CreateHabitInput(name: "  Leer \n"), with: useCase)
 
         #expect(await repository.created.first?.name == "Leer")
     }
@@ -91,24 +77,24 @@ struct CreateHabitUseCaseTests {
     // MARK: Validación
 
     @Test(arguments: [
-        (Input(name: ""), CreateHabitError.emptyName),
-        (Input(name: " \n "), CreateHabitError.emptyName),
-        (Input(color: "blue"), CreateHabitError.invalidColor),
-        (Input(color: "#12345"), CreateHabitError.invalidColor),
-        (Input(color: "#GGGGGG"), CreateHabitError.invalidColor),
-        (Input(color: "007AFF0"), CreateHabitError.invalidColor),
+        (CreateHabitInput(name: ""), CreateHabitErrorEnum.emptyName),
+        (CreateHabitInput(name: " \n "), CreateHabitErrorEnum.emptyName),
+        (CreateHabitInput(color: "blue"), CreateHabitErrorEnum.invalidColor),
+        (CreateHabitInput(color: "#12345"), CreateHabitErrorEnum.invalidColor),
+        (CreateHabitInput(color: "#GGGGGG"), CreateHabitErrorEnum.invalidColor),
+        (CreateHabitInput(color: "007AFF0"), CreateHabitErrorEnum.invalidColor),
         // Dígitos hexadecimales de ancho completo: `isHexDigit` los acepta, pero no son ASCII.
-        (Input(color: "#ＡＢＣ１２３"), CreateHabitError.invalidColor),
-        (Input(repetitionsPerDay: 0), CreateHabitError.invalidRepetitionsPerDay),
-        (Input(frequency: .weeklyCount(timesPerWeek: 0)), CreateHabitError.invalidTimesPerWeek),
-        (Input(frequency: .weeklyCount(timesPerWeek: 8)), CreateHabitError.invalidTimesPerWeek),
-        (Input(frequency: .fixedDays(weekdays: [])), CreateHabitError.emptyWeekdays),
-        (Input(frequency: .fixedDays(weekdays: [0, 2])), CreateHabitError.invalidWeekdays),
-        (Input(frequency: .fixedDays(weekdays: [2, 8])), CreateHabitError.invalidWeekdays),
+        (CreateHabitInput(color: "#ＡＢＣ１２３"), CreateHabitErrorEnum.invalidColor),
+        (CreateHabitInput(repetitionsPerDay: 0), CreateHabitErrorEnum.invalidRepetitionsPerDay),
+        (CreateHabitInput(frequency: .weeklyCount(timesPerWeek: 0)), CreateHabitErrorEnum.invalidTimesPerWeek),
+        (CreateHabitInput(frequency: .weeklyCount(timesPerWeek: 8)), CreateHabitErrorEnum.invalidTimesPerWeek),
+        (CreateHabitInput(frequency: .fixedDays(weekdays: [])), CreateHabitErrorEnum.emptyWeekdays),
+        (CreateHabitInput(frequency: .fixedDays(weekdays: [0, 2])), CreateHabitErrorEnum.invalidWeekdays),
+        (CreateHabitInput(frequency: .fixedDays(weekdays: [2, 8])), CreateHabitErrorEnum.invalidWeekdays),
     ])
-    fileprivate func rejectsInvalidInputWithoutTouchingTheRepository(
-        input: Input,
-        expectedError: CreateHabitError
+    func `Rejects invalid input without touching the repository`(
+        input: CreateHabitInput,
+        expectedError: CreateHabitErrorEnum
     ) async throws {
         let repository = FakeHabitRepository()
         let useCase = makeUseCase(repository: repository)
@@ -121,12 +107,12 @@ struct CreateHabitUseCaseTests {
 
     // MARK: Errores del repositorio
 
-    @Test func propagatesRepositoryErrors() async {
+    @Test func `Propagates repository errors`() async {
         let repository = FakeHabitRepository(error: RepositoryFailure())
         let useCase = makeUseCase(repository: repository)
 
         await #expect(throws: RepositoryFailure()) {
-            try await execute(Input(), with: useCase)
+            try await execute(CreateHabitInput(), with: useCase)
         }
     }
 }

@@ -1,7 +1,6 @@
 import Testing
 import Foundation
-import Core
-@testable import Habits
+@testable import Core
 
 struct HabitScheduleSummaryTests {
     /// Calendario gregoriano con la semana empezando en `firstWeekday` y símbolos del idioma dado.
@@ -16,8 +15,8 @@ struct HabitScheduleSummaryTests {
         _ frequency: HabitFrequency,
         repetitionsPerDay: Int = 1,
         calendar: Calendar? = nil
-    ) -> HabitScheduleSummary {
-        HabitScheduleSummary(
+    ) -> HabitScheduleSummaryEnum {
+        HabitScheduleSummaryEnum(
             schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: repetitionsPerDay),
             calendar: calendar ?? makeCalendar(locale: "es_ES", firstWeekday: 2)
         )
@@ -73,7 +72,7 @@ struct HabitScheduleSummaryTests {
         (3, "3 veces por semana"),
     ])
     func timesPerWeekTextInSpanish(count: Int, expected: String) {
-        #expect(resolve(HabitsTextsEnum.summaryTimesPerWeek(count), locale: "es") == expected)
+        #expect(resolve(CoreTextsEnum.summaryTimesPerWeek(count), locale: "es") == expected)
     }
 
     @Test(arguments: [
@@ -81,16 +80,16 @@ struct HabitScheduleSummaryTests {
         (3, "3 times a week"),
     ])
     func timesPerWeekTextInEnglish(count: Int, expected: String) {
-        #expect(resolve(HabitsTextsEnum.summaryTimesPerWeek(count), locale: "en") == expected)
+        #expect(resolve(CoreTextsEnum.summaryTimesPerWeek(count), locale: "en") == expected)
     }
 
     @Test func timesPerDayText() {
-        #expect(resolve(HabitsTextsEnum.summaryTimesPerDay(3), locale: "es") == "3 veces al día")
-        #expect(resolve(HabitsTextsEnum.summaryTimesPerDay(3), locale: "en") == "3 times a day")
+        #expect(resolve(CoreTextsEnum.summaryTimesPerDay(3), locale: "es") == "3 veces al día")
+        #expect(resolve(CoreTextsEnum.summaryTimesPerDay(3), locale: "en") == "3 times a day")
     }
 
     @Test func everyDayText() {
-        #expect(resolve(HabitsTextsEnum.summaryEveryDay, locale: "es") == "Cada día")
-        #expect(resolve(HabitsTextsEnum.summaryEveryDay, locale: "en") == "Every day")
+        #expect(resolve(CoreTextsEnum.summaryEveryDay, locale: "es") == "Cada día")
+        #expect(resolve(CoreTextsEnum.summaryEveryDay, locale: "en") == "Every day")
     }
 }
