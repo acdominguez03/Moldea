@@ -16,6 +16,7 @@ public struct Habit: Sendable, Equatable, Identifiable {
     public let createdAt: Date
     public let updatedAt: Date
     public let schedule: HabitSchedule
+    public let reminder: HabitReminder?
 
     public init(
         id: UUID,
@@ -25,7 +26,8 @@ public struct Habit: Sendable, Equatable, Identifiable {
         isActive: Bool,
         createdAt: Date,
         updatedAt: Date,
-        schedule: HabitSchedule
+        schedule: HabitSchedule,
+        reminder: HabitReminder? = nil
     ) {
         self.id = id
         self.name = name
@@ -35,5 +37,6 @@ public struct Habit: Sendable, Equatable, Identifiable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.schedule = schedule
+        self.reminder = reminder
     }
 }

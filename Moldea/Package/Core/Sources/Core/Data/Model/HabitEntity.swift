@@ -24,6 +24,9 @@ final class HabitEntity {
     @Relationship(deleteRule: .cascade, inverse: \HabitCompletionEntity.habit)
     var completions: [HabitCompletionEntity]? = []
 
+    @Relationship(deleteRule: .cascade, inverse: \HabitReminderEntity.habit)
+    var reminder: HabitReminderEntity?
+
     init(
         id: UUID,
         name: String,

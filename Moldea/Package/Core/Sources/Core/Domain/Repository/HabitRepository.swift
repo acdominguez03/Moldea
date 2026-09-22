@@ -17,6 +17,7 @@ public protocol HabitRepository: Sendable {
         color: String,
         icon: String,
         schedule: HabitSchedule,
+        reminder: HabitReminder?,
         updatedAt: Date
     ) async throws
 }

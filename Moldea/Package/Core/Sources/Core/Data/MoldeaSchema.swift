@@ -13,6 +13,7 @@ public enum MoldeaSchema {
             HabitEntity.self,
             HabitScheduleEntity.self,
             HabitCompletionEntity.self,
+            HabitReminderEntity.self,
         ]
     }
 

@@ -80,9 +80,7 @@ final class HabitFormViewModel: BaseViewModel {
     }
     
     func save() async {
-        print("isRemindHabitEnabled: \(isRemindHabitEnabled) | isMutedOnWeekends: \(isMutedOnWeekends) | reminderTime: \(reminderTime)")
-        
-        /*await perform {
+        await perform {
             if let habitID {
                 try await updateHabitUseCase.execute(
                     id: habitID,
@@ -90,7 +88,10 @@ final class HabitFormViewModel: BaseViewModel {
                     color: selectedColorHex,
                     icon: selectedIcon,
                     frequency: makeFrequency(),
-                    repetitionsPerDay: selectedTimesADay
+                    repetitionsPerDay: selectedTimesADay,
+                    isReminderEnabled: isRemindHabitEnabled,
+                    reminderTime: reminderTime,
+                    isMutedOnWeekends: isMutedOnWeekends
                 )
             } else {
                 try await createHabitUseCase.execute(
@@ -98,11 +99,14 @@ final class HabitFormViewModel: BaseViewModel {
                     color: selectedColorHex,
                     icon: selectedIcon,
                     frequency: makeFrequency(),
-                    repetitionsPerDay: selectedTimesADay
+                    repetitionsPerDay: selectedTimesADay,
+                    isReminderEnabled: isRemindHabitEnabled,
+                    reminderTime: reminderTime,
+                    isMutedOnWeekends: isMutedOnWeekends
                 )
             }
             didSave = true
-        }*/
+        }
     }
     
     func setLoading(_ isLoading: Bool) {

@@ -29,7 +29,8 @@ enum HabitMapper {
             schedule: HabitSchedule(
                 frequency: try frequency(of: schedule, habitID: entity.id),
                 repetitionsPerDay: schedule.repetitionsPerDay
-            )
+            ),
+            reminder: entity.reminder.map(toDomain)
         )
     }
 
@@ -44,7 +45,16 @@ enum HabitMapper {
             updatedAt: habit.updatedAt
         )
         apply(habit.schedule, to: entity)
+        apply(habit.reminder, to: entity)
         return entity
+    }
+
+    static func toDomain(_ entity: HabitReminderEntity) -> HabitReminder {
+        HabitReminder(
+            time: entity.time,
+            isEnabled: entity.enabled,
+            isMutedOnWeekends: entity.isMutedOnWeekends
+        )
     }
 
     static func apply(_ schedule: HabitSchedule, to entity: HabitEntity) {
@@ -65,6 +75,23 @@ enum HabitMapper {
             scheduleEntity.fixedWeekdays = weekdays.sorted()
         }
         entity.schedule = scheduleEntity
+    }
+
+    static func apply(_ reminder: HabitReminder?, to entity: HabitEntity) {
+        guard let reminder else {
+            entity.reminder = nil
+            return
+        }
+
+        let reminderEntity = entity.reminder ?? HabitReminderEntity(
+            time: reminder.time,
+            enabled: reminder.isEnabled,
+            isMutedOnWeekends: reminder.isMutedOnWeekends
+        )
+        reminderEntity.time = reminder.time
+        reminderEntity.enabled = reminder.isEnabled
+        reminderEntity.isMutedOnWeekends = reminder.isMutedOnWeekends
+        entity.reminder = reminderEntity
     }
 
     private static func frequency(

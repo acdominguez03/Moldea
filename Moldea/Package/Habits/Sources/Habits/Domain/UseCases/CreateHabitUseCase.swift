@@ -14,7 +14,10 @@ protocol CreateHabitUseCase: Sendable {
         color: String,
         icon: String,
         frequency: HabitFrequency,
-        repetitionsPerDay: Int
+        repetitionsPerDay: Int,
+        isReminderEnabled: Bool,
+        reminderTime: Date,
+        isMutedOnWeekends: Bool
     ) async throws
 }
 
@@ -38,7 +41,10 @@ struct DefaultCreateHabitUseCase: CreateHabitUseCase {
         color: String,
         icon: String,
         frequency: HabitFrequency,
-        repetitionsPerDay: Int
+        repetitionsPerDay: Int,
+        isReminderEnabled: Bool,
+        reminderTime: Date,
+        isMutedOnWeekends: Bool
     ) async throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         try HabitValidator.validate(
@@ -57,7 +63,12 @@ struct DefaultCreateHabitUseCase: CreateHabitUseCase {
             isActive: true,
             createdAt: date,
             updatedAt: date,
-            schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: repetitionsPerDay)
+            schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: repetitionsPerDay),
+            reminder: HabitReminder(
+                time: reminderTime,
+                isEnabled: isReminderEnabled,
+                isMutedOnWeekends: isMutedOnWeekends
+            )
         )
         try await repository.create(habit)
     }

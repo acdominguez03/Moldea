@@ -15,7 +15,10 @@ protocol UpdateHabitUseCase: Sendable {
         color: String,
         icon: String,
         frequency: HabitFrequency,
-        repetitionsPerDay: Int
+        repetitionsPerDay: Int,
+        isReminderEnabled: Bool,
+        reminderTime: Date,
+        isMutedOnWeekends: Bool
     ) async throws
 }
 
@@ -32,7 +35,10 @@ struct DefaultUpdateHabitUseCase: UpdateHabitUseCase {
         color: String,
         icon: String,
         frequency: HabitFrequency,
-        repetitionsPerDay: Int
+        repetitionsPerDay: Int,
+        isReminderEnabled: Bool,
+        reminderTime: Date,
+        isMutedOnWeekends: Bool
     ) async throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         try HabitValidator.validate(
@@ -48,6 +54,11 @@ struct DefaultUpdateHabitUseCase: UpdateHabitUseCase {
             color: color,
             icon: icon,
             schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: repetitionsPerDay),
+            reminder: HabitReminder(
+                time: reminderTime,
+                isEnabled: isReminderEnabled,
+                isMutedOnWeekends: isMutedOnWeekends
+            ),
             updatedAt: .now
         )
     }

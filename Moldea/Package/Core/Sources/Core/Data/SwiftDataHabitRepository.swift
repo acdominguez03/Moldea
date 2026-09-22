@@ -67,6 +67,7 @@ public actor SwiftDataHabitRepository: HabitRepository {
         color: String,
         icon: String,
         schedule: HabitSchedule,
+        reminder: HabitReminder?,
         updatedAt: Date
     ) async throws {
         var descriptor = FetchDescriptor<HabitEntity>(
@@ -83,6 +84,12 @@ public actor SwiftDataHabitRepository: HabitRepository {
         entity.icon = icon
         entity.updatedAt = updatedAt
         HabitMapper.apply(schedule, to: entity)
+
+        if reminder == nil, let orphanedReminder = entity.reminder {
+            modelContext.delete(orphanedReminder)
+        }
+        
+        HabitMapper.apply(reminder, to: entity)
 
         do {
             try modelContext.save()
