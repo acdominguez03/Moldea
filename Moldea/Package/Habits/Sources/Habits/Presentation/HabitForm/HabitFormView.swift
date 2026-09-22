@@ -89,6 +89,30 @@ struct HabitFormView: View {
                     value: habitFormViewModel.selectedFrequency
                 )
                 
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(CoreTextsEnum.announcements)
+                        .textCase(.uppercase)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    
+                    NotificationsPicker(
+                        isRemindHabitEnabled: habitFormViewModel
+                            .isRemindHabitEnabled,
+                        isMutedOnWeekends: habitFormViewModel
+                            .isMutedOnWeekends,
+                        reminderTime: habitFormViewModel.reminderTime,
+                        onRemindHabitToggled: {
+                            habitFormViewModel.onRemidHabitToggled($0)
+                        },
+                        onMuteOnWeekendToggled: {
+                            habitFormViewModel.onMuteOnWeekendToggled($0)
+                        },
+                        onReminderTimeChanged: {
+                            habitFormViewModel.onReminderTimeChanged($0)
+                        }
+                    )
+                }
+                
                 if let errorMessage = habitFormViewModel.errorMessage {
                     Text(errorMessage)
                         .font(.footnote)

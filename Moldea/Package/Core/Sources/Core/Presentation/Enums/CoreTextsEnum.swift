@@ -60,4 +60,7 @@ public enum CoreTextsEnum {
     public static let transcriptionStageAnalysis = resource("transcription_stage_analysis")
     public static let cancel = resource("cancel")
     public static let save = resource("save")
+    
+    // MARK: Announcements
+    public static let announcements = resource("announcements")
 }

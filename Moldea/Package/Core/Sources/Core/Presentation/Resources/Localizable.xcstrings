@@ -1,6 +1,40 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "announcements" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Announcements"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Avisos"
+          }
+        }
+      }
+    },
+    "cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
     "close" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -31,23 +65,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terminar"
-          }
-        }
-      }
-    },
-    "cancel" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelar"
           }
         }
       }
@@ -369,6 +386,24 @@
         }
       }
     },
+    "transcription_error_unavailable" : {
+      "comment" : "Error cuando el dispositivo no admite la transcripción en directo.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device doesn’t support live transcription."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo no admite la transcripción en directo."
+          }
+        }
+      }
+    },
     "transcription_stage_analysis" : {
       "comment" : "Nombre de la etapa de análisis de voz de la sesión de transcripción.",
       "extractionState" : "manual",
@@ -473,24 +508,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Permiso del micrófono"
-          }
-        }
-      }
-    },
-    "transcription_error_unavailable" : {
-      "comment" : "Error cuando el dispositivo no admite la transcripción en directo.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This device doesn’t support live transcription."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este dispositivo no admite la transcripción en directo."
           }
         }
       }

@@ -32,6 +32,10 @@ final class HabitFormViewModel: BaseViewModel {
     private let habitID: Habit.ID?
     private let createHabitUseCase: any CreateHabitUseCase
     private let updateHabitUseCase: any UpdateHabitUseCase
+    
+    private(set) var isRemindHabitEnabled: Bool = false
+    private(set) var isMutedOnWeekends: Bool = false
+    private(set) var reminderTime: Date = defaultReminderTime()
 
     init(
         id: Habit.ID? = nil,
@@ -76,7 +80,9 @@ final class HabitFormViewModel: BaseViewModel {
     }
     
     func save() async {
-        await perform {
+        print("isRemindHabitEnabled: \(isRemindHabitEnabled) | isMutedOnWeekends: \(isMutedOnWeekends) | reminderTime: \(reminderTime)")
+        
+        /*await perform {
             if let habitID {
                 try await updateHabitUseCase.execute(
                     id: habitID,
@@ -96,7 +102,7 @@ final class HabitFormViewModel: BaseViewModel {
                 )
             }
             didSave = true
-        }
+        }*/
     }
     
     func setLoading(_ isLoading: Bool) {
@@ -151,6 +157,18 @@ final class HabitFormViewModel: BaseViewModel {
         selectedTimesAWeek = selectedTimesAWeek - 1
     }
     
+    func onRemidHabitToggled(_ isEnabled: Bool) {
+        isRemindHabitEnabled = isEnabled
+    }
+    
+    func onMuteOnWeekendToggled(_ isEnabled: Bool) {
+        isMutedOnWeekends = isEnabled
+    }
+    
+    func onReminderTimeChanged(_ newReminderTime: Date) {
+        reminderTime = newReminderTime
+    }
+    
     private func makeFrequency() -> HabitFrequency {
         switch selectedFrequency {
         case .everyDay: .daily
@@ -167,5 +185,14 @@ final class HabitFormViewModel: BaseViewModel {
             let index = (calendar.firstWeekday - 1 + offset) % 7
             return WeekdayItem(id: index + 1, symbol: symbols[index], name: names[index])
         }
+    }
+    
+    private static func defaultReminderTime() -> Date {
+        Calendar.current.date(
+            bySettingHour: 8,
+            minute: 0,
+            second: 0,
+            of: .now
+        ) ?? .now
     }
 }

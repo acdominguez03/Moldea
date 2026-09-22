@@ -1171,6 +1171,40 @@
         }
       }
     },
+    "hour" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hour"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Hora"
+          }
+        }
+      }
+    },
+    "mute_on_weekends" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mute on weekend"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Silenciar los fines de semana"
+          }
+        }
+      }
+    },
     "new_habit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1205,6 +1239,57 @@
         }
       }
     },
+    "remind_me_about_this_habit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remind me about this habit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordarme este hábito"
+          }
+        }
+      }
+    },
+    "saturdays_and_sundays_without_notifications" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saturdays and Sundays without notifications"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Sábados y domingos sin avisos"
+          }
+        }
+      }
+    },
+    "starting_at %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting at %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "A partir de las %@"
+          }
+        }
+      }
+    },
     "times_a_day" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1216,7 +1301,7 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Veces al día"
           }
         }
@@ -1252,6 +1337,23 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Veces/Semana"
+          }
+        }
+      }
+    },
+    "you_will_not_receive_notifications_about_this habit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You will not receive notifications about this habit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No recibirás avisos de este hábito"
           }
         }
       }

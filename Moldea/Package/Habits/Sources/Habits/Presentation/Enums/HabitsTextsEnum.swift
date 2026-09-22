@@ -117,4 +117,17 @@ public enum HabitsTextsEnum {
     public static let onPause = resource("on_pause")
     
     public static let habitGuidance = resource("habit_guidance")
+    
+    // MARK: Announcements
+    public static let youWillNotReceiveNotificationsAboutThisHabit = resource("you_will_not_receive_notifications_about_this habit")
+    public static let remindMeAboutThisHabit = resource("remind_me_about_this_habit")
+    
+    public static let youWilNotReceiveNotificationsAboutThisHabit = resource("you_will_not_receive_notifications_about_this habit")
+    public static let saturdaysAndSundaysWithoutNotifications = resource("saturdays_and_sundays_without_notifications")
+    public static let muteOnWeekends = resource("mute_on_weekends")
+    
+    public static let hour = resource("hour")
+    public static func startingFrom(_ hourAndMinute: Date) -> LocalizedStringResource {
+        localized("starting_from \(hourAndMinute, format: .dateTime.hour().minute())")
+    }
 }
