@@ -25,7 +25,6 @@ enum HabitPaletteColor: CaseIterable, Identifiable {
 
     var id: Self { self }
 
-    /// Hex `#RRGGBB`: es lo que se guarda en el hábito.
     var hex: String {
         switch self {
         case .red: "#C8372D"
@@ -44,7 +43,6 @@ enum HabitPaletteColor: CaseIterable, Identifiable {
         }
     }
 
-    /// El fallback es una red de seguridad: `HabitPaletteColorTests` garantiza que todos los hex parsean.
     var color: Color {
         HexColorConverter.color(fromHex: hex) ?? .gray
     }

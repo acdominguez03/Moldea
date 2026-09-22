@@ -44,7 +44,6 @@ public enum CoreTextsEnum {
     public static let transcriptionErrorNoCompatibleFormat = resource("transcription_error_no_compatible_format")
     public static let transcriptionErrorConversionFailed = resource("transcription_error_conversion_failed")
 
-    /// El argumento es la etapa de la sesión que ha fallado, ya resuelta al idioma actual.
     public static func transcriptionErrorStageFailed(_ stage: String) -> LocalizedStringResource {
         LocalizedStringResource(
             "transcription_error_stage_failed \(stage)",

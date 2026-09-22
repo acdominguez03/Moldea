@@ -18,7 +18,6 @@ final class LiveTranscriptionModel {
     
     private(set) var phase: TranscriptionPhaseEnum = .idle
 
-    //Progreso de la descarga del modelo
     private(set) var downloadProgress: Progress?
     
     var isTranscribing: Bool { phase == .transcribing }
@@ -30,7 +29,6 @@ final class LiveTranscriptionModel {
     private var inputBuilder: AsyncStream<AnalyzerInput>.Continuation?
     private var captureSession: AVCaptureSession?
     
-    // `CaptureInputSequenceProvider` es de iOS 27 asi que se guarda como AnyObject
     private var captureProvider: AnyObject?
     private var sessionTask: Task<Void, Never>?
     private var resultsTask: Task<Void, Never>?
@@ -57,7 +55,6 @@ final class LiveTranscriptionModel {
             do {
                 try await runSession()
             } catch is CancellationError {
-                // Expected when the session is stopped.
             } catch {
                 print("Session failed: \(String(describing: error))")
                 phase = .failed(Self.message(for: error))
@@ -118,7 +115,6 @@ final class LiveTranscriptionModel {
         try await analyze(inputSequence, with: analyzer)
     }*/
 
-    // Funcionalidad de iOS 26: motor de audio con tap y conversión manual de buffers.
     private func analyzeAudioEngine(transcriber: TranscriberEnum) async throws {
         let engine = try run(.audioEngine) {
             try makeEngine()
@@ -208,7 +204,6 @@ final class LiveTranscriptionModel {
                     }
                 }
             } catch is CancellationError {
-                // The session was ended before the stream drained; not a failure.
             } catch {
                 print("Results stream failed: \(String(describing: error))")
                 self?.phase = .failed(Self.message(for: error))
@@ -245,7 +240,6 @@ final class LiveTranscriptionModel {
         throw TranscriptionErrorEnum.localeNotSupported
     }
 
-    // Downloads the speech models on demand, reporting progress to the UI.
     private func installAssets(for module: any SpeechModule) async throws {
         let status = await AssetInventory.status(forModules: [module])
         print("Asset status: \(String(describing: status))")
@@ -336,7 +330,6 @@ final class LiveTranscriptionModel {
         return output.frameLength > 0 ? output : nil
     }
 
-    // Runs one step of the session, tagging any failure with the step that produced it.
     private func run<T>(_ stage: StageEnum, _ work: () async throws -> T) async throws -> T {
         do {
             return try await work()

@@ -24,12 +24,21 @@ struct MoldeaApp: App {
 
     init() {
         do {
-            let container = try MoldeaSchema.makeModelContainer()
+            let container = try MoldeaSchema.makeModelContainer(inMemory: Self.usesInMemoryStore)
             modelContainer = container
             habitRepository = SwiftDataHabitRepository(modelContainer: container)
         } catch {
             fatalError("No se pudo crear el ModelContainer: \(error)")
         }
+    }
+
+    /// Los tests de UI lanzan la app con `-inMemoryStore` para no tocar los datos del simulador.
+    private static var usesInMemoryStore: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-inMemoryStore")
+        #else
+        false
+        #endif
     }
 
     var body: some Scene {

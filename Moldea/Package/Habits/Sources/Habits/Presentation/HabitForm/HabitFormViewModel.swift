@@ -1,5 +1,5 @@
 //
-//  CreateHabitViewModel.swift
+//  HabitFormViewModel.swift
 //  Habits
 //
 //  Created by Ismael Cordón Domínguez on 19/9/26.
@@ -11,11 +11,10 @@ import Core
 
 @Observable
 @MainActor
-final class CreateHabitViewModel: BaseViewModel {
+final class HabitFormViewModel: BaseViewModel {
     let timesADayRange = 1...20
     let timesAWeekRange = 1...7
     
-    /// Hex `#RRGGBB`: es lo que se guardará en el hábito.
     private(set) var selectedColorHex: String = HabitPaletteColor.gray.hex
     private(set) var selectedIcon: String = HabitPaletteIcon.drop.systemName
     private(set) var name: String = ""
@@ -28,17 +27,48 @@ final class CreateHabitViewModel: BaseViewModel {
     
     private(set) var isLoading = false
     private(set) var errorMessage: LocalizedStringResource?
-    /// Pasa a `true` cuando el hábito se ha guardado; la vista se cierra al observarlo.
     private(set) var didSave = false
     
+    private let habitID: Habit.ID?
     private let createHabitUseCase: any CreateHabitUseCase
-    
-    init(createHabitUseCase: any CreateHabitUseCase, calendar: Calendar = .current) {
+    private let updateHabitUseCase: any UpdateHabitUseCase
+
+    init(
+        id: Habit.ID? = nil,
+        name: String = "",
+        color: String = HabitPaletteColor.gray.hex,
+        icon: String = HabitPaletteIcon.drop.systemName,
+        frequency: HabitFrequency = .daily,
+        repetitionsPerDay: Int = 1,
+        createHabitUseCase: any CreateHabitUseCase,
+        updateHabitUseCase: any UpdateHabitUseCase,
+        calendar: Calendar = .current
+    ) {
+        self.habitID = id
         self.createHabitUseCase = createHabitUseCase
+        self.updateHabitUseCase = updateHabitUseCase
         self.weekdayItems = Self.makeWeekdays(calendar: calendar)
+        self.name = name
+        self.selectedColorHex = color
+        self.selectedIcon = icon
+        self.selectedTimesADay = repetitionsPerDay
+
+        switch frequency {
+        case .daily:
+            selectedFrequency = .everyDay
+        case .weeklyCount(let timesPerWeek):
+            selectedFrequency = .timesPerWeek
+            selectedTimesAWeek = timesPerWeek
+        case .fixedDays(let weekdays):
+            selectedFrequency = .fixedDays
+            selectedWeekdays = weekdays
+        }
     }
-    
-    /// Comodidad de la interfaz; las reglas de verdad las valida el caso de uso.
+
+    var isEditing: Bool {
+        habitID != nil
+    }
+
     var canSave: Bool {
         let hasName = !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         let hasDays = selectedFrequency != .fixedDays || !selectedWeekdays.isEmpty
@@ -47,13 +77,24 @@ final class CreateHabitViewModel: BaseViewModel {
     
     func save() async {
         await perform {
-            try await createHabitUseCase.execute(
-                name: name,
-                color: selectedColorHex,
-                icon: selectedIcon,
-                frequency: makeFrequency(),
-                repetitionsPerDay: selectedTimesADay
-            )
+            if let habitID {
+                try await updateHabitUseCase.execute(
+                    id: habitID,
+                    name: name,
+                    color: selectedColorHex,
+                    icon: selectedIcon,
+                    frequency: makeFrequency(),
+                    repetitionsPerDay: selectedTimesADay
+                )
+            } else {
+                try await createHabitUseCase.execute(
+                    name: name,
+                    color: selectedColorHex,
+                    icon: selectedIcon,
+                    frequency: makeFrequency(),
+                    repetitionsPerDay: selectedTimesADay
+                )
+            }
             didSave = true
         }
     }

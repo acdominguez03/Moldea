@@ -12,7 +12,6 @@ import Foundation
 final class HabitEntity {
     @Attribute(.unique) var id: UUID
     var name: String
-    /// Hex `#RRGGBB`.
     var color: String
     var icon: String
     var active: Bool

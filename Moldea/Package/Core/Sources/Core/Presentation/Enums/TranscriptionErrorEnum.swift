@@ -17,8 +17,6 @@ enum TranscriptionErrorEnum: Error {
     case audioConversionFailed
     case stageFailed(StageEnum, any Error)
 
-    /// Texto que se enseña al usuario. El error subyacente de `stageFailed` no se publica:
-    /// no está traducido y solo sirve para diagnóstico, así que se queda en el log.
     var message: LocalizedStringResource {
         switch self {
         case .microphoneNotAuthorized:

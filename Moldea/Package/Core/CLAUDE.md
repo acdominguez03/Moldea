@@ -76,9 +76,10 @@ las valida el caso de uso.
   días como `Set<Int>` de `Calendar.weekday` (1 = domingo … 7 = sábado).
 
 **Repositorio** (`Domain/Repository`): `HabitRepository` es un protocolo `public` y `Sendable`.
-Recibe y devuelve solo tipos de dominio. Hoy solo tiene `create(_:)`; `fetch` se añadirá cuando
-`Today` y `Statistics` lo necesiten, y con él habrá que decidir qué hacer con una fila corrupta
-al listar (saltarla y registrarla, o propagar el error).
+Recibe y devuelve solo tipos de dominio. Tiene `create(_:)`, `delete(id:)`,
+`setActive(id:isActive:updatedAt:)` y `update(id:name:color:icon:schedule:updatedAt:)`. `fetch`
+se añadirá cuando `Today` y `Statistics` lo necesiten, y con él habrá que decidir qué hacer con
+una fila corrupta al listar (saltarla y registrarla, o propagar el error).
 
 ## Data
 
@@ -89,17 +90,27 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
   `timesPerWeek?`, `fixedWeekdays: [Int]?` y `repetitionsPerDay`) y `HabitCompletionEntity`
   (`id` único, `day` con `#Index`). `FrequencyType` es la etiqueta de persistencia de la
   frecuencia; el dominio usa `HabitFrequency`.
-- **`HabitMapper`**: `makeEntity(from:)` (dominio → entidad, con `fixedWeekdays` ordenado para
-  que lo persistido sea determinista) y `toDomain(_:) throws`, que lanza `HabitMappingError`
-  (`missingSchedule`, `missingTimesPerWeek`, `missingFixedWeekdays`, todos con el `habitID`) si
-  los datos son incoherentes. No rellena valores por defecto: ocultaría la corrupción.
+- **`HabitMapper`**: `makeEntity(from:)` (dominio → entidad) y `toDomain(_:) throws`, que lanza
+  `HabitMappingError` (`missingSchedule`, `missingTimesPerWeek`, `missingFixedWeekdays`, todos
+  con el `habitID`) si los datos son incoherentes. No rellena valores por defecto: ocultaría la
+  corrupción. `apply(_:to:)` traduce un `HabitSchedule` a los campos de un
+  `HabitScheduleEntity` existente o nuevo, con `fixedWeekdays` ordenado para que lo persistido
+  sea determinista; es el único sitio que hace esa traducción, y lo usan tanto `makeEntity`
+  como `SwiftDataHabitRepository.update`.
 - **`MoldeaSchema`** (`public`): lista de modelos, `schema` y
   `makeModelContainer(inMemory:)`. Es el único punto de verdad del esquema; cuando lleguen los
   widgets y el App Group, la configuración compartida se añadirá aquí.
 - **`SwiftDataHabitRepository`** (`public`, `@ModelActor`): `@ModelActor` genera un
   `public init(modelContainer:)` cuando el actor es `public`, que es lo que usa `MoldeaApp`.
-  `create` inserta y guarda; si `save()` falla hace `rollback()` y relanza el error, para que la
-  entidad no quede pendiente y se guarde con el siguiente `create`.
+  Las cuatro operaciones siguen el mismo patrón: si `save()` falla hacen `rollback()` y relanzan
+  el error, para que la entidad no quede pendiente en el contexto.
+  - `create` inserta y guarda.
+  - `delete`, `setActive` y `update` buscan la entidad por `id` con un `FetchDescriptor` de
+    `fetchLimit = 1` y no hacen nada si no existe.
+  - `update` cambia `name`, `color`, `icon` y `updatedAt`, y delega el `schedule` en
+    `HabitMapper.apply(_:to:)`, que también lo usa `create` por dentro. Al cambiar de
+    frecuencia deja a `nil` los campos de la anterior (`timesPerWeek` o `fixedWeekdays`), para
+    no dejar datos sueltos de una frecuencia que ya no aplica.
 
 ## Colores: `HexColorConverter`
 
@@ -180,7 +191,10 @@ contexto, o el proceso de tests se cae. Los `*Entity` se ven con `@testable impo
 - `HabitMapperTests`: ida y vuelta con las tres frecuencias, `fixedWeekdays` ordenado, solo se
   rellenan los campos de la frecuencia, y los tres errores de datos incoherentes.
 - `SwiftDataHabitRepositoryTests`: `create` persiste con las tres frecuencias y dos `create`
-  dejan dos hábitos. No cubre el `rollback()` de un `save()` fallido.
+  dejan dos hábitos; `delete` borra, borra solo el indicado y no hace nada con un `id`
+  desconocido; `update` cambia los campos editables conservando `id`, `createdAt` e
+  `isActive`, y al cambiar de frecuencia limpia los campos de la anterior. No cubre el
+  `rollback()` de un `save()` fallido.
 - `HexColorConverterTests`: parseo, entradas inválidas, ida y vuelta con los 13 hex de la
   paleta, mayúsculas y recorte de rango.
 

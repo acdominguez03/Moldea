@@ -3,18 +3,23 @@ import Foundation
 import Core
 @testable import Habits
 
+private struct UpdateCall: Sendable, Equatable {
+    let id: Habit.ID
+    let name: String
+    let color: String
+    let icon: String
+    let schedule: HabitSchedule
+}
+
 private actor FakeHabitRepository: HabitRepository {
-    private(set) var created: [Habit] = []
+    private(set) var updateCalls: [UpdateCall] = []
     private let error: (any Error)?
 
     init(error: (any Error)? = nil) {
         self.error = error
     }
 
-    func create(_ habit: Habit) async throws {
-        if let error { throw error }
-        created.append(habit)
-    }
+    func create(_ habit: Habit) async throws {}
 
     func delete(id: Habit.ID) async throws {}
 
@@ -27,7 +32,10 @@ private actor FakeHabitRepository: HabitRepository {
         icon: String,
         schedule: HabitSchedule,
         updatedAt: Date
-    ) async throws {}
+    ) async throws {
+        if let error { throw error }
+        updateCalls.append(UpdateCall(id: id, name: name, color: color, icon: icon, schedule: schedule))
+    }
 }
 
 private struct RepositoryFailure: Error, Equatable {}
@@ -40,18 +48,16 @@ private struct Input: Sendable {
     var repetitionsPerDay = 1
 }
 
-struct CreateHabitUseCaseTests {
+struct UpdateHabitUseCaseTests {
     private let fixedID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
-    private let fixedDate = Date(timeIntervalSince1970: 1_000)
 
-    private func makeUseCase(repository: FakeHabitRepository) -> DefaultCreateHabitUseCase {
-        let id = fixedID
-        let date = fixedDate
-        return DefaultCreateHabitUseCase(repository: repository, makeID: { id }, now: { date })
-    }
-
-    private func execute(_ input: Input, with useCase: DefaultCreateHabitUseCase) async throws {
+    private func execute(
+        _ input: Input,
+        id: Habit.ID? = nil,
+        with useCase: DefaultUpdateHabitUseCase
+    ) async throws {
         try await useCase.execute(
+            id: id ?? fixedID,
             name: input.name,
             color: input.color,
             icon: input.icon,
@@ -67,35 +73,33 @@ struct CreateHabitUseCaseTests {
         .weeklyCount(timesPerWeek: 3),
         .fixedDays(weekdays: [2, 4, 6]),
     ])
-    func createsTheHabitWithGeneratedIDAndDates(frequency: HabitFrequency) async throws {
+    func updatesTheHabitWithTheGivenID(frequency: HabitFrequency) async throws {
         let repository = FakeHabitRepository()
-        let useCase = makeUseCase(repository: repository)
+        let useCase = DefaultUpdateHabitUseCase(repository: repository)
 
         try await execute(
             Input(name: "Beber agua", frequency: frequency, repetitionsPerDay: 2),
             with: useCase
         )
 
-        let expected = Habit(
-            id: fixedID,
-            name: "Beber agua",
-            color: "#007AFF",
-            icon: "drop",
-            isActive: true,
-            createdAt: fixedDate,
-            updatedAt: fixedDate,
-            schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: 2)
-        )
-        #expect(await repository.created == [expected])
+        #expect(await repository.updateCalls == [
+            UpdateCall(
+                id: fixedID,
+                name: "Beber agua",
+                color: "#007AFF",
+                icon: "drop",
+                schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: 2)
+            )
+        ])
     }
 
     @Test func trimsTheName() async throws {
         let repository = FakeHabitRepository()
-        let useCase = makeUseCase(repository: repository)
+        let useCase = DefaultUpdateHabitUseCase(repository: repository)
 
         try await execute(Input(name: "  Leer \n"), with: useCase)
 
-        #expect(await repository.created.first?.name == "Leer")
+        #expect(await repository.updateCalls.first?.name == "Leer")
     }
 
     // MARK: Validación
@@ -120,19 +124,19 @@ struct CreateHabitUseCaseTests {
         expectedError: CreateHabitError
     ) async throws {
         let repository = FakeHabitRepository()
-        let useCase = makeUseCase(repository: repository)
+        let useCase = DefaultUpdateHabitUseCase(repository: repository)
 
         await #expect(throws: expectedError) {
             try await execute(input, with: useCase)
         }
-        #expect(await repository.created.isEmpty)
+        #expect(await repository.updateCalls.isEmpty)
     }
 
     // MARK: Errores del repositorio
 
     @Test func propagatesRepositoryErrors() async {
         let repository = FakeHabitRepository(error: RepositoryFailure())
-        let useCase = makeUseCase(repository: repository)
+        let useCase = DefaultUpdateHabitUseCase(repository: repository)
 
         await #expect(throws: RepositoryFailure()) {
             try await execute(Input(), with: useCase)

@@ -7,8 +7,6 @@
 
 import SwiftData
 
-/// Único punto de verdad del esquema de SwiftData de Moldea.
-/// Lo consumen la app y, más adelante, los widgets y los App Intents.
 public enum MoldeaSchema {
     public static var models: [any PersistentModel.Type] {
         [
@@ -22,7 +20,6 @@ public enum MoldeaSchema {
         Schema(models)
     }
 
-    /// - Parameter inMemory: `true` para tests y previews; no toca el disco.
     public static func makeModelContainer(inMemory: Bool = false) throws -> ModelContainer {
         let configuration = ModelConfiguration(
             schema: schema,

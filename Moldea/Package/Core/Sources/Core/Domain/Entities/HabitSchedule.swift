@@ -5,7 +5,6 @@
 //  Created by Ismael Cordón Domínguez on 21/9/26.
 //
 
-/// Patrón de repetición de un hábito.
 public struct HabitSchedule: Sendable, Equatable {
     public let frequency: HabitFrequency
     public let repetitionsPerDay: Int

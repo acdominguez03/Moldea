@@ -5,7 +5,6 @@ import Core
 struct HabitPaletteColorTests {
     @Test(arguments: HabitPaletteColor.allCases)
     func hexParsesToAColor(_ paletteColor: HabitPaletteColor) {
-        // Si esto falla, `color` estaría usando su fallback.
         #expect(HexColorConverter.color(fromHex: paletteColor.hex) != nil)
     }
 
@@ -24,7 +23,6 @@ struct HabitPaletteColorTests {
         #expect(Set(hexes).count == hexes.count)
     }
 
-    /// `HabitColorPicker` reparte 7 colores en la primera fila y el resto, más el `ColorPicker`, en la segunda.
     @Test func paletteHasThirteenColors() {
         #expect(HabitPaletteColor.allCases.count == 13)
     }

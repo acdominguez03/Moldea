@@ -1,15 +1,16 @@
 //
-//  CreateHabitUseCase.swift
+//  UpdateHabitUseCase.swift
 //  Habits
 //
-//  Created by Ismael Cordón Domínguez on 21/9/26.
+//  Created by Ismael Cordón Domínguez on 22/9/26.
 //
 
 import Foundation
 import Core
 
-protocol CreateHabitUseCase: Sendable {
+protocol UpdateHabitUseCase: Sendable {
     func execute(
+        id: Habit.ID,
         name: String,
         color: String,
         icon: String,
@@ -18,22 +19,15 @@ protocol CreateHabitUseCase: Sendable {
     ) async throws
 }
 
-struct DefaultCreateHabitUseCase: CreateHabitUseCase {
+struct DefaultUpdateHabitUseCase: UpdateHabitUseCase {
     private let repository: any HabitRepository
-    private let makeID: @Sendable () -> UUID
-    private let now: @Sendable () -> Date
 
-    init(
-        repository: any HabitRepository,
-        makeID: @escaping @Sendable () -> UUID = { UUID() },
-        now: @escaping @Sendable () -> Date = { .now }
-    ) {
+    init(repository: any HabitRepository) {
         self.repository = repository
-        self.makeID = makeID
-        self.now = now
     }
 
     func execute(
+        id: Habit.ID,
         name: String,
         color: String,
         icon: String,
@@ -48,17 +42,13 @@ struct DefaultCreateHabitUseCase: CreateHabitUseCase {
             repetitionsPerDay: repetitionsPerDay
         )
 
-        let date = now()
-        let habit = Habit(
-            id: makeID(),
+        try await repository.update(
+            id: id,
             name: trimmedName,
             color: color,
             icon: icon,
-            isActive: true,
-            createdAt: date,
-            updatedAt: date,
-            schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: repetitionsPerDay)
+            schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: repetitionsPerDay),
+            updatedAt: .now
         )
-        try await repository.create(habit)
     }
 }

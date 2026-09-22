@@ -252,13 +252,15 @@ Core/
 - **El repositorio** (`HabitRepository`, `Sendable`) recibe y devuelve solo tipos de dominio.
   `SwiftDataHabitRepository` es un `@ModelActor` (contexto propio, fuera del hilo principal) y
   hace `rollback()` si el `save()` falla para no dejar la entidad pendiente en el contexto.
-  Hoy solo expone `create`; la lectura se añade cuando `Today` y `Statistics` la necesiten.
+  Expone `create`, `delete`, `setActive` y `update`; la lectura se añade cuando `Today` y
+  `Statistics` la necesiten.
 
 ### Casos de uso
 
-Viven en el `Domain` de la feature que los usa (p. ej. `Habits/Domain/UseCases`). Son un
-protocolo (`CreateHabitUseCase`) más una implementación (`DefaultCreateHabitUseCase`) que recibe
-el repositorio y, para poder testearse, el generador de `UUID` y el reloj como closures.
+Viven en el `Domain` de la feature que los usa (p. ej. `Habits/Domain/UseCases`). Uno por
+operación: `CreateHabitUseCase`, `UpdateHabitUseCase`, `DeleteHabitUseCase` y
+`SetHabitActiveUseCase`, cada uno con su protocolo y su implementación `Default*`, que recibe
+el repositorio por `init`.
 
 **Norma: el caso de uso recibe los datos sueltos y construye él los objetos de dominio; el
 view model no conoce `Habit` ni ningún objeto de entrada.**
@@ -268,20 +270,32 @@ func execute(name: String, color: String, icon: String,
              frequency: HabitFrequency, repetitionsPerDay: Int) async throws
 ```
 
-El caso de uso valida (es el único sitio con reglas de negocio), genera `id` y fechas, y llama
-al repositorio. Lo que el view model sí hace es traducir el estado de la UI a esos parámetros
-(p. ej. su enum de frecuencia a `HabitFrequency`). Los errores de validación son tipos propios
-(`CreateHabitError`); `BaseViewModel.perform` los muestra como el error genérico, porque la UI
-ya evita las entradas inválidas (`canSave` es solo comodidad).
+`CreateHabitUseCase` y `UpdateHabitUseCase` comparten esa forma (`update` añade `id` delante);
+`DeleteHabitUseCase` y `SetHabitActiveUseCase` solo necesitan el `id` del hábito.
 
-Flujo de guardado:
+El caso de uso valida (es el único sitio con reglas de negocio) y llama al repositorio.
+`CreateHabitUseCase` genera `id` y fechas con `makeID`/`now` como closures, para poder
+testearse; `UpdateHabitUseCase` conserva el `id` que recibe y usa `.now` directamente, porque
+solo genera `updatedAt`. La validación (nombre recortado, color, repeticiones, frecuencia) es
+la misma para crear y editar: vive en `HabitValidator`, que usan los dos casos de uso y lanza
+`CreateHabitError`. Lo que el view model sí hace es traducir el estado de la UI a esos
+parámetros (p. ej. su enum de frecuencia a `HabitFrequency`). `BaseViewModel.perform` muestra
+cualquier error, también los de validación, como el mensaje genérico, porque la UI ya evita las
+entradas inválidas (`canSave` es solo comodidad).
+
+Flujo de guardado, en `HabitFormViewModel.save()`: con un `id` (modo edición) llama a
+`UpdateHabitUseCase`; sin él, a `CreateHabitUseCase`.
 
 ```
-Botón Guardar → CreateHabitViewModel.save()
-  → CreateHabitUseCase.execute(...)   valida, genera id y fechas, construye Habit
-  → HabitRepository.create(Habit)     protocolo de Core/Domain
-  → SwiftDataHabitRepository          @ModelActor: HabitMapper.makeEntity + save()
+Botón Guardar → HabitFormViewModel.save()
+  → UpdateHabitUseCase.execute(id:...)     valida, construye HabitSchedule       (editar)
+  → CreateHabitUseCase.execute(...)        valida, genera id y fechas, construye Habit   (crear)
+  → HabitRepository.update / .create       protocolo de Core/Domain
+  → SwiftDataHabitRepository               @ModelActor: HabitMapper.apply/makeEntity + save()
 ```
+
+`delete` y `setActive` siguen el mismo patrón, sin formulario: la vista pide la acción
+(swipe), el view model llama a su caso de uso, y este al repositorio.
 
 ### Composición
 

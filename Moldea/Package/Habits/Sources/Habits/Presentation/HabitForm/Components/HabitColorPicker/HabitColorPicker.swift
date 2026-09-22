@@ -11,7 +11,6 @@ import Core
 struct HabitColorPicker: View {
     @Environment(\.self) private var environment
 
-    /// Hex `#RRGGBB` del color seleccionado.
     let selectedHex: String
     let onColorSelected: (String) -> Void
 
@@ -25,7 +24,6 @@ struct HabitColorPicker: View {
         Array(HabitPaletteColor.allCases.dropFirst(itemsPerRow))
     }
 
-    /// El color elegido con el selector nativo; `nil` si es uno de la paleta.
     private var customColor: Color? {
         guard !HabitPaletteColor.allCases.contains(where: { $0.hex == selectedHex }) else {
             return nil

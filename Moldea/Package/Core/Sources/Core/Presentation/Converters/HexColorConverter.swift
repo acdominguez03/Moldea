@@ -7,9 +7,7 @@
 
 import SwiftUI
 
-/// Convierte entre `Color` de SwiftUI y hex `#RRGGBB`.
 public enum HexColorConverter {
-    /// Acepta `#RRGGBB` (el `#` es opcional; mayúsculas o minúsculas). `nil` si no es válido.
     public static func color(fromHex hex: String) -> Color? {
         var digits = hex
         if digits.hasPrefix("#") { digits.removeFirst() }
@@ -27,7 +25,6 @@ public enum HexColorConverter {
         )
     }
 
-    /// Hex `#RRGGBB` en mayúsculas, resuelto en el entorno dado.
     public static func hex(from color: Color, in environment: EnvironmentValues) -> String {
         let resolved = color.resolve(in: environment)
         return String(
@@ -36,7 +33,6 @@ public enum HexColorConverter {
         )
     }
 
-    /// `Color.Resolved` usa sRGB de rango extendido: se recorta a 0...1 antes de pasar a 0...255.
     private static func component(_ value: Float) -> Int {
         Int((min(max(value, 0), 1) * 255).rounded())
     }

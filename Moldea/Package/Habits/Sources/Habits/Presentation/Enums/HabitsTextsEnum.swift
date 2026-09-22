@@ -15,11 +15,16 @@ public enum HabitsTextsEnum {
         )
     }
 
+    private static func localized(_ value: String.LocalizationValue) -> LocalizedStringResource {
+        LocalizedStringResource(value, bundle: .atURL(Bundle.module.bundleURL))
+    }
+
     // MARK: Screen Texts
     public static let screenTitle = resource("habits_screen_title")
     public static let emptyState = resource("habits_empty_state")
     
     public static let newHabit = resource("new_habit")
+    public static let editHabit = resource("edit_habit")
 
     // MARK: Color Picker Texts
     public static let colorTitle = resource("habits_color_title")
@@ -84,4 +89,32 @@ public enum HabitsTextsEnum {
     public static let fixedDaysFrequency = resource("fixed_days_frequency")
     public static let timesADay = resource("times_a_day")
     public static let timesAWeek = resource("times_a_week")
+
+    // MARK: Habit list
+    public static let summaryEveryDay = resource("habits_summary_every_day")
+
+    public static func summaryTimesPerDay(_ count: Int) -> LocalizedStringResource {
+        localized("habits_summary_times_per_day \(count)")
+    }
+
+    public static func summaryTimesPerWeek(_ count: Int) -> LocalizedStringResource {
+        localized("habits_summary_times_per_week \(count)")
+    }
+    
+    public static let days = resource("days")
+    public static let activate = resource("activate")
+    public static let deactivate = resource("deactivate")
+    
+    public static let delete = resource("delete")
+    public static let confirm = resource("confirm")
+    
+    // MARK: Delete habit alert
+    public static let deleteHabitAlertTitle = resource("delete_habit_alert_title")
+    public static func deleteHabitAlertMessage(_ habitName: String) -> LocalizedStringResource {
+        localized("delete_habit_alert_message \(habitName)")
+    }
+    
+    public static let onPause = resource("on_pause")
+    
+    public static let habitGuidance = resource("habit_guidance")
 }

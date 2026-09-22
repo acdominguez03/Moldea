@@ -70,6 +70,23 @@
         }
       }
     },
+    "habit_functionality" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a habit to change its icon, color, frequency, or notifications. Swipe right to delete it and left to pause it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Toca un hábito para cambiar su icono, su color, su frecuencia o sus avisos. Arrastra hacia la derecha para borrarlo y hacia la izquierda para pausarlo."
+          }
+        }
+      }
+    },
     "habits_title" : {
       "extractionState" : "manual",
       "localizations" : {

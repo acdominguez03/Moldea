@@ -2,7 +2,7 @@
 
 Paquete de la feature **Hábitos**: la pestaña de creación y gestión de los hábitos de Moldea.
 
-Hoy contiene la pantalla de creación de hábitos (`CreateHabitView`) con su caso de uso, el
+Hoy contiene la pantalla de creación de hábitos (`HabitFormView`) con su caso de uso, el
 catálogo de iconos y la paleta de colores. `HabitsView` todavía no lista los hábitos: no hay
 `fetch` en el repositorio, así que tras guardar un hábito no se ve en ninguna pantalla.
 
@@ -35,9 +35,9 @@ Sources/Habits/
 │   └── Resources/habit-icon-families.json
 └── Presentation/
     ├── HabitsView.swift                 # punto de entrada público
-    ├── CreateHabit/
-    │   ├── CreateHabitView.swift
-    │   ├── CreateHabitViewModel.swift
+    ├── HabitForm/
+    │   ├── HabitFormView.swift
+    │   ├── HabitFormViewModel.swift
     │   ├── ChooseHabitIconView.swift
     │   ├── ChooseHabitIconViewModel.swift
     │   ├── Model/WeekdayItem.swift
@@ -55,18 +55,18 @@ repositorio de hábitos y su persistencia viven en `Core`.
 ## Pantalla y composición
 
 `HabitsView` es el punto de entrada público: un `NavigationStack` con un `ScrollView` vacío, el
-título en grande y un botón `+` que presenta `CreateHabitView` en una hoja. La compone el target
+título en grande y un botón `+` que presenta `HabitFormView` en una hoja. La compone el target
 `Moldea` en el caso `.habits` de `MainTab`.
 
 Su `init` público recibe `habitRepository: any HabitRepository`. Construye por dentro
-`DefaultCreateHabitUseCase(repository:)` y crea un `CreateHabitViewModel` **nuevo cada vez que se
+`DefaultCreateHabitUseCase(repository:)` y crea un `HabitFormViewModel` **nuevo cada vez que se
 abre la hoja**. Así el caso de uso, el view model y `BundleHabitIconCatalog` siguen siendo
 `internal`.
 
 ## Guardar un hábito
 
 ```
-Guardar → CreateHabitViewModel.save()
+Guardar → HabitFormViewModel.save()
   → CreateHabitUseCase.execute(name:color:icon:frequency:repetitionsPerDay:)
   → HabitRepository.create(Habit)          (Core)
 ```
@@ -89,7 +89,7 @@ Valida en este orden y lanza el primer error (`CreateHabitError`):
 
 No se valida el icono: no tiene formato comprobable sin UIKit y el selector no da uno vacío.
 
-**`CreateHabitViewModel`** conforma `BaseViewModel` (`isLoading`, `errorMessage`). Guarda el
+**`HabitFormViewModel`** conforma `BaseViewModel` (`isLoading`, `errorMessage`). Guarda el
 estado de la pantalla y traduce `selectedFrequency` + `selectedTimesAWeek` + `selectedWeekdays`
 a un `HabitFrequency` (`makeFrequency()`).
 
@@ -100,7 +100,7 @@ a un `HabitFrequency` (`makeFrequency()`).
   frecuencia es «días fijos», y no estar guardando. El caso de uso valida igualmente.
 - Cualquier error, también los de validación, se muestra como el mensaje genérico de `Core`
   (`BaseViewModel.perform`). Como la UI evita las entradas inválidas, no deberían llegar al
-  usuario. `CreateHabitView` lo pinta como texto rojo bajo el formulario.
+  usuario. `HabitFormView` lo pinta como texto rojo bajo el formulario.
 
 ## Colores
 
@@ -112,7 +112,7 @@ aplica este paquete:
   `HexColorConverter`, con `.gray` de red de seguridad) y `name` localizado. El orden de
   `allCases` es el del picker: 7 en la primera fila y los 6 restantes más el `ColorPicker`
   nativo en la segunda, por eso hay un test que exige exactamente 13.
-- `CreateHabitViewModel` guarda `selectedColorHex` (**gris por defecto**, `#5B6470`) y expone
+- `HabitFormViewModel` guarda `selectedColorHex` (**gris por defecto**, `#5B6470`) y expone
   `selectedColor: Color`; `selectColor(hex:)` es la única forma de cambiarlo. El resto de vistas
   (`HabitSummaryView`, `HabitIconPicker`, `ChooseHabitIconView`) reciben un `Color`.
 - `HabitColorPicker` recibe `selectedHex` y devuelve un hex. Los colores de la paleta devuelven
@@ -172,7 +172,7 @@ Swift Testing. Los repositorios y casos de uso falsos son `actor` (los protocolo
   `id` y fecha fijados), nombre recortado, 13 entradas inválidas (cada una lanza su error y no
   toca el repositorio; incluye un hex de ancho completo) y propagación del error del
   repositorio.
-- `CreateHabitViewModelTests`: color por defecto y selección (paleta, personalizado, hex
+- `HabitFormViewModelTests`: color por defecto y selección (paleta, personalizado, hex
   ilegible → gris), `canSave`, traducción de cada frecuencia al caso de uso, `didSave` y error
   genérico cuando el caso de uso falla.
 - `HabitPaletteColorTests`: los 13 hex parsean (garantiza que el fallback no se usa), formato

@@ -1,5 +1,5 @@
 //
-//  CreateHabitView.swift
+//  HabitFormView.swift
 //  Habits
 //
 //  Created by Ismael Cordón Domínguez on 19/9/26.
@@ -8,15 +8,15 @@
 import SwiftUI
 import Core
 
-struct CreateHabitView: View {
+struct HabitFormView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var createHabitViewModel: CreateHabitViewModel
+    @State private var habitFormViewModel: HabitFormViewModel
     @State private var isShowingIconChooser = false
 
     private let iconCatalog: any HabitIconCatalog
 
-    init(createHabitViewModel: CreateHabitViewModel, iconCatalog: any HabitIconCatalog) {
-        self.createHabitViewModel = createHabitViewModel
+    init(habitFormViewModel: HabitFormViewModel, iconCatalog: any HabitIconCatalog) {
+        self.habitFormViewModel = habitFormViewModel
         self.iconCatalog = iconCatalog
     }
 
@@ -24,11 +24,11 @@ struct CreateHabitView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 12) {
                 HabitSummaryView(
-                    color: createHabitViewModel.selectedColor,
-                    icon: createHabitViewModel.selectedIcon,
-                    name: createHabitViewModel.name,
+                    color: habitFormViewModel.selectedColor,
+                    icon: habitFormViewModel.selectedIcon,
+                    name: habitFormViewModel.name,
                     onHabitNameChanged: {
-                        createHabitViewModel.onHabitNameChanged($0)
+                        habitFormViewModel.onHabitNameChanged($0)
                     }
                 )
                 
@@ -39,9 +39,9 @@ struct CreateHabitView: View {
                         .foregroundStyle(.secondary)
 
                     HabitIconPicker(
-                        selectedIcon: createHabitViewModel.selectedIcon,
-                        tint: createHabitViewModel.selectedColor,
-                        onIconSelected: { createHabitViewModel.selectIcon($0) },
+                        selectedIcon: habitFormViewModel.selectedIcon,
+                        tint: habitFormViewModel.selectedColor,
+                        onIconSelected: { habitFormViewModel.selectIcon($0) },
                         onMoreTapped: { isShowingIconChooser = true }
                     )
                 }
@@ -53,8 +53,8 @@ struct CreateHabitView: View {
                         .foregroundStyle(.secondary)
 
                     HabitColorPicker(
-                        selectedHex: createHabitViewModel.selectedColorHex,
-                        onColorSelected: { createHabitViewModel.selectColor(hex: $0) }
+                        selectedHex: habitFormViewModel.selectedColorHex,
+                        onColorSelected: { habitFormViewModel.selectColor(hex: $0) }
                     )
                 }
                 
@@ -65,20 +65,20 @@ struct CreateHabitView: View {
                         .foregroundStyle(.secondary)
                     
                     HabitFrequencyPicker(
-                        selectedHabitFrequency: createHabitViewModel.selectedFrequency,
+                        selectedHabitFrequency: habitFormViewModel.selectedFrequency,
                         onFrequencyChanged: {
-                            createHabitViewModel.onFrequencyChanged($0)
+                            habitFormViewModel.onFrequencyChanged($0)
                         }
                     )
                     
                     TimesADayPicker(
-                        range: createHabitViewModel.timesADayRange,
-                        selectedTimesADay: createHabitViewModel.selectedTimesADay,
+                        range: habitFormViewModel.timesADayRange,
+                        selectedTimesADay: habitFormViewModel.selectedTimesADay,
                         onIncrementTimesADay: {
-                            createHabitViewModel.onIncrementTimeADayClicked()
+                            habitFormViewModel.onIncrementTimeADayClicked()
                         },
                         onDecrementTimesADay: {
-                            createHabitViewModel.onDecrementTimeADayClicked()
+                            habitFormViewModel.onDecrementTimeADayClicked()
                         }
                     )
                     
@@ -86,10 +86,10 @@ struct CreateHabitView: View {
                 }
                 .animation(
                     .snappy,
-                    value: createHabitViewModel.selectedFrequency
+                    value: habitFormViewModel.selectedFrequency
                 )
                 
-                if let errorMessage = createHabitViewModel.errorMessage {
+                if let errorMessage = habitFormViewModel.errorMessage {
                     Text(errorMessage)
                         .font(.footnote)
                         .foregroundStyle(.red)
@@ -97,17 +97,19 @@ struct CreateHabitView: View {
             }
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .navigationTitle(HabitsTextsEnum.newHabit)
+            .navigationTitle(
+                habitFormViewModel.isEditing ? HabitsTextsEnum.editHabit : HabitsTextsEnum.newHabit
+            )
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $isShowingIconChooser) {
                 ChooseHabitIconView(
                     catalog: iconCatalog,
-                    selectedIcon: createHabitViewModel.selectedIcon,
-                    tint: createHabitViewModel.selectedColor,
-                    onIconSelected: { createHabitViewModel.selectIcon($0) }
+                    selectedIcon: habitFormViewModel.selectedIcon,
+                    tint: habitFormViewModel.selectedColor,
+                    onIconSelected: { habitFormViewModel.selectIcon($0) }
                 )
             }
-            .onChange(of: createHabitViewModel.didSave) { _, didSave in
+            .onChange(of: habitFormViewModel.didSave) { _, didSave in
                 if didSave { dismiss() }
             }
             .toolbar {
@@ -115,11 +117,11 @@ struct CreateHabitView: View {
                     placement: .confirmationAction,
                     content: {
                         Button {
-                            Task { await createHabitViewModel.save() }
+                            Task { await habitFormViewModel.save() }
                         } label: {
                             Text(CoreTextsEnum.save)
                         }
-                        .disabled(!createHabitViewModel.canSave)
+                        .disabled(!habitFormViewModel.canSave)
                     }
                 )
                 ToolbarItem(
@@ -138,26 +140,26 @@ struct CreateHabitView: View {
     
     @ViewBuilder
     private var frequencyDetail: some View {
-        switch createHabitViewModel.selectedFrequency {
+        switch habitFormViewModel.selectedFrequency {
         case .everyDay:
             EmptyView()
         case .timesPerWeek:
             TimesAWeekPicker(
-                range: createHabitViewModel.timesAWeekRange,
-                selectedTimesAWeek: createHabitViewModel.selectedTimesAWeek,
+                range: habitFormViewModel.timesAWeekRange,
+                selectedTimesAWeek: habitFormViewModel.selectedTimesAWeek,
                 onIncrementTimesAWeek: {
-                    createHabitViewModel.onIncrementTimesAWeekClicked()
+                    habitFormViewModel.onIncrementTimesAWeekClicked()
                 },
                 onDecrementTimesAWeek: {
-                    createHabitViewModel.onDecrementTimesAWeekClicked()
+                    habitFormViewModel.onDecrementTimesAWeekClicked()
                 }
             )
         case .fixedDays:
             WeekDayPicker(
-                weekdays: createHabitViewModel.weekdayItems,
-                selectedWeekdays: createHabitViewModel.selectedWeekdays,
+                weekdays: habitFormViewModel.weekdayItems,
+                selectedWeekdays: habitFormViewModel.selectedWeekdays,
                 onWeekDayItemToggled: {
-                    createHabitViewModel.onWeekdayToggled($0)
+                    habitFormViewModel.onWeekdayToggled($0)
                 }
             )
         }
@@ -165,9 +167,14 @@ struct CreateHabitView: View {
 }
 
 #Preview {
-    CreateHabitView(
-        createHabitViewModel: CreateHabitViewModel(
+    HabitFormView(
+        habitFormViewModel: HabitFormViewModel(
             createHabitUseCase: DefaultCreateHabitUseCase(
+                repository: SwiftDataHabitRepository(
+                    modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
+                )
+            ),
+            updateHabitUseCase: DefaultUpdateHabitUseCase(
                 repository: SwiftDataHabitRepository(
                     modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
                 )

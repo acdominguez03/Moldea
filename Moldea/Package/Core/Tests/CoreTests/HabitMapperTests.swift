@@ -67,7 +67,6 @@ struct HabitMapperTests {
     }
 
     @Test func insertingTheEntityLinksTheInverseRelationship() throws {
-        // El contenedor debe seguir vivo mientras se usa su contexto.
         let container = try MoldeaSchema.makeModelContainer(inMemory: true)
         let context = container.mainContext
         let entity = HabitMapper.makeEntity(from: makeHabit(frequency: .daily))

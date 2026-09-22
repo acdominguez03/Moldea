@@ -7,7 +7,6 @@
 
 enum CreateHabitError: Error, Equatable {
     case emptyName
-    /// No es `#RRGGBB`.
     case invalidColor
     case invalidRepetitionsPerDay
     case invalidTimesPerWeek

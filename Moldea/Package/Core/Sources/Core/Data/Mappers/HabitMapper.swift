@@ -43,8 +43,28 @@ enum HabitMapper {
             createdAt: habit.createdAt,
             updatedAt: habit.updatedAt
         )
-        entity.schedule = makeScheduleEntity(from: habit.schedule)
+        apply(habit.schedule, to: entity)
         return entity
+    }
+
+    static func apply(_ schedule: HabitSchedule, to entity: HabitEntity) {
+        let scheduleEntity = entity.schedule ?? HabitScheduleEntity(frequencyType: .daily)
+        scheduleEntity.repetitionsPerDay = schedule.repetitionsPerDay
+        switch schedule.frequency {
+        case .daily:
+            scheduleEntity.frequencyType = .daily
+            scheduleEntity.timesPerWeek = nil
+            scheduleEntity.fixedWeekdays = nil
+        case .weeklyCount(let timesPerWeek):
+            scheduleEntity.frequencyType = .weeklyCount
+            scheduleEntity.timesPerWeek = timesPerWeek
+            scheduleEntity.fixedWeekdays = nil
+        case .fixedDays(let weekdays):
+            scheduleEntity.frequencyType = .fixedDays
+            scheduleEntity.timesPerWeek = nil
+            scheduleEntity.fixedWeekdays = weekdays.sorted()
+        }
+        entity.schedule = scheduleEntity
     }
 
     private static func frequency(
@@ -64,28 +84,6 @@ enum HabitMapper {
                 throw HabitMappingError.missingFixedWeekdays(habitID: habitID)
             }
             return .fixedDays(weekdays: Set(weekdays))
-        }
-    }
-
-    private static func makeScheduleEntity(from schedule: HabitSchedule) -> HabitScheduleEntity {
-        switch schedule.frequency {
-        case .daily:
-            HabitScheduleEntity(
-                frequencyType: .daily,
-                repetitionsPerDay: schedule.repetitionsPerDay
-            )
-        case .weeklyCount(let timesPerWeek):
-            HabitScheduleEntity(
-                frequencyType: .weeklyCount,
-                timesPerWeek: timesPerWeek,
-                repetitionsPerDay: schedule.repetitionsPerDay
-            )
-        case .fixedDays(let weekdays):
-            HabitScheduleEntity(
-                frequencyType: .fixedDays,
-                fixedWeekdays: weekdays.sorted(),
-                repetitionsPerDay: schedule.repetitionsPerDay
-            )
         }
     }
 }
