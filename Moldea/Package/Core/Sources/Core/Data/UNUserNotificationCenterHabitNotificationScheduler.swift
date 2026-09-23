@@ -18,6 +18,7 @@ public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificat
         self.userDefaultsRepository = userDefaultsRepository
     }
 
+    @MainActor
     public func scheduleReminder(for habit: Habit) async {
         print("[HabitNotificationScheduler] scheduleReminder(for:) called — habit: \"\(habit.name)\" (id: \(habit.id))")
 
@@ -118,8 +119,12 @@ public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificat
         }
     }*/
 
+    
+    @MainActor
     public func cancelReminders(for habitID: Habit.ID) async {
-        let identifiers = (1...7).map { notificationIdentifier(habitID: habitID, weekday: $0) }
+        let identifiers = (1...7).map {
+            notificationIdentifier(habitID: habitID, weekday: $0)
+        }
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
         print("[HabitNotificationScheduler] Cancelled pending reminders for habit id: \(habitID)")
     }

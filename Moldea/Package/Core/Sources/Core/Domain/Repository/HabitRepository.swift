@@ -18,6 +18,13 @@ public protocol HabitRepository: Sendable {
         updatedAt: Date
     ) async throws
     func updateReminder(id: Habit.ID, reminder: HabitReminder?, updatedAt: Date) async throws
+    
+    func setCompletions(
+        habitID: Habit.ID,
+        day: Date,
+        count: Int,
+        completedAt: Date
+    ) async throws
     func update(
         id: Habit.ID,
         name: String,

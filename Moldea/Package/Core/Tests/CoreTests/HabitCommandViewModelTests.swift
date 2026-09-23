@@ -70,7 +70,10 @@ private actor FakeCreateHabitUseCase: CreateHabitUseCase {
         color: String,
         icon: String,
         frequency: HabitFrequency,
-        repetitionsPerDay: Int
+        repetitionsPerDay: Int,
+        isReminderEnabled: Bool,
+        reminderTime: Date,
+        isMutedOnWeekends: Bool
     ) async throws {
         calls.append(
             CreateCall(

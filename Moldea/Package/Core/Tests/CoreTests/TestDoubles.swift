@@ -10,11 +10,19 @@ struct UpdateCall: Sendable, Equatable {
     let reminder: HabitReminder?
 }
 
+struct SetCompletionsCall: Sendable, Equatable {
+    let habitID: Habit.ID
+    let day: Date
+    let count: Int
+    let completedAt: Date
+}
+
 actor FakeHabitRepository: HabitRepository {
     private(set) var created: [Habit] = []
     private(set) var deleted: [Habit.ID] = []
     private(set) var setActiveCalls: [(id: Habit.ID, isActive: Bool)] = []
     private(set) var updateCalls: [UpdateCall] = []
+    private(set) var setCompletionsCalls: [SetCompletionsCall] = []
     private let error: (any Error)?
 
     init(error: (any Error)? = nil) {
@@ -44,6 +52,18 @@ actor FakeHabitRepository: HabitRepository {
     ) async throws {}
 
     func updateReminder(id: Habit.ID, reminder: HabitReminder?, updatedAt: Date) async throws {}
+
+    func setCompletions(
+        habitID: Habit.ID,
+        day: Date,
+        count: Int,
+        completedAt: Date
+    ) async throws {
+        if let error { throw error }
+        setCompletionsCalls.append(
+            SetCompletionsCall(habitID: habitID, day: day, count: count, completedAt: completedAt)
+        )
+    }
 
     func update(
         id: Habit.ID,

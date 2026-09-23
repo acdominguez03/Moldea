@@ -141,6 +141,56 @@ crear, también el generador de `UUID` y el reloj como closures para poder teste
 `CreateHabitUseCase` es el **único** sitio con reglas de negocio: valida nombre, hex del color,
 rango de `timesPerWeek` y de los `weekdays`, y lanza `CreateHabitErrorEnum`.
 
+### Progreso: `CalculateHabitsProgressUseCase`
+
+El porcentaje de hábitos completados de la pestaña **Hoy** —y, cuando llegue, el de
+`Statistics`—. Es el único caso de uso **síncrono y sin repositorio** del paquete:
+`execute(habits: [TodayHabit], scope: HabitProgressScopeEnum) -> HabitsProgress`. No hay I/O, así
+que `async`/`throws` serían ruido; el protocolo se llama `CalculateHabitsProgressUseCaseProtocol`
+porque el nombre sin sufijo se lo lleva la implementación.
+
+Recibe los `TodayHabit` que ya publican `@TodayHabitsQuery` / `@WeeklyHabitsQuery` en vez de leer
+de la base de datos: así el porcentaje se recalcula solo al marcar una completion, sin recargas
+a mano, y se testea sin SwiftData. **No recibe una fecha**: el día ya viaja dentro de cada
+`TodayHabit` como `referenceDay`, que es contra el que están calculados `completedToday` y
+`completedDaysThisWeek`; pedirla otra vez permitiría pasar una distinta de la que filtró las
+completions.
+
+La fórmula es **ponderada por repeticiones**, no un recuento de hábitos hechos:
+
+| Alcance   | Numerador                                    | Denominador                          |
+| --------- | -------------------------------------------- | ------------------------------------ |
+| `.daily`  | `Σ min(completedToday, repetitionsPerDay)`   | `Σ repetitionsPerDay`                |
+| `.weekly` | `Σ completedRepetitionsThisWeek`             | `Σ timesPerWeek × repetitionsPerDay` |
+
+Así un hábito 3/4 aporta lo que ha hecho, que es lo que ya pintan las barras de `TodayCardView`.
+
+**La unidad del alcance semanal son repeticiones, no días.** `completedDaysThisWeek` solo cuenta
+los días con **todas** sus repeticiones hechas, así que con él un día a medias (1 de 2) aportaba
+0 a la semana aunque `TodayCardView` ya lo pintase como barra parcial. Por eso el numerador es
+`TodayHabit.completedRepetitionsThisWeek` —suma `min(hechas ese día, repetitionsPerDay)` de cada
+día y topa el total en `timesPerWeek × repetitionsPerDay`— y el denominador se multiplica por las
+repeticiones. Un `weeklyCount(3)` con `repetitionsPerDay: 2`, dos días completos y una repetición
+de hoy da 5/6, no 2/3. `completedDaysThisWeek` sigue existiendo: es lo que necesitan el texto «X
+de Y esta semana» y las barras de la tarjeta.
+`HabitsProgress` (`Domain/Model`) lleva los dos pares —`completedHabits`/`totalHabits` para el
+texto «X de Y hábitos» y `completedUnits`/`totalUnits` para la barra— y deriva `fraction`
+(0 cuando `totalUnits == 0`, que es lo que quita el `max(count, 1)` que había en la vista) y
+`percentage`.
+
+Dos detalles que no son casuales:
+
+- **En `.weekly`, un hábito que no sea `.weeklyCount` se descarta** (`compactMap` a `nil`), no
+  cae a la fórmula diaria: no tiene objetivo semanal, así que no debe sumar ni al numerador ni al
+  denominador ni a `totalHabits`. `WeeklyHabitsQuery` ya filtra, pero el caso de uso no depende de
+  que quien le llame acierte.
+- **Los `min(…)`** existen aunque `completedDaysThisWeek` ya venga topado y el toggle nunca pase
+  de `repetitionsPerDay`: un dato viejo en base de datos no puede dar más de un 100 %.
+
+Esto sustituye al `habits.filter(\.isCompletedToday).count` que hacía `TodayView`, que además
+medía mal la pestaña semanal: `isCompletedToday` es el objetivo **del día**, así que un hábito de
+3 veces por semana con 2 días hechos contaba 0 mientras no se marcase hoy.
+
 ## Data
 
 Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
@@ -850,6 +900,12 @@ contexto, o el proceso de tests se cae. Los `*Entity` se ven con `@testable impo
 - `CreateHabitUseCaseTests` / `DeleteHabitUseCaseTests`: el `Habit` que recibe el repositorio con
   las tres frecuencias, el nombre recortado, las 13 entradas inválidas y la propagación del error
   del repositorio. Vinieron de `HabitsTests` al bajar los casos de uso a `Core`.
+- `CalculateHabitsProgressUseCaseTests`: la ponderación por repeticiones (2/4 + 1/1 → 60 %),
+  `completedHabits` contando solo los que llegan al objetivo, el alcance semanal midiendo contra
+  `timesPerWeek × repetitionsPerDay`, **un día a medias sumando a la semana** (5/6 → 83 %), **un
+  hábito sin objetivo semanal colado en la lista semanal que no suma en ningún campo**, la lista
+  vacía sin dividir entre cero, el redondeo del porcentaje (1/3 → 33, 2/3 → 67) y que unas
+  completions de más en base de datos no pasen del 100 %.
 - `GenerableHabitMapperTests`: draft → dominio con las tres frecuencias (ignorando los campos de
   las otras dos), nombre recortado, días duplicados, `timesPerWeek` fuera de rango y
   `fixedWeekdays` vacío; **la tabla día a día de `GenerableWeekday` → `Calendar.weekday`**, que

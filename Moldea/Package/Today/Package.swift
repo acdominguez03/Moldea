@@ -32,7 +32,10 @@ let package = Package(
         ),
         .testTarget(
             name: "TodayTests",
-            dependencies: ["Today"],
+            dependencies: [
+                "Today",
+                .product(name: "Core", package: "Core")
+            ],
             swiftSettings: [
                 .enableUpcomingFeature("ApproachableConcurrency"),
             ],

@@ -95,6 +95,53 @@ public actor SwiftDataHabitRepository: HabitRepository {
         }
     }
 
+    public func setCompletions(
+        habitID: Habit.ID,
+        day: Date,
+        count: Int,
+        completedAt: Date
+    ) async throws {
+        var descriptor = FetchDescriptor<HabitEntity>(
+            predicate: #Predicate { $0.id == habitID }
+        )
+        descriptor.fetchLimit = 1
+
+        guard let entity = try modelContext.fetch(descriptor).first else {
+            return
+        }
+
+        let calendar = Calendar.current
+        let existing = (entity.completions ?? [])
+            .filter { calendar.isDate($0.day, inSameDayAs: day) }
+            .sorted { $0.repetitionIndex < $1.repetitionIndex }
+
+        let target = max(count, 0)
+        if target < existing.count {
+            for completion in existing[target...] {
+                modelContext.delete(completion)
+            }
+        } else if target > existing.count {
+            for repetitionIndex in existing.count..<target {
+                modelContext.insert(
+                    HabitCompletionEntity(
+                        id: UUID(),
+                        habit: entity,
+                        day: day,
+                        repetitionIndex: repetitionIndex,
+                        completedAt: completedAt
+                    )
+                )
+            }
+        }
+
+        do {
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            throw error
+        }
+    }
+
     public func update(
         id: Habit.ID,
         name: String,

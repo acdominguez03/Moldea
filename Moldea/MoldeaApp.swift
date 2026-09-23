@@ -78,7 +78,7 @@ struct MoldeaApp: App {
     private func tabContent(for tab: MainTab) -> some View {
         switch tab {
         case .today:
-            TodayView()
+            TodayView(habitRepository: habitRepository)
         case .statistics:
             StatisticsView()
         case .habits:

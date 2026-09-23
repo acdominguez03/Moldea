@@ -16,22 +16,22 @@ final class LiveTranscriptionModel {
     private(set) var finalizedText = "" {
         didSet { refreshStyledTranscript() }
     }
-
+    
     private(set) var volatileText = "" {
         didSet { refreshStyledTranscript() }
     }
-
+    
     private(set) var styledTranscript = AttributedString()
-
+    
     private(set) var phase: TranscriptionPhaseEnum = .idle
-
+    
     //Progreso de la descarga del modelo
     private(set) var downloadProgress: Progress?
-
+    
     var isTranscribing: Bool { phase == .transcribing }
     var isPreparing: Bool { phase == .preparing }
     var hasTranscript: Bool { !finalizedText.isEmpty || !volatileText.isEmpty }
-
+    
     var transcript: String {
         (finalizedText + volatileText)
             .split(whereSeparator: \.isWhitespace)
@@ -113,7 +113,7 @@ final class LiveTranscriptionModel {
 #else
     private static func samplePhrase() -> String { "" }
 #endif
-
+    
     private func runSession() async throws {
         if Self.isSimulator {
             finalizedText = Self.samplePhrase()
@@ -128,38 +128,43 @@ final class LiveTranscriptionModel {
         }
         try await installAssets(for: transcriber.module)
         
-        /*if #available(iOS 27, *) {
-         try await analyzeCaptureSession(transcriber: transcriber)
-         } else {
-         try await analyzeAudioEngine(transcriber: transcriber)
-         }*/
+#if compiler(>=6.3)
+        if #available(iOS 27, *) {
+            try await analyzeCaptureSession(transcriber: transcriber)
+        }
+#else
+        try await analyzeAudioEngine(transcriber: transcriber)
+#endif
+        
         try await analyzeAudioEngine(transcriber: transcriber)
     }
     
-    /*@available(iOS 27, *)
-     private func analyzeCaptureSession(transcriber: TranscriberEnum) async throws {
-     let provider = try await run(.audioEngine) {
-     try await Self.makeCaptureProvider(for: transcriber.module)
-     }
-     captureProvider = provider
-     captureSession = provider.captureSession
-     
-     guard let analyzerFormat = await SpeechAnalyzer.bestAvailableAudioFormat(
-     compatibleWith: [transcriber.module]
-     ) else {
-     throw TranscriptionErrorEnum.stageFailed(.audioFormat, TranscriptionErrorEnum.noCompatibleAudioFormat)
-     }
-     print("Analyzer format: \(String(describing: analyzerFormat))")
-     
-     let analyzer = try await prepareAnalyzer(for: transcriber, format: analyzerFormat)
-     observeResults(of: transcriber)
-     
-     let inputSequence = provider.analyzerInputs
-     provider.captureSession.startRunning()
-     phase = .transcribing
-     
-     try await analyze(inputSequence, with: analyzer)
-     }*/
+#if compiler(>=6.3)
+    @available(iOS 27, *)
+    private func analyzeCaptureSession(transcriber: TranscriberEnum) async throws {
+        let provider = try await run(.audioEngine) {
+            try await Self.makeCaptureProvider(for: transcriber.module)
+        }
+        captureProvider = provider
+        captureSession = provider.captureSession
+        
+        guard let analyzerFormat = await SpeechAnalyzer.bestAvailableAudioFormat(
+            compatibleWith: [transcriber.module]
+        ) else {
+            throw TranscriptionErrorEnum.stageFailed(.audioFormat, TranscriptionErrorEnum.noCompatibleAudioFormat)
+        }
+        print("Analyzer format: \(String(describing: analyzerFormat))")
+        
+        let analyzer = try await prepareAnalyzer(for: transcriber, format: analyzerFormat)
+        observeResults(of: transcriber)
+        
+        let inputSequence = provider.analyzerInputs
+        provider.captureSession.startRunning()
+        phase = .transcribing
+        
+        try await analyze(inputSequence, with: analyzer)
+    }
+#endif
     
     // Funcionalidad de iOS 26: motor de audio con tap y conversión manual de buffers.
     private func analyzeAudioEngine(transcriber: TranscriberEnum) async throws {
@@ -196,19 +201,21 @@ final class LiveTranscriptionModel {
         try await analyze(inputSequence, with: analyzer)
     }
     
-    /*@available(iOS 27, *)
-     @concurrent
-     private nonisolated static func makeCaptureProvider(
-     for module: any SpeechModule
-     ) async throws -> sending CaptureInputSequenceProvider {
-     guard let captureDevice = AVCaptureDevice.default(.microphone, for: .audio, position: .unspecified) else {
-     throw TranscriptionErrorEnum.microphoneUnavailable
-     }
-     return try await CaptureInputSequenceProvider.providerWithSession(
-     from: captureDevice,
-     compatibleWith: [module]
-     )
-     }*/
+#if compiler(>=6.3)
+    @available(iOS 27, *)
+    @concurrent
+    private nonisolated static func makeCaptureProvider(
+        for module: any SpeechModule
+    ) async throws -> sending CaptureInputSequenceProvider {
+        guard let captureDevice = AVCaptureDevice.default(.microphone, for: .audio, position: .unspecified) else {
+            throw TranscriptionErrorEnum.microphoneUnavailable
+        }
+        return try await CaptureInputSequenceProvider.providerWithSession(
+            from: captureDevice,
+            compatibleWith: [module]
+        )
+    }
+#endif
     
     private func prepareAnalyzer(for transcriber: TranscriberEnum, format: AVAudioFormat) async throws -> SpeechAnalyzer {
         let analyzer = SpeechAnalyzer(
@@ -409,7 +416,7 @@ final class LiveTranscriptionModel {
     
     private func apply(text: AttributedString, isFinal: Bool) {
         let plainText = String(text.characters)
-
+        
         if isFinal {
             finalizedText += plainText
             volatileText = ""
@@ -417,7 +424,7 @@ final class LiveTranscriptionModel {
             volatileText = plainText
         }
     }
-
+    
     private func refreshStyledTranscript() {
         var text = AttributedString(finalizedText)
         var volatile = AttributedString(volatileText)
