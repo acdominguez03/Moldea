@@ -103,7 +103,7 @@ Las tablas describen el modelo lógico. Cómo se materializa en código (entidad
 - **SwiftData** — framework de persistencia de Apple; guarda y consulta el modelo de datos de la app (hábitos, horarios, registros de completado, recordatorios) sin depender de librerías externas.
 - **Swift Charts** — framework de visualización de datos de Apple; se usa para representar gráficamente las estadísticas de progreso de los hábitos.
 - **App Intents** — framework que expone acciones de la app al sistema; permite que Siri cree/consulte hábitos por voz, y es el mecanismo que usan los botones interactivos dentro de los widgets para ejecutar acciones sin abrir la app.
-- **Foundation Models** — framework de modelos de lenguaje on-device de Apple Intelligence; permite responder preguntas en lenguaje natural sobre los hábitos del usuario, apoyándose en herramientas (`Tool`) que consultan los datos de la app.
+- **Foundation Models** — framework de modelos de lenguaje on-device de Apple Intelligence; interpreta lo que el usuario dice en voz alta como un comando (crear un hábito, borrarlo o listar los completados) con `@Generable`, `DynamicGenerationSchema` y `LanguageModelSession`. El detalle está en el `CLAUDE.md` de `Core`, en _Comandos de voz_.
 - **UserNotifications** — framework de notificaciones locales del sistema; programa los recordatorios de hábitos para que se disparen aunque la app no esté abierta.
 - **BackgroundTasks** — framework de ejecución en segundo plano; despierta la app periódicamente para mantener sincronizados los recordatorios pendientes con lo que hay guardado en la base de datos.
 - **WidgetKit** — framework para crear widgets del sistema; se usa para el widget de pantalla de bloqueo (progreso del día) y el widget interactivo de pantalla principal (checklist de hábitos).
@@ -256,9 +256,12 @@ Core/
 
 ### Casos de uso
 
-Viven en el `Domain` de la feature que los usa (p. ej. `Habits/Domain/UseCases`). Son un
-protocolo (`CreateHabitUseCase`) más una implementación (`DefaultCreateHabitUseCase`) que recibe
-el repositorio y, para poder testearse, el generador de `UUID` y el reloj como closures.
+Viven en el `Domain` de la feature que los usa, y **bajan a `Core/Domain/UseCases` en cuanto los
+necesita un segundo módulo**, igual que cualquier otra cosa compartida. `CreateHabitUseCase` y
+`DeleteHabitUseCase` ya están en `Core`: los usan la pantalla de creación de `Habits` y la capa
+de comandos de voz de `Core`. Son un protocolo (`CreateHabitUseCase`) más una implementación
+(`DefaultCreateHabitUseCase`) que recibe el repositorio y, para poder testearse, el generador de
+`UUID` y el reloj como closures.
 
 **Norma: el caso de uso recibe los datos sueltos y construye él los objetos de dominio; el
 view model no conoce `Habit` ni ningún objeto de entrada.**

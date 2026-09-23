@@ -1,24 +1,22 @@
 //
 //  DeleteHabitUseCase.swift
-//  Habits
+//  Core
 //
 //  Created by Ismael Cordón Domínguez on 21/9/26.
 //
 
-import Core
-
-protocol DeleteHabitUseCase: Sendable {
+public protocol DeleteHabitUseCase: Sendable {
     func execute(id: Habit.ID) async throws
 }
 
-struct DefaultDeleteHabitUseCase: DeleteHabitUseCase {
+public struct DefaultDeleteHabitUseCase: DeleteHabitUseCase {
     private let repository: any HabitRepository
-    
-    init(repository: any HabitRepository) {
+
+    public init(repository: any HabitRepository) {
         self.repository = repository
     }
-    
-    func execute(id: Habit.ID) async throws {
+
+    public func execute(id: Habit.ID) async throws {
         try await repository.delete(id: id)
     }
 }

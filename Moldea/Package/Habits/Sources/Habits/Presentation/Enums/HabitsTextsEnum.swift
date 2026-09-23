@@ -93,17 +93,6 @@ public enum HabitsTextsEnum {
     public static let timesAWeek = resource("times_a_week")
 
     // MARK: Habit list
-    public static let summaryEveryDay = resource("habits_summary_every_day")
-
-    public static func summaryTimesPerDay(_ count: Int) -> LocalizedStringResource {
-        localized("habits_summary_times_per_day \(count)")
-    }
-
-    public static func summaryTimesPerWeek(_ count: Int) -> LocalizedStringResource {
-        localized("habits_summary_times_per_week \(count)")
-    }
-    
-    public static let days = resource("days")
     public static let activate = resource("activate")
     public static let deactivate = resource("deactivate")
     

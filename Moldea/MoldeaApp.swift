@@ -52,8 +52,8 @@ struct MoldeaApp: App {
                     MainTabsView(selection: $tabRouter.selectedTab) { tab in
                         tabContent(for: tab)
                     } sheetContent: {
-                        SpeechToTextView()
-                            .presentationDetents([.medium, .large])
+                        SpeechToTextView(habitRepository: habitRepository)
+                            .presentationDetents([.medium])
                     }
                 }
             }

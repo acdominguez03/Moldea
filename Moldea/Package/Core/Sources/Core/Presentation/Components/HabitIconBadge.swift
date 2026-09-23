@@ -1,6 +1,6 @@
 //
 //  HabitIconBadge.swift
-//  Habits
+//  Core
 //
 //  Created by Ismael Cordón Domínguez on 21/9/26.
 //
@@ -9,11 +9,16 @@ import SwiftUI
 
 /// Icono del hábito sobre un círculo de su color al 20 %. Lo comparten el resumen de la pantalla
 /// de creación y las filas de la lista para que se vean igual.
-struct HabitIconBadge: View {
-    let color: Color
-    let icon: String
+public struct HabitIconBadge: View {
+    private let color: Color
+    private let icon: String
 
-    var body: some View {
+    public init(color: Color, icon: String) {
+        self.color = color
+        self.icon = icon
+    }
+
+    public var body: some View {
         Image(systemName: icon)
             .font(.title2)
             .foregroundStyle(color)
@@ -24,5 +29,8 @@ struct HabitIconBadge: View {
 }
 
 #Preview {
-    HabitIconBadge(color: HabitPaletteColor.blue.color, icon: "drop")
+    HabitIconBadge(
+        color: HexColorConverter.color(fromHex: HabitAppearanceDefaultsEnum.colorHex) ?? .gray,
+        icon: HabitAppearanceDefaultsEnum.icon
+    )
 }

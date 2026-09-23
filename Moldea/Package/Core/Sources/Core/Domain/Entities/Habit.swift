@@ -10,9 +10,7 @@ import Foundation
 public struct Habit: Sendable, Equatable, Identifiable {
     public let id: UUID
     public let name: String
-    /// Hex `#RRGGBB`.
     public let color: String
-    /// Nombre del SF Symbol.
     public let icon: String
     public let isActive: Bool
     public let createdAt: Date

@@ -1,14 +1,13 @@
 //
 //  CreateHabitUseCase.swift
-//  Habits
+//  Core
 //
 //  Created by Ismael Cordón Domínguez on 21/9/26.
 //
 
 import Foundation
-import Core
 
-protocol CreateHabitUseCase: Sendable {
+public protocol CreateHabitUseCase: Sendable {
     func execute(
         name: String,
         color: String,
@@ -18,7 +17,7 @@ protocol CreateHabitUseCase: Sendable {
     ) async throws
 }
 
-struct DefaultCreateHabitUseCase: CreateHabitUseCase {
+public struct DefaultCreateHabitUseCase: CreateHabitUseCase {
     private static let weekdays = 1...7
     private static let timesPerWeek = 1...7
 
@@ -26,7 +25,7 @@ struct DefaultCreateHabitUseCase: CreateHabitUseCase {
     private let makeID: @Sendable () -> UUID
     private let now: @Sendable () -> Date
 
-    init(
+    public init(
         repository: any HabitRepository,
         makeID: @escaping @Sendable () -> UUID = { UUID() },
         now: @escaping @Sendable () -> Date = { .now }
@@ -36,7 +35,7 @@ struct DefaultCreateHabitUseCase: CreateHabitUseCase {
         self.now = now
     }
 
-    func execute(
+    public func execute(
         name: String,
         color: String,
         icon: String,
@@ -72,27 +71,27 @@ struct DefaultCreateHabitUseCase: CreateHabitUseCase {
         repetitionsPerDay: Int
     ) throws {
         guard !trimmedName.isEmpty else {
-            throw CreateHabitError.emptyName
+            throw CreateHabitErrorEnum.emptyName
         }
         guard Self.isHexColor(color) else {
-            throw CreateHabitError.invalidColor
+            throw CreateHabitErrorEnum.invalidColor
         }
         guard repetitionsPerDay >= 1 else {
-            throw CreateHabitError.invalidRepetitionsPerDay
+            throw CreateHabitErrorEnum.invalidRepetitionsPerDay
         }
         switch frequency {
         case .daily:
             break
         case .weeklyCount(let timesPerWeek):
             guard Self.timesPerWeek.contains(timesPerWeek) else {
-                throw CreateHabitError.invalidTimesPerWeek
+                throw CreateHabitErrorEnum.invalidTimesPerWeek
             }
         case .fixedDays(let weekdays):
             guard !weekdays.isEmpty else {
-                throw CreateHabitError.emptyWeekdays
+                throw CreateHabitErrorEnum.emptyWeekdays
             }
             guard weekdays.allSatisfy(Self.weekdays.contains) else {
-                throw CreateHabitError.invalidWeekdays
+                throw CreateHabitErrorEnum.invalidWeekdays
             }
         }
     }
