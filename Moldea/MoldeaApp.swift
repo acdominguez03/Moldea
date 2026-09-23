@@ -21,12 +21,14 @@ struct MoldeaApp: App {
     @State private var router = AppRouter(initialFlow: .tabView)
     private let modelContainer: ModelContainer
     private let habitRepository: any HabitRepository
+    private let userDefaultsRepository: any UserDefaultsRepository
 
     init() {
         do {
             let container = try MoldeaSchema.makeModelContainer(inMemory: Self.usesInMemoryStore)
             modelContainer = container
             habitRepository = SwiftDataHabitRepository(modelContainer: container)
+            userDefaultsRepository = UserDefaultsRepositoryImpl()
         } catch {
             fatalError("No se pudo crear el ModelContainer: \(error)")
         }
@@ -71,7 +73,10 @@ struct MoldeaApp: App {
         case .habits:
             HabitsView(habitRepository: habitRepository)
         case .settings:
-            SettingsView()
+            SettingsView(
+                habitRepository: habitRepository,
+                userDefaultsRepository: userDefaultsRepository
+            )
         case .microphone:
             EmptyView()
         }

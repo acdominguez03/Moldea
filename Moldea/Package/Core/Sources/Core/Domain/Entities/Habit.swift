@@ -40,3 +40,9 @@ public struct Habit: Sendable, Equatable, Identifiable {
         self.reminder = reminder
     }
 }
+
+public extension Habit {
+    var hasActiveReminder: Bool {
+        reminder?.isEnabled ?? false
+    }
+}

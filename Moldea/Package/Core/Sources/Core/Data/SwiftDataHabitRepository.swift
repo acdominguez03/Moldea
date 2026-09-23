@@ -61,6 +61,40 @@ public actor SwiftDataHabitRepository: HabitRepository {
         }
     }
 
+    public func setReminderEnabled(
+        id: Habit.ID,
+        isEnabled: Bool,
+        defaultTime: Date,
+        updatedAt: Date
+    ) async throws {
+        var descriptor = FetchDescriptor<HabitEntity>(
+            predicate: #Predicate { $0.id == id }
+        )
+        descriptor.fetchLimit = 1
+
+        guard let entity = try modelContext.fetch(descriptor).first else {
+            return
+        }
+
+        if let existingReminder = entity.reminder {
+            existingReminder.enabled = isEnabled
+        } else if isEnabled {
+            entity.reminder = HabitReminderEntity(
+                time: defaultTime,
+                enabled: true,
+                isMutedOnWeekends: false
+            )
+        }
+        entity.updatedAt = updatedAt
+
+        do {
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            throw error
+        }
+    }
+
     public func update(
         id: Habit.ID,
         name: String,
@@ -84,12 +118,7 @@ public actor SwiftDataHabitRepository: HabitRepository {
         entity.icon = icon
         entity.updatedAt = updatedAt
         HabitMapper.apply(schedule, to: entity)
-
-        if reminder == nil, let orphanedReminder = entity.reminder {
-            modelContext.delete(orphanedReminder)
-        }
-        
-        HabitMapper.apply(reminder, to: entity)
+        applyReminder(reminder, to: entity)
 
         do {
             try modelContext.save()
@@ -97,5 +126,40 @@ public actor SwiftDataHabitRepository: HabitRepository {
             modelContext.rollback()
             throw error
         }
+    }
+
+    public func updateReminder(
+        id: Habit.ID,
+        reminder: HabitReminder?,
+        updatedAt: Date
+    ) async throws {
+        var descriptor = FetchDescriptor<HabitEntity>(
+            predicate: #Predicate { $0.id == id }
+        )
+        descriptor.fetchLimit = 1
+
+        guard let entity = try modelContext.fetch(descriptor).first else {
+            return
+        }
+
+        entity.updatedAt = updatedAt
+        applyReminder(reminder, to: entity)
+
+        do {
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            throw error
+        }
+    }
+
+    /// Desasignar la relación no borra la fila (el `deleteRule: .cascade` solo actúa al borrar
+    /// el `HabitEntity` padre): si el nuevo valor es `nil` y ya había uno, hay que borrarlo
+    /// explícitamente del contexto antes de que `HabitMapper.apply` lo desligue.
+    private func applyReminder(_ reminder: HabitReminder?, to entity: HabitEntity) {
+        if reminder == nil, let orphanedReminder = entity.reminder {
+            modelContext.delete(orphanedReminder)
+        }
+        HabitMapper.apply(reminder, to: entity)
     }
 }

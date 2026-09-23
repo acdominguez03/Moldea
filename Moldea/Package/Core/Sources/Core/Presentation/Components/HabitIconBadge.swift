@@ -1,17 +1,22 @@
 //
 //  HabitIconBadge.swift
-//  Habits
+//  Core
 //
 //  Created by Ismael Cordón Domínguez on 21/9/26.
 //
 
 import SwiftUI
 
-struct HabitIconBadge: View {
+public struct HabitIconBadge: View {
     let color: Color
     let icon: String
 
-    var body: some View {
+    public init(color: Color, icon: String) {
+        self.color = color
+        self.icon = icon
+    }
+
+    public var body: some View {
         Image(systemName: icon)
             .font(.title2)
             .foregroundStyle(color)
@@ -22,5 +27,5 @@ struct HabitIconBadge: View {
 }
 
 #Preview {
-    HabitIconBadge(color: HabitPaletteColor.blue.color, icon: "drop")
+    HabitIconBadge(color: .blue, icon: "drop")
 }

@@ -46,7 +46,10 @@ final class HabitFormViewModel: BaseViewModel {
         repetitionsPerDay: Int = 1,
         createHabitUseCase: any CreateHabitUseCase,
         updateHabitUseCase: any UpdateHabitUseCase,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        isRemindHabitEnabled: Bool = false,
+        isMutedOnWeekends: Bool = false,
+        reminderTime: Date = defaultReminderTime()
     ) {
         self.habitID = id
         self.createHabitUseCase = createHabitUseCase
@@ -56,6 +59,11 @@ final class HabitFormViewModel: BaseViewModel {
         self.selectedColorHex = color
         self.selectedIcon = icon
         self.selectedTimesADay = repetitionsPerDay
+        
+        self.isRemindHabitEnabled = isRemindHabitEnabled
+        self.isMutedOnWeekends = isMutedOnWeekends
+        self.reminderTime = reminderTime
+        
 
         switch frequency {
         case .daily:
@@ -191,7 +199,7 @@ final class HabitFormViewModel: BaseViewModel {
         }
     }
     
-    private static func defaultReminderTime() -> Date {
+    public static func defaultReminderTime() -> Date {
         Calendar.current.date(
             bySettingHour: 8,
             minute: 0,

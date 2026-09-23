@@ -131,7 +131,11 @@ public struct HabitsView: View {
                         frequency: habit.schedule.frequency,
                         repetitionsPerDay: habit.schedule.repetitionsPerDay,
                         createHabitUseCase: createHabitUseCase,
-                        updateHabitUseCase: updateHabitUseCase
+                        updateHabitUseCase: updateHabitUseCase,
+                        isRemindHabitEnabled: habit.reminder?.isEnabled ?? false,
+                        isMutedOnWeekends: habit.reminder?.isMutedOnWeekends ?? false,
+                        reminderTime: habit.reminder?.time ?? HabitFormViewModel
+                            .defaultReminderTime()
                     ),
                     iconCatalog: BundleHabitIconCatalog()
                 )
