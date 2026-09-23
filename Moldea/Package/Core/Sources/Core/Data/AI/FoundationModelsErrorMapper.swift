@@ -24,6 +24,7 @@ enum FoundationModelsErrorMapper {
             return .generationFailed
         }
 
+        #if compiler(>=6.3)
         if #available(iOS 27.0, *) {
             if let error = error as? SystemLanguageModel.Error {
                 switch error {
@@ -44,6 +45,7 @@ enum FoundationModelsErrorMapper {
                 }
             }
         }
+        #endif
 
         if let error = error as? LanguageModelSession.GenerationError {
             switch error {

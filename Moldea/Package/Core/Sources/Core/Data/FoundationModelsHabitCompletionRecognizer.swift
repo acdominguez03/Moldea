@@ -82,7 +82,7 @@ final class FoundationModelsHabitCompletionRecognizer: HabitCompletionRecognizin
         do {
             let response = try await session.respond(
                 generating: Bool.self,
-                options: GenerationOptions(samplingMode: .greedy)
+                options: GenerationOptions(sampling: .greedy)
             ) {
                 "Hábito: \(Self.singleLine(habit.name))"
 

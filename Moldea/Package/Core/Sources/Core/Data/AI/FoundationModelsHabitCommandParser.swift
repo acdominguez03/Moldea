@@ -70,7 +70,7 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
         return try await mappingErrors {
             let response = try await session.respond(
                 generating: GenerableCommandDecision.self,
-                options: GenerationOptions(samplingMode: .greedy)
+                options: GenerationOptions(sampling: .greedy)
             ) {
                 "Frase del usuario: \(phrase)"
 
@@ -87,7 +87,7 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
         let generated: GenerableHabitDraft = try await mappingErrors {
             let response = try await session.respond(
                 generating: GenerableHabitDraft.self,
-                options: GenerationOptions(samplingMode: .greedy)
+                options: GenerationOptions(sampling: .greedy)
             ) {
                 "Frase del usuario: \(phrase)"
 
@@ -118,7 +118,7 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
         let name: String = try await mappingErrors {
             let response = try await session.respond(
                 schema: schema,
-                options: GenerationOptions(samplingMode: .greedy)
+                options: GenerationOptions(sampling: .greedy)
             ) {
                 "Hábitos del usuario: \(names.joined(separator: "; "))"
 

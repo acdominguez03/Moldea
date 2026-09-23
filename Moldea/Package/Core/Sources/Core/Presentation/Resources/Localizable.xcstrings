@@ -1,29 +1,17 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-<<<<<<< HEAD
-    "announcements" : {
-=======
     "ai_command_confirm" : {
->>>>>>> develop
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-<<<<<<< HEAD
-            "value" : "Announcements"
-=======
             "value" : "Confirm"
->>>>>>> develop
           }
         },
         "es" : {
           "stringUnit" : {
-<<<<<<< HEAD
-            "state" : "needs_review",
-            "value" : "Avisos"
-=======
             "state" : "translated",
             "value" : "Confirmar"
           }
@@ -305,7 +293,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comprobando qué hábitos has mencionado…"
->>>>>>> develop
+          }
+        }
+      }
+    },
+    "announcements" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Announcements"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Avisos"
           }
         }
       }
@@ -390,18 +394,12 @@
         },
         "es" : {
           "stringUnit" : {
-<<<<<<< HEAD
-            "state" : "needs_review",
-=======
             "state" : "translated",
->>>>>>> develop
             "value" : "Toca un hábito para cambiar su icono, su color, su frecuencia o sus avisos. Arrastra hacia la derecha para borrarlo y hacia la izquierda para pausarlo."
           }
         }
       }
     },
-<<<<<<< HEAD
-=======
     "habits_summary_every_day" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -519,7 +517,6 @@
         }
       }
     },
->>>>>>> develop
     "habits_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -550,6 +547,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escuchando"
+          }
+        }
+      }
+    },
+    "notification_habit_daily_multiple_body %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today it's %lld times. Shall we start?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy son %lld veces. ¿Empezamos?"
+          }
+        }
+      }
+    },
+    "notification_habit_daily_single_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It's your moment today. Mark it when you do it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es tu momento de hoy. Márcalo cuando lo hagas."
+          }
+        }
+      }
+    },
+    "notification_habit_fixed_days_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today is one of your days. You decide when."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy es uno de tus días. Tú decides cuándo."
+          }
+        }
+      }
+    },
+    "notification_habit_weekly_count_body %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your goal is %lld times this week. If today works for you, go for it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu objetivo es %lld veces esta semana. Si hoy te encaja, adelante."
           }
         }
       }
@@ -780,74 +845,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ningún modelo instalado admite un formato de audio compatible."
-          }
-        }
-      }
-    },
-    "notification_habit_daily_single_body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "It's your moment today. Mark it when you do it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es tu momento de hoy. Márcalo cuando lo hagas."
-          }
-        }
-      }
-    },
-    "notification_habit_daily_multiple_body %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Today it's %lld times. Shall we start?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hoy son %lld veces. ¿Empezamos?"
-          }
-        }
-      }
-    },
-    "notification_habit_weekly_count_body %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your goal is %lld times this week. If today works for you, go for it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu objetivo es %lld veces esta semana. Si hoy te encaja, adelante."
-          }
-        }
-      }
-    },
-    "notification_habit_fixed_days_body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Today is one of your days. You decide when."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hoy es uno de tus días. Tú decides cuándo."
           }
         }
       }

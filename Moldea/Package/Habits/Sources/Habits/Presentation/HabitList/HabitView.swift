@@ -18,8 +18,8 @@ struct HabitView: View {
         HexColorConverter.color(fromHex: habit.color) ?? HabitPaletteColor.gray.color
     }
     
-    private var summary: HabitScheduleSummary {
-        HabitScheduleSummary(schedule: habit.schedule)
+    private var summary: HabitScheduleSummaryEnum {
+        HabitScheduleSummaryEnum(schedule: habit.schedule)
     }
     
     var body: some View {
