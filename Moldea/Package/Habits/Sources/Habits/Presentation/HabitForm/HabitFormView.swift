@@ -196,11 +196,17 @@ struct HabitFormView: View {
             createHabitUseCase: DefaultCreateHabitUseCase(
                 repository: SwiftDataHabitRepository(
                     modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
+                ),
+                notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
+                    userDefaultsRepository: UserDefaultsRepositoryImpl()
                 )
             ),
             updateHabitUseCase: DefaultUpdateHabitUseCase(
                 repository: SwiftDataHabitRepository(
                     modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
+                ),
+                notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
+                    userDefaultsRepository: UserDefaultsRepositoryImpl()
                 )
             )
         ),

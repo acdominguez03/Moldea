@@ -368,6 +368,74 @@
         }
       }
     },
+    "notification_habit_daily_single_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It's your moment today. Mark it when you do it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es tu momento de hoy. Márcalo cuando lo hagas."
+          }
+        }
+      }
+    },
+    "notification_habit_daily_multiple_body %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today it's %lld times. Shall we start?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy son %lld veces. ¿Empezamos?"
+          }
+        }
+      }
+    },
+    "notification_habit_weekly_count_body %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your goal is %lld times this week. If today works for you, go for it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu objetivo es %lld veces esta semana. Si hoy te encaja, adelante."
+          }
+        }
+      }
+    },
+    "notification_habit_fixed_days_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today is one of your days. You decide when."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy es uno de tus días. Tú decides cuándo."
+          }
+        }
+      }
+    },
     "transcription_error_stage_failed %@" : {
       "comment" : "Error cuando falla una etapa de la sesión de voz. La variable es el nombre de la etapa (permiso, motor de audio, etc.).",
       "extractionState" : "manual",

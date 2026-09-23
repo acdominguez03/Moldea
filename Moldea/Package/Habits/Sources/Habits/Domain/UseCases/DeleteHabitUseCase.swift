@@ -13,12 +13,15 @@ protocol DeleteHabitUseCase: Sendable {
 
 struct DefaultDeleteHabitUseCase: DeleteHabitUseCase {
     private let repository: any HabitRepository
-    
-    init(repository: any HabitRepository) {
+    private let notificationScheduler: any HabitNotificationScheduler
+
+    init(repository: any HabitRepository, notificationScheduler: any HabitNotificationScheduler) {
         self.repository = repository
+        self.notificationScheduler = notificationScheduler
     }
-    
+
     func execute(id: Habit.ID) async throws {
         try await repository.delete(id: id)
+        await notificationScheduler.cancelReminders(for: id)
     }
 }

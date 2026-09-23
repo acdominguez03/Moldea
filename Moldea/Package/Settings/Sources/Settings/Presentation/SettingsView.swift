@@ -22,7 +22,7 @@ public struct SettingsView: View {
     private var isNotificationsEnabledBinding: Binding<Bool> {
         Binding(
             get: { settingsViewModel.isNotificationsEnabled },
-            set: { _ in settingsViewModel.onIsNotificationsEnabledToggled() }
+            set: { _ in Task { await settingsViewModel.onIsNotificationsEnabledToggled(habits: habits) } }
         )
     }
     
@@ -39,7 +39,10 @@ public struct SettingsView: View {
                     userDefaultsRepository: userDefaultsRepository
                 ),
                 setIsNotificationsEnabledUseCase: SetIsNotificationsEnabledUseCase(
-                    userDefaultsRepository: userDefaultsRepository
+                    userDefaultsRepository: userDefaultsRepository,
+                    notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
+                        userDefaultsRepository: userDefaultsRepository
+                    )
                 ),
                 getIsNotificationPermissionAllowedUseCase: GetIsNotificationPermissionAllowedUseCase(
                     userDefaultsRepository: userDefaultsRepository
@@ -136,7 +139,10 @@ public struct SettingsView: View {
                     habitReminderSheetViewModel: HabitReminderSheetViewModel(
                         habit: habit,
                         updateHabitReminderUseCase: DefaultUpdateHabitReminderUseCase(
-                            repository: habitRepository
+                            repository: habitRepository,
+                            notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
+                                userDefaultsRepository: userDefaultsRepository
+                            )
                         )
                     )
                 )

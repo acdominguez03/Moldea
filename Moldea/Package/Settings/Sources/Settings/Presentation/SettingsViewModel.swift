@@ -60,14 +60,11 @@ final class SettingsViewModel: BaseViewModel {
         }
     }
     
-    func onIsNotificationsEnabledToggled() {
-        do {
-            try setIsNotificationsEnabledUseCase
-                .execute(isEnabled: !isNotificationsEnabled)
-            
-            isNotificationsEnabled.toggle()
-        } catch {
-            print("ERRRRROR")
+    func onIsNotificationsEnabledToggled(habits: [Habit]) async {
+        let isEnabled = !isNotificationsEnabled
+        await perform {
+            try await setIsNotificationsEnabledUseCase.execute(isEnabled: isEnabled, habits: habits)
+            isNotificationsEnabled = isEnabled
         }
     }
 }

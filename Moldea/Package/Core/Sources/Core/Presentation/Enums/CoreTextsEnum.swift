@@ -63,4 +63,22 @@ public enum CoreTextsEnum {
     
     // MARK: Announcements
     public static let announcements = resource("announcements")
+
+    // MARK: Habit Reminder Notification
+    public static let habitReminderDailySingleBody = resource("notification_habit_daily_single_body")
+    public static let habitReminderFixedDaysBody = resource("notification_habit_fixed_days_body")
+
+    public static func habitReminderDailyMultipleBody(_ repetitionsPerDay: Int) -> LocalizedStringResource {
+        LocalizedStringResource(
+            "notification_habit_daily_multiple_body \(repetitionsPerDay)",
+            bundle: .atURL(Bundle.module.bundleURL)
+        )
+    }
+
+    public static func habitReminderWeeklyCountBody(_ timesPerWeek: Int) -> LocalizedStringResource {
+        LocalizedStringResource(
+            "notification_habit_weekly_count_body \(timesPerWeek)",
+            bundle: .atURL(Bundle.module.bundleURL)
+        )
+    }
 }

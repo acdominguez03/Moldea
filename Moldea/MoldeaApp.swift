@@ -79,7 +79,7 @@ struct MoldeaApp: App {
         case .statistics:
             StatisticsView()
         case .habits:
-            HabitsView(habitRepository: habitRepository)
+            HabitsView(habitRepository: habitRepository, userDefaultsRepository: userDefaultsRepository)
         case .settings:
             SettingsView(
                 habitRepository: habitRepository,

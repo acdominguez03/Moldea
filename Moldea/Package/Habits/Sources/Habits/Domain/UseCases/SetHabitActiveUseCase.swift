@@ -9,17 +9,30 @@ import Foundation
 import Core
 
 protocol SetHabitActiveUseCase: Sendable {
-    func execute(id: Habit.ID, isActive: Bool) async throws
+    func execute(habit: Habit) async throws
 }
 
 struct DefaultSetHabitActiveUseCase: SetHabitActiveUseCase {
     private let repository: any HabitRepository
+    private let notificationScheduler: any HabitNotificationScheduler
 
-    init(repository: any HabitRepository) {
+    init(repository: any HabitRepository, notificationScheduler: any HabitNotificationScheduler) {
         self.repository = repository
+        self.notificationScheduler = notificationScheduler
     }
 
-    func execute(id: Habit.ID, isActive: Bool) async throws {
-        try await repository.setActive(id: id, isActive: isActive, updatedAt: .now)
+    func execute(habit: Habit) async throws {
+        let isActive = !habit.isActive
+        
+        try await repository
+            .setActive(id: habit.id, isActive: isActive, updatedAt: .now)
+
+        if isActive {
+            print("Hábito activado, guardando reminder")
+            await notificationScheduler.scheduleReminder(for: habit)
+        } else {
+            print("Hábito desactivado, eliminando reminders")
+            await notificationScheduler.cancelReminders(for: habit.id)
+        }
     }
 }

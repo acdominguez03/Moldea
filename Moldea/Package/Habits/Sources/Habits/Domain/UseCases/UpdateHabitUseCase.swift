@@ -24,9 +24,11 @@ protocol UpdateHabitUseCase: Sendable {
 
 struct DefaultUpdateHabitUseCase: UpdateHabitUseCase {
     private let repository: any HabitRepository
+    private let notificationScheduler: any HabitNotificationScheduler
 
-    init(repository: any HabitRepository) {
+    init(repository: any HabitRepository, notificationScheduler: any HabitNotificationScheduler) {
         self.repository = repository
+        self.notificationScheduler = notificationScheduler
     }
 
     func execute(
@@ -48,18 +50,35 @@ struct DefaultUpdateHabitUseCase: UpdateHabitUseCase {
             repetitionsPerDay: repetitionsPerDay
         )
 
+        let schedule = HabitSchedule(frequency: frequency, repetitionsPerDay: repetitionsPerDay)
+        let reminder = HabitReminder(
+            time: reminderTime,
+            isEnabled: isReminderEnabled,
+            isMutedOnWeekends: isMutedOnWeekends
+        )
+        let date = Date.now
+
         try await repository.update(
             id: id,
             name: trimmedName,
             color: color,
             icon: icon,
-            schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: repetitionsPerDay),
-            reminder: HabitReminder(
-                time: reminderTime,
-                isEnabled: isReminderEnabled,
-                isMutedOnWeekends: isMutedOnWeekends
-            ),
-            updatedAt: .now
+            schedule: schedule,
+            reminder: reminder,
+            updatedAt: date
         )
+
+        await notificationScheduler.cancelReminders(for: id)
+        await notificationScheduler.scheduleReminder(for: Habit(
+            id: id,
+            name: trimmedName,
+            color: color,
+            icon: icon,
+            isActive: true,
+            createdAt: date,
+            updatedAt: date,
+            schedule: schedule,
+            reminder: reminder
+        ))
     }
 }

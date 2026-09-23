@@ -9,6 +9,7 @@ private struct UpdateCall: Sendable, Equatable {
     let color: String
     let icon: String
     let schedule: HabitSchedule
+    let reminder: HabitReminder?
 }
 
 private actor FakeHabitRepository: HabitRepository {
@@ -25,16 +26,39 @@ private actor FakeHabitRepository: HabitRepository {
 
     func setActive(id: Habit.ID, isActive: Bool, updatedAt: Date) async throws {}
 
+    func setReminderEnabled(
+        id: Habit.ID,
+        isEnabled: Bool,
+        defaultTime: Date,
+        updatedAt: Date
+    ) async throws {}
+
+    func updateReminder(id: Habit.ID, reminder: HabitReminder?, updatedAt: Date) async throws {}
+
     func update(
         id: Habit.ID,
         name: String,
         color: String,
         icon: String,
         schedule: HabitSchedule,
+        reminder: HabitReminder?,
         updatedAt: Date
     ) async throws {
         if let error { throw error }
-        updateCalls.append(UpdateCall(id: id, name: name, color: color, icon: icon, schedule: schedule))
+        updateCalls.append(UpdateCall(id: id, name: name, color: color, icon: icon, schedule: schedule, reminder: reminder))
+    }
+}
+
+private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
+    private(set) var scheduledHabits: [Habit] = []
+    private(set) var cancelledHabitIDs: [Habit.ID] = []
+
+    func scheduleReminder(for habit: Habit) async {
+        scheduledHabits.append(habit)
+    }
+
+    func cancelReminders(for habitID: Habit.ID) async {
+        cancelledHabitIDs.append(habitID)
     }
 }
 
@@ -46,10 +70,20 @@ private struct Input: Sendable {
     var icon = "drop"
     var frequency = HabitFrequency.daily
     var repetitionsPerDay = 1
+    var isReminderEnabled = true
+    var reminderTime = Date(timeIntervalSince1970: 2_000)
+    var isMutedOnWeekends = false
 }
 
 struct UpdateHabitUseCaseTests {
     private let fixedID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+
+    private func makeUseCase(
+        repository: FakeHabitRepository,
+        notificationScheduler: FakeHabitNotificationScheduler = FakeHabitNotificationScheduler()
+    ) -> DefaultUpdateHabitUseCase {
+        DefaultUpdateHabitUseCase(repository: repository, notificationScheduler: notificationScheduler)
+    }
 
     private func execute(
         _ input: Input,
@@ -62,7 +96,10 @@ struct UpdateHabitUseCaseTests {
             color: input.color,
             icon: input.icon,
             frequency: input.frequency,
-            repetitionsPerDay: input.repetitionsPerDay
+            repetitionsPerDay: input.repetitionsPerDay,
+            isReminderEnabled: input.isReminderEnabled,
+            reminderTime: input.reminderTime,
+            isMutedOnWeekends: input.isMutedOnWeekends
         )
     }
 
@@ -75,7 +112,7 @@ struct UpdateHabitUseCaseTests {
     ])
     func updatesTheHabitWithTheGivenID(frequency: HabitFrequency) async throws {
         let repository = FakeHabitRepository()
-        let useCase = DefaultUpdateHabitUseCase(repository: repository)
+        let useCase = makeUseCase(repository: repository)
 
         try await execute(
             Input(name: "Beber agua", frequency: frequency, repetitionsPerDay: 2),
@@ -88,18 +125,39 @@ struct UpdateHabitUseCaseTests {
                 name: "Beber agua",
                 color: "#007AFF",
                 icon: "drop",
-                schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: 2)
+                schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: 2),
+                reminder: HabitReminder(
+                    time: Date(timeIntervalSince1970: 2_000),
+                    isEnabled: true,
+                    isMutedOnWeekends: false
+                )
             )
         ])
     }
 
     @Test func trimsTheName() async throws {
         let repository = FakeHabitRepository()
-        let useCase = DefaultUpdateHabitUseCase(repository: repository)
+        let useCase = makeUseCase(repository: repository)
 
         try await execute(Input(name: "  Leer \n"), with: useCase)
 
         #expect(await repository.updateCalls.first?.name == "Leer")
+    }
+
+    // MARK: Notificaciones
+
+    @Test func cancelsAndReschedulesRemindersAfterUpdating() async throws {
+        let repository = FakeHabitRepository()
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = makeUseCase(repository: repository, notificationScheduler: scheduler)
+
+        try await execute(Input(), with: useCase)
+
+        #expect(await scheduler.cancelledHabitIDs == [fixedID])
+        #expect(await scheduler.scheduledHabits.map(\.id) == [fixedID])
+        #expect(await scheduler.scheduledHabits.map(\.reminder) == [
+            HabitReminder(time: Date(timeIntervalSince1970: 2_000), isEnabled: true, isMutedOnWeekends: false)
+        ])
     }
 
     // MARK: Validación
@@ -124,22 +182,28 @@ struct UpdateHabitUseCaseTests {
         expectedError: CreateHabitError
     ) async throws {
         let repository = FakeHabitRepository()
-        let useCase = DefaultUpdateHabitUseCase(repository: repository)
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = makeUseCase(repository: repository, notificationScheduler: scheduler)
 
         await #expect(throws: expectedError) {
             try await execute(input, with: useCase)
         }
         #expect(await repository.updateCalls.isEmpty)
+        #expect(await scheduler.cancelledHabitIDs.isEmpty)
+        #expect(await scheduler.scheduledHabits.isEmpty)
     }
 
     // MARK: Errores del repositorio
 
-    @Test func propagatesRepositoryErrors() async {
+    @Test func propagatesRepositoryErrorsWithoutTouchingNotifications() async {
         let repository = FakeHabitRepository(error: RepositoryFailure())
-        let useCase = DefaultUpdateHabitUseCase(repository: repository)
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = makeUseCase(repository: repository, notificationScheduler: scheduler)
 
         await #expect(throws: RepositoryFailure()) {
             try await execute(Input(), with: useCase)
         }
+        #expect(await scheduler.cancelledHabitIDs.isEmpty)
+        #expect(await scheduler.scheduledHabits.isEmpty)
     }
 }

@@ -30,16 +30,27 @@ public struct HabitsView: View {
     private let createHabitUseCase: any CreateHabitUseCase
     private let updateHabitUseCase: any UpdateHabitUseCase
 
-    public init(habitRepository: any HabitRepository) {
-        self.createHabitUseCase = DefaultCreateHabitUseCase(repository: habitRepository)
-        self.updateHabitUseCase = DefaultUpdateHabitUseCase(repository: habitRepository)
+    public init(habitRepository: any HabitRepository, userDefaultsRepository: any UserDefaultsRepository) {
+        let notificationScheduler = UNUserNotificationCenterHabitNotificationScheduler(
+            userDefaultsRepository: userDefaultsRepository
+        )
+        self.createHabitUseCase = DefaultCreateHabitUseCase(
+            repository: habitRepository,
+            notificationScheduler: notificationScheduler
+        )
+        self.updateHabitUseCase = DefaultUpdateHabitUseCase(
+            repository: habitRepository,
+            notificationScheduler: notificationScheduler
+        )
         _habitsViewModel = State(
             initialValue: HabitsViewModel(
                 deleteHabitUseCase: DefaultDeleteHabitUseCase(
-                    repository: habitRepository
+                    repository: habitRepository,
+                    notificationScheduler: notificationScheduler
                 ),
                 setHabitActiveUseCase: DefaultSetHabitActiveUseCase(
-                    repository: habitRepository
+                    repository: habitRepository,
+                    notificationScheduler: notificationScheduler
                 )
             )
         )
@@ -148,6 +159,7 @@ public struct HabitsView: View {
     HabitsView(
         habitRepository: SwiftDataHabitRepository(
             modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
-        )
+        ),
+        userDefaultsRepository: UserDefaultsRepositoryImpl()
     )
 }

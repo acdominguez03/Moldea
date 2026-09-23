@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 import SwiftUI
 import Core
 @testable import Habits
@@ -9,6 +10,9 @@ private struct ExecuteCall: Sendable, Equatable {
     let icon: String
     let frequency: HabitFrequency
     let repetitionsPerDay: Int
+    let isReminderEnabled: Bool
+    let reminderTime: Date
+    let isMutedOnWeekends: Bool
 }
 
 private actor FakeCreateHabitUseCase: CreateHabitUseCase {
@@ -24,7 +28,10 @@ private actor FakeCreateHabitUseCase: CreateHabitUseCase {
         color: String,
         icon: String,
         frequency: HabitFrequency,
-        repetitionsPerDay: Int
+        repetitionsPerDay: Int,
+        isReminderEnabled: Bool,
+        reminderTime: Date,
+        isMutedOnWeekends: Bool
     ) async throws {
         calls.append(
             ExecuteCall(
@@ -32,7 +39,10 @@ private actor FakeCreateHabitUseCase: CreateHabitUseCase {
                 color: color,
                 icon: icon,
                 frequency: frequency,
-                repetitionsPerDay: repetitionsPerDay
+                repetitionsPerDay: repetitionsPerDay,
+                isReminderEnabled: isReminderEnabled,
+                reminderTime: reminderTime,
+                isMutedOnWeekends: isMutedOnWeekends
             )
         )
         if let error { throw error }
@@ -46,6 +56,9 @@ private struct UpdateExecuteCall: Sendable, Equatable {
     let icon: String
     let frequency: HabitFrequency
     let repetitionsPerDay: Int
+    let isReminderEnabled: Bool
+    let reminderTime: Date
+    let isMutedOnWeekends: Bool
 }
 
 private actor FakeUpdateHabitUseCase: UpdateHabitUseCase {
@@ -62,7 +75,10 @@ private actor FakeUpdateHabitUseCase: UpdateHabitUseCase {
         color: String,
         icon: String,
         frequency: HabitFrequency,
-        repetitionsPerDay: Int
+        repetitionsPerDay: Int,
+        isReminderEnabled: Bool,
+        reminderTime: Date,
+        isMutedOnWeekends: Bool
     ) async throws {
         calls.append(
             UpdateExecuteCall(
@@ -71,7 +87,10 @@ private actor FakeUpdateHabitUseCase: UpdateHabitUseCase {
                 color: color,
                 icon: icon,
                 frequency: frequency,
-                repetitionsPerDay: repetitionsPerDay
+                repetitionsPerDay: repetitionsPerDay,
+                isReminderEnabled: isReminderEnabled,
+                reminderTime: reminderTime,
+                isMutedOnWeekends: isMutedOnWeekends
             )
         )
         if let error { throw error }
@@ -79,6 +98,8 @@ private actor FakeUpdateHabitUseCase: UpdateHabitUseCase {
 }
 
 private struct UseCaseFailure: Error {}
+
+private let fixedReminderTime = Date(timeIntervalSince1970: 2_000)
 
 @MainActor
 struct HabitFormViewModelTests {
@@ -100,7 +121,8 @@ struct HabitFormViewModelTests {
             frequency: frequency,
             repetitionsPerDay: repetitionsPerDay,
             createHabitUseCase: useCase,
-            updateHabitUseCase: updateUseCase
+            updateHabitUseCase: updateUseCase,
+            reminderTime: fixedReminderTime
         )
     }
 
@@ -221,7 +243,10 @@ struct HabitFormViewModelTests {
                 color: "#3A6BC6",
                 icon: "figure.run",
                 frequency: .daily,
-                repetitionsPerDay: 2
+                repetitionsPerDay: 2,
+                isReminderEnabled: false,
+                reminderTime: fixedReminderTime,
+                isMutedOnWeekends: false
             )
         ])
     }
@@ -311,7 +336,10 @@ struct HabitFormViewModelTests {
                 color: "#3A6BC6",
                 icon: "leaf",
                 frequency: .daily,
-                repetitionsPerDay: 1
+                repetitionsPerDay: 1,
+                isReminderEnabled: false,
+                reminderTime: fixedReminderTime,
+                isMutedOnWeekends: false
             )
         ])
     }

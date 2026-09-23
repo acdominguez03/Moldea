@@ -61,7 +61,7 @@ final class HabitsViewModel: BaseViewModel {
 
     func onSetHabitActiveClicked(_ habit: Habit) async {
         await perform {
-            try await setHabitActiveUseCase.execute(id: habit.id, isActive: !habit.isActive)
+            try await setHabitActiveUseCase.execute(habit: habit)
         }
     }
 }

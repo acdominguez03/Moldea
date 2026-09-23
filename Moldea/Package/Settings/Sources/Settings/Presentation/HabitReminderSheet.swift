@@ -156,5 +156,5 @@ struct HabitReminderSheet: View {
 }
 
 private struct PreviewUpdateHabitReminderUseCase: UpdateHabitReminderUseCase {
-    func execute(id: Habit.ID, isReminderEnabled: Bool, reminderTime: Date, isMutedOnWeekends: Bool) async throws {}
+    func execute(habit: Habit, isReminderEnabled: Bool, reminderTime: Date, isMutedOnWeekends: Bool) async throws {}
 }

@@ -20,11 +20,11 @@ final class HabitReminderSheetViewModel: BaseViewModel {
     private(set) var isMutedOnWeekends: Bool
     private(set) var reminderTime: Date
 
-    private let habitID: Habit.ID
+    private let habit: Habit
     private let updateHabitReminderUseCase: any UpdateHabitReminderUseCase
 
     init(habit: Habit, updateHabitReminderUseCase: any UpdateHabitReminderUseCase) {
-        self.habitID = habit.id
+        self.habit = habit
         self.updateHabitReminderUseCase = updateHabitReminderUseCase
         self.isReminderEnabled = habit.reminder?.isEnabled ?? false
         self.isMutedOnWeekends = habit.reminder?.isMutedOnWeekends ?? false
@@ -54,7 +54,7 @@ final class HabitReminderSheetViewModel: BaseViewModel {
     func save() async {
         await perform {
             try await updateHabitReminderUseCase.execute(
-                id: habitID,
+                habit: habit,
                 isReminderEnabled: isReminderEnabled,
                 reminderTime: reminderTime,
                 isMutedOnWeekends: isMutedOnWeekends

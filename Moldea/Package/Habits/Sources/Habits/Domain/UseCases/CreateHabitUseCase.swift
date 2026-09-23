@@ -23,15 +23,18 @@ protocol CreateHabitUseCase: Sendable {
 
 struct DefaultCreateHabitUseCase: CreateHabitUseCase {
     private let repository: any HabitRepository
+    private let notificationScheduler: any HabitNotificationScheduler
     private let makeID: @Sendable () -> UUID
     private let now: @Sendable () -> Date
 
     init(
         repository: any HabitRepository,
+        notificationScheduler: any HabitNotificationScheduler,
         makeID: @escaping @Sendable () -> UUID = { UUID() },
         now: @escaping @Sendable () -> Date = { .now }
     ) {
         self.repository = repository
+        self.notificationScheduler = notificationScheduler
         self.makeID = makeID
         self.now = now
     }
@@ -71,5 +74,6 @@ struct DefaultCreateHabitUseCase: CreateHabitUseCase {
             )
         )
         try await repository.create(habit)
+        await notificationScheduler.scheduleReminder(for: habit)
     }
 }

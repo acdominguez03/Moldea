@@ -20,14 +20,34 @@ private actor FakeHabitRepository: HabitRepository {
 
     func setActive(id: Habit.ID, isActive: Bool, updatedAt: Date) async throws {}
 
+    func setReminderEnabled(
+        id: Habit.ID,
+        isEnabled: Bool,
+        defaultTime: Date,
+        updatedAt: Date
+    ) async throws {}
+
+    func updateReminder(id: Habit.ID, reminder: HabitReminder?, updatedAt: Date) async throws {}
+
     func update(
         id: Habit.ID,
         name: String,
         color: String,
         icon: String,
         schedule: HabitSchedule,
+        reminder: HabitReminder?,
         updatedAt: Date
     ) async throws {}
+}
+
+private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
+    private(set) var scheduledHabits: [Habit] = []
+
+    func scheduleReminder(for habit: Habit) async {
+        scheduledHabits.append(habit)
+    }
+
+    func cancelReminders(for habitID: Habit.ID) async {}
 }
 
 private struct RepositoryFailure: Error, Equatable {}
@@ -38,16 +58,27 @@ private struct Input: Sendable {
     var icon = "drop"
     var frequency = HabitFrequency.daily
     var repetitionsPerDay = 1
+    var isReminderEnabled = false
+    var reminderTime = Date(timeIntervalSince1970: 2_000)
+    var isMutedOnWeekends = false
 }
 
 struct CreateHabitUseCaseTests {
     private let fixedID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
     private let fixedDate = Date(timeIntervalSince1970: 1_000)
 
-    private func makeUseCase(repository: FakeHabitRepository) -> DefaultCreateHabitUseCase {
+    private func makeUseCase(
+        repository: FakeHabitRepository,
+        notificationScheduler: FakeHabitNotificationScheduler = FakeHabitNotificationScheduler()
+    ) -> DefaultCreateHabitUseCase {
         let id = fixedID
         let date = fixedDate
-        return DefaultCreateHabitUseCase(repository: repository, makeID: { id }, now: { date })
+        return DefaultCreateHabitUseCase(
+            repository: repository,
+            notificationScheduler: notificationScheduler,
+            makeID: { id },
+            now: { date }
+        )
     }
 
     private func execute(_ input: Input, with useCase: DefaultCreateHabitUseCase) async throws {
@@ -56,7 +87,10 @@ struct CreateHabitUseCaseTests {
             color: input.color,
             icon: input.icon,
             frequency: input.frequency,
-            repetitionsPerDay: input.repetitionsPerDay
+            repetitionsPerDay: input.repetitionsPerDay,
+            isReminderEnabled: input.isReminderEnabled,
+            reminderTime: input.reminderTime,
+            isMutedOnWeekends: input.isMutedOnWeekends
         )
     }
 
@@ -84,7 +118,12 @@ struct CreateHabitUseCaseTests {
             isActive: true,
             createdAt: fixedDate,
             updatedAt: fixedDate,
-            schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: 2)
+            schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: 2),
+            reminder: HabitReminder(
+                time: Date(timeIntervalSince1970: 2_000),
+                isEnabled: false,
+                isMutedOnWeekends: false
+            )
         )
         #expect(await repository.created == [expected])
     }

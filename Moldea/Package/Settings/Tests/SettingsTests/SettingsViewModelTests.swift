@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 import Core
 @testable import Settings
 
@@ -32,14 +33,30 @@ private actor FakeRequestNotificationAuthorizationUseCase: RequestNotificationAu
     }
 }
 
+private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
+    private(set) var scheduledHabits: [Habit] = []
+    private(set) var cancelledHabitIDs: [Habit.ID] = []
+
+    func scheduleReminder(for habit: Habit) async {
+        scheduledHabits.append(habit)
+    }
+
+    func cancelReminders(for habitID: Habit.ID) async {
+        cancelledHabitIDs.append(habitID)
+    }
+}
+
 @MainActor
 struct SettingsViewModelTests {
     private func makeViewModel(
-        isNotificationPermissionAllowedAtLaunch: Bool,
-        refreshedPermission: Bool
+        isNotificationPermissionAllowedAtLaunch: Bool = true,
+        refreshedPermission: Bool = true,
+        isNotificationsEnabledAtLaunch: Bool = false,
+        notificationScheduler: FakeHabitNotificationScheduler = FakeHabitNotificationScheduler()
     ) -> (SettingsViewModel, FakeRequestNotificationAuthorizationUseCase) {
         let userDefaultsRepository = FakeUserDefaultsRepository()
         userDefaultsRepository.saveBool(.isNotificationPermissionAllowed, isNotificationPermissionAllowedAtLaunch)
+        userDefaultsRepository.saveBool(.isNotificationsEnabled, isNotificationsEnabledAtLaunch)
         let requestUseCase = FakeRequestNotificationAuthorizationUseCase(result: refreshedPermission)
 
         let viewModel = SettingsViewModel(
@@ -48,7 +65,8 @@ struct SettingsViewModelTests {
                 userDefaultsRepository: userDefaultsRepository
             ),
             setIsNotificationsEnabledUseCase: SetIsNotificationsEnabledUseCase(
-                userDefaultsRepository: userDefaultsRepository
+                userDefaultsRepository: userDefaultsRepository,
+                notificationScheduler: notificationScheduler
             ),
             getIsNotificationPermissionAllowedUseCase: GetIsNotificationPermissionAllowedUseCase(
                 userDefaultsRepository: userDefaultsRepository
@@ -89,5 +107,47 @@ struct SettingsViewModelTests {
         await viewModel.refreshNotificationPermissionStatus()
 
         #expect(viewModel.isNotificationPermissionAllowed == false)
+    }
+
+    // MARK: onIsNotificationsEnabledToggled
+
+    private func makeHabit(isActive: Bool = true, hasReminder: Bool = true) -> Habit {
+        Habit(
+            id: UUID(),
+            name: "Leer",
+            color: "#007AFF",
+            icon: "book",
+            isActive: isActive,
+            createdAt: .now,
+            updatedAt: .now,
+            schedule: HabitSchedule(frequency: .daily, repetitionsPerDay: 1),
+            reminder: hasReminder ? HabitReminder(time: .now, isEnabled: true, isMutedOnWeekends: false) : nil
+        )
+    }
+
+    @Test func disablingCancelsRemindersOfActiveHabitsWithReminder() async {
+        let scheduler = FakeHabitNotificationScheduler()
+        let (viewModel, _) = makeViewModel(isNotificationsEnabledAtLaunch: true, notificationScheduler: scheduler)
+        let withReminder = makeHabit()
+        let inactive = makeHabit(isActive: false)
+        let withoutReminder = makeHabit(hasReminder: false)
+
+        await viewModel.onIsNotificationsEnabledToggled(habits: [withReminder, inactive, withoutReminder])
+
+        #expect(viewModel.isNotificationsEnabled == false)
+        #expect(await scheduler.cancelledHabitIDs == [withReminder.id])
+        #expect(await scheduler.scheduledHabits.isEmpty)
+    }
+
+    @Test func enablingSchedulesRemindersOfActiveHabitsWithReminder() async {
+        let scheduler = FakeHabitNotificationScheduler()
+        let (viewModel, _) = makeViewModel(isNotificationsEnabledAtLaunch: false, notificationScheduler: scheduler)
+        let withReminder = makeHabit()
+
+        await viewModel.onIsNotificationsEnabledToggled(habits: [withReminder])
+
+        #expect(viewModel.isNotificationsEnabled == true)
+        #expect(await scheduler.scheduledHabits == [withReminder])
+        #expect(await scheduler.cancelledHabitIDs.isEmpty)
     }
 }
