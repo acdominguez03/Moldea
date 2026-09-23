@@ -1,14 +1,13 @@
 //
 //  UpdateHabitUseCase.swift
-//  Habits
+//  Core
 //
 //  Created by Ismael Cordón Domínguez on 22/9/26.
 //
 
 import Foundation
-import Core
 
-protocol UpdateHabitUseCase: Sendable {
+public protocol UpdateHabitUseCase: Sendable {
     func execute(
         id: Habit.ID,
         name: String,
@@ -22,16 +21,16 @@ protocol UpdateHabitUseCase: Sendable {
     ) async throws
 }
 
-struct DefaultUpdateHabitUseCase: UpdateHabitUseCase {
+public struct DefaultUpdateHabitUseCase: UpdateHabitUseCase {
     private let repository: any HabitRepository
     private let notificationScheduler: any HabitNotificationScheduler
 
-    init(repository: any HabitRepository, notificationScheduler: any HabitNotificationScheduler) {
+    public init(repository: any HabitRepository, notificationScheduler: any HabitNotificationScheduler) {
         self.repository = repository
         self.notificationScheduler = notificationScheduler
     }
 
-    func execute(
+    public func execute(
         id: Habit.ID,
         name: String,
         color: String,

@@ -1,27 +1,26 @@
 //
 //  SetHabitActiveUseCase.swift
-//  Habits
+//  Core
 //
 //  Created by Ismael Cordón Domínguez on 21/9/26.
 //
 
 import Foundation
-import Core
 
-protocol SetHabitActiveUseCase: Sendable {
+public protocol SetHabitActiveUseCase: Sendable {
     func execute(habit: Habit) async throws
 }
 
-struct DefaultSetHabitActiveUseCase: SetHabitActiveUseCase {
+public struct DefaultSetHabitActiveUseCase: SetHabitActiveUseCase {
     private let repository: any HabitRepository
     private let notificationScheduler: any HabitNotificationScheduler
 
-    init(repository: any HabitRepository, notificationScheduler: any HabitNotificationScheduler) {
+    public init(repository: any HabitRepository, notificationScheduler: any HabitNotificationScheduler) {
         self.repository = repository
         self.notificationScheduler = notificationScheduler
     }
 
-    func execute(habit: Habit) async throws {
+    public func execute(habit: Habit) async throws {
         let isActive = !habit.isActive
         
         try await repository

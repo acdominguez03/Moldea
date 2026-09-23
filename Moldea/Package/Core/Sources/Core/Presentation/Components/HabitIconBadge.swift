@@ -7,9 +7,11 @@
 
 import SwiftUI
 
+/// Icono del hábito sobre un círculo de su color al 20 %. Lo comparten el resumen de la pantalla
+/// de creación y las filas de la lista para que se vean igual.
 public struct HabitIconBadge: View {
-    let color: Color
-    let icon: String
+    private let color: Color
+    private let icon: String
 
     public init(color: Color, icon: String) {
         self.color = color
@@ -27,5 +29,8 @@ public struct HabitIconBadge: View {
 }
 
 #Preview {
-    HabitIconBadge(color: .blue, icon: "drop")
+    HabitIconBadge(
+        color: HexColorConverter.color(fromHex: HabitAppearanceDefaultsEnum.colorHex) ?? .gray,
+        icon: HabitAppearanceDefaultsEnum.icon
+    )
 }

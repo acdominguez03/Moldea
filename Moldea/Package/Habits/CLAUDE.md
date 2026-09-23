@@ -2,9 +2,8 @@
 
 Paquete de la feature **Hábitos**: la pestaña de creación y gestión de los hábitos de Moldea.
 
-Hoy contiene la pantalla de creación de hábitos (`HabitFormView`) con su caso de uso, el
-catálogo de iconos y la paleta de colores. `HabitsView` todavía no lista los hábitos: no hay
-`fetch` en el repositorio, así que tras guardar un hábito no se ve en ninguna pantalla.
+Hoy contiene la lista de hábitos (`HabitsView`), la pantalla de creación (`CreateHabitView`),
+el catálogo de iconos y la paleta de colores.
 
 Depende de `Core` (`.package(path: "../Core")`), de donde salen las entidades de dominio
 (`Habit`, `HabitFrequency`…), el protocolo `HabitRepository`, `BaseViewModel` y
@@ -25,9 +24,6 @@ ve: solo trabaja con tipos de dominio. La arquitectura completa está en el `CLA
 ```
 Sources/Habits/
 ├── Domain/
-│   ├── UseCases/
-│   │   ├── CreateHabitUseCase.swift     # protocolo + DefaultCreateHabitUseCase
-│   │   └── CreateHabitError.swift
 │   ├── HabitIconCatalog.swift           # protocolo
 │   └── HabitIconFamily.swift
 ├── Data/
@@ -38,6 +34,10 @@ Sources/Habits/
     ├── HabitForm/
     │   ├── HabitFormView.swift
     │   ├── HabitFormViewModel.swift
+    ├── HabitList/HabitView.swift        # fila de la lista
+    ├── CreateHabit/
+    │   ├── CreateHabitView.swift
+    │   ├── CreateHabitViewModel.swift
     │   ├── ChooseHabitIconView.swift
     │   ├── ChooseHabitIconViewModel.swift
     │   ├── Model/WeekdayItem.swift
@@ -52,11 +52,20 @@ Tests/HabitsTests/
 `Data` de este paquete solo tiene las fuentes propias de la feature (el catálogo de iconos). El
 repositorio de hábitos y su persistencia viven en `Core`.
 
+**La tarjeta de hábito tampoco vive aquí.** `HabitCardView`, `HabitIconBadge` y
+`HabitScheduleSummaryEnum` bajaron a `Core/Presentation/Components` cuando las pantallas de comandos
+de voz las necesitaron, y con ellas los textos del resumen de la frecuencia
+(`habits_summary_every_day`, `habits_summary_times_per_day`, `habits_summary_times_per_week` y
+`days`), que ahora están en `CoreTextsEnum`. `HabitView` se queda con lo que solo tiene sentido
+dentro de un `List`: envuelve `HabitCardView(habit:)` y le añade el chevron y los dos
+`swipeActions`.
+
 ## Pantalla y composición
 
-`HabitsView` es el punto de entrada público: un `NavigationStack` con un `ScrollView` vacío, el
-título en grande y un botón `+` que presenta `HabitFormView` en una hoja. La compone el target
-`Moldea` en el caso `.habits` de `MainTab`.
+`HabitsView` es el punto de entrada público: un `NavigationStack` con la lista de hábitos —que
+lee con `@HabitsQuery`, de `Core`, y pinta con `HabitView`—, un `ContentUnavailableView` cuando
+no hay ninguno, el título en grande y un botón `+` que presenta `CreateHabitView` en una hoja.
+La compone el target `Moldea` en el caso `.habits` de `MainTab`.
 
 Su `init` público recibe `habitRepository: any HabitRepository`. Construye por dentro
 `DefaultCreateHabitUseCase(repository:)` y crea un `HabitFormViewModel` **nuevo cada vez que se
@@ -71,23 +80,13 @@ Guardar → HabitFormViewModel.save()
   → HabitRepository.create(Habit)          (Core)
 ```
 
-**`CreateHabitUseCase`** recibe los datos sueltos y construye él el `Habit`: el view model no
-conoce ninguna entidad. `DefaultCreateHabitUseCase` recibe el repositorio y, para poder
-testearse, `makeID` y `now` como closures (con `UUID()` y `.now` por defecto). Recorta el nombre
-y crea el hábito con `isActive = true` y `createdAt == updatedAt`.
+**`CreateHabitUseCase` y `DeleteHabitUseCase` ya no viven aquí: están en `Core/Domain/UseCases`.**
+Bajaron cuando la capa de comandos de voz de `Core` los necesitó, siguiendo la regla de que lo
+que usan dos módulos baja a `Core`. `Habits` los resuelve con el `import Core` que ya tenía, y
+`CreateHabitErrorEnum` y su tabla de validación están documentados en el `CLAUDE.md` de `Core`.
 
-Valida en este orden y lanza el primer error (`CreateHabitError`):
-
-| Error | Cuándo |
-|---|---|
-| `emptyName` | el nombre recortado está vacío |
-| `invalidColor` | no es `#` más 6 dígitos hexadecimales **ASCII** |
-| `invalidRepetitionsPerDay` | `repetitionsPerDay < 1` (el rango 1...20 es cosa de la UI) |
-| `invalidTimesPerWeek` | `weeklyCount` fuera de 1...7 |
-| `emptyWeekdays` | `fixedDays` sin ningún día |
-| `invalidWeekdays` | algún día de `fixedDays` fuera de 1...7 |
-
-No se valida el icono: no tiene formato comprobable sin UIKit y el selector no da uno vacío.
+Lo que sigue siendo cierto aquí: **el caso de uso recibe los datos sueltos y construye él el
+`Habit`**, así que el view model no conoce ninguna entidad.
 
 **`HabitFormViewModel`** conforma `BaseViewModel` (`isLoading`, `errorMessage`). Guarda el
 estado de la pantalla y traduce `selectedFrequency` + `selectedTimesAWeek` + `selectedWeekdays`
@@ -104,11 +103,11 @@ a un `HabitFrequency` (`makeFrequency()`).
 
 ## Colores
 
-Contrato y razonamiento en el `CLAUDE.md` raíz, en *Colores de los hábitos*. Resumen de cómo lo
+Contrato y razonamiento en el `CLAUDE.md` raíz, en _Colores de los hábitos_. Resumen de cómo lo
 aplica este paquete:
 
 - `HabitPaletteColor`: 13 casos (`red, orange, yellow, green, mint, teal, blue, indigo, purple,
-  pink, gray, brown, stone`), cada uno con `hex`, `color` (derivado del hex con
+pink, gray, brown, stone`), cada uno con `hex`, `color` (derivado del hex con
   `HexColorConverter`, con `.gray` de red de seguridad) y `name` localizado. El orden de
   `allCases` es el del picker: 7 en la primera fila y los 6 restantes más el `ColorPicker`
   nativo en la segunda, por eso hay un test que exige exactamente 13.
@@ -168,11 +167,14 @@ el catálogo en vez de concatenar.
 Swift Testing. Los repositorios y casos de uso falsos son `actor` (los protocolos son
 `Sendable`).
 
-- `CreateHabitUseCaseTests`: el `Habit` que recibe el repositorio para las tres frecuencias (con
-  `id` y fecha fijados), nombre recortado, 13 entradas inválidas (cada una lanza su error y no
-  toca el repositorio; incluye un hex de ancho completo) y propagación del error del
-  repositorio.
-- `HabitFormViewModelTests`: color por defecto y selección (paleta, personalizado, hex
+`CreateHabitUseCaseTests` se fue a `CoreTests` con el caso de uso, y
+`HabitScheduleSummaryTests` con el resumen.
+
+- `HabitAppearanceDefaultsTests`: ata `HabitAppearanceDefaultsEnum` (en `Core`) a
+  `HabitPaletteColor.gray.hex` y a `HabitPaletteIcon.drop.systemName`. Existe porque `Core` no
+  puede importar `Habits`, así que los valores por defecto de un hábito creado por voz están
+  duplicados; este test es lo único que impide que se separen en silencio.
+- `CreateHabitViewModelTests`: color por defecto y selección (paleta, personalizado, hex
   ilegible → gris), `canSave`, traducción de cada frecuencia al caso de uso, `didSave` y error
   genérico cuando el caso de uso falla.
 - `HabitPaletteColorTests`: los 13 hex parsean (garantiza que el fallback no se usa), formato

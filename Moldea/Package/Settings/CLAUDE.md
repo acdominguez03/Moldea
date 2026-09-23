@@ -13,7 +13,7 @@ Depende de `Core` (`.package(path: "../Core")`), de donde salen las entidades de
 
 ## Configuración
 
-- `swift-tools-version: 6.4`
+- `swift-tools-version: 6.2`
 - Plataforma mínima: `.iOS(.v26)`
 - `swiftSettings`: `.enableUpcomingFeature("ApproachableConcurrency")` en target y test target
 - Dependencia: `.package(path: "../Core")`

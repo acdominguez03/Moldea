@@ -9,101 +9,113 @@ import SwiftUI
 
 public struct SpeechToTextView: View {
     @Environment(\.dismiss) private var dismiss
+
+    @State private var viewModel: SpeechToTextViewModel
     
-    @State private var model = LiveTranscriptionModel()
-    
-    public init() {}
+    private var isPresentingCommand: Binding<Bool> {
+        Binding(
+            get: { viewModel.isPresentingCommand },
+            set: { isPresented in
+                guard !isPresented else { return }
+                viewModel.dismissCommand()
+            }
+        )
+    }
+
+    public init(habitRepository: any HabitRepository, userDefaultsRepository: any UserDefaultsRepository) {
+        _viewModel = State(
+            initialValue: SpeechToTextViewModel(
+                habitRepository: habitRepository,
+                notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
+                    userDefaultsRepository: userDefaultsRepository
+                )
+            )
+        )
+    }
     
     public var body: some View {
         VStack(spacing: 20) {
-            transcript
+            Group {
+                if viewModel.hasTranscript {
+                    Text(viewModel.styledTranscript)
+                } else {
+                    Text(CoreTextsEnum.speechToTextPlaceholder)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .font(.body)
+            .textSelection(.enabled)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             
-            status
+            switch viewModel.phase {
+            case .preparing:
+                if let progress = viewModel.downloadProgress {
+                    ProgressView(progress)
+                        .font(.footnote)
+                } else {
+                    ProgressView {
+                        Text(CoreTextsEnum.speechToTextPreparing)
+                    }
+                    .font(.footnote)
+                }
+            case .failed(let message):
+                Text(message)
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+            case .idle, .transcribing:
+                EmptyView()
+            }
             
-            WaveAnimation(isActive: model.isTranscribing)
+            WaveAnimation(isActive: viewModel.isTranscribing)
                 .accessibilityHidden(true)
             
             Button {
-                finish()
+                Task { await viewModel.finishAndRecognize() }
             } label: {
                 Text(CoreTextsEnum.finish)
             }
             .buttonStyle(.glass)
             .buttonSizing(.flexible)
+            .disabled(!viewModel.canFinish)
             
             Text(CoreTextsEnum.speechToTextDescription)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .font(.body)
-                .lineLimit(3)
                 .multilineTextAlignment(.leading)
         }
         .padding(20)
         .navigationTitle(CoreTextsEnum.listening)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: isPresentingCommand) {
+            HabitCommandView(
+                transcript: viewModel.transcriptForAI,
+                recognizer: viewModel.recognizer,
+                createHabitUseCase: viewModel.createHabitUseCase,
+                deleteHabitUseCase: viewModel.deleteHabitUseCase,
+                onFinish: {
+                    viewModel.stop()
+                    dismiss()
+                },
+                parser: viewModel.parser
+            )
+        }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button {
-                    finish()
+                    viewModel.stop()
+                    dismiss()
                 } label: {
                     Text(CoreTextsEnum.close)
                 }
-                .disabled(model.isPreparing)
+                .disabled(!viewModel.canClose)
             }
         }
         .task {
-            model.startTranscribing()
+            await viewModel.start()
         }
         .onDisappear {
-            model.stopTranscribing()
+            viewModel.stop()
         }
-    }
-    
-    private var transcript: some View {
-        
-        Group {
-            if model.hasTranscript {
-                Text(model.finalizedText + dimmedVolatileText)
-            } else {
-                Text(CoreTextsEnum.speechToTextPlaceholder)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .font(.body)
-        .textSelection(.enabled)
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-    
-    private var dimmedVolatileText: AttributedString {
-        var text = model.volatileText
-        text.foregroundColor = .secondary
-        return text
-    }
-    
-    @ViewBuilder
-    private var status: some View {
-        switch model.phase {
-        case .preparing:
-            if let progress = model.downloadProgress {
-                ProgressView(progress)
-                    .font(.footnote)
-            } else {
-                ProgressView {
-                    Text(CoreTextsEnum.speechToTextPreparing)
-                }
-                .font(.footnote)
-            }
-        case .failed(let message):
-            Text(message)
-                .font(.footnote)
-                .foregroundStyle(.red)
-                .multilineTextAlignment(.center)
-        case .idle, .transcribing:
-            EmptyView()
-        }
-    }
-    
-    private func finish() {
-        model.stopTranscribing()
-        dismiss()
     }
 }

@@ -1,14 +1,13 @@
 //
 //  CreateHabitUseCase.swift
-//  Habits
+//  Core
 //
 //  Created by Ismael Cordón Domínguez on 21/9/26.
 //
 
 import Foundation
-import Core
 
-protocol CreateHabitUseCase: Sendable {
+public protocol CreateHabitUseCase: Sendable {
     func execute(
         name: String,
         color: String,
@@ -21,13 +20,35 @@ protocol CreateHabitUseCase: Sendable {
     ) async throws
 }
 
-struct DefaultCreateHabitUseCase: CreateHabitUseCase {
+public extension CreateHabitUseCase {
+    /// Crea el hábito sin recordatorio. Es lo que usan los flujos que no lo configuran (p. ej. la IA).
+    func execute(
+        name: String,
+        color: String,
+        icon: String,
+        frequency: HabitFrequency,
+        repetitionsPerDay: Int
+    ) async throws {
+        try await execute(
+            name: name,
+            color: color,
+            icon: icon,
+            frequency: frequency,
+            repetitionsPerDay: repetitionsPerDay,
+            isReminderEnabled: false,
+            reminderTime: .now,
+            isMutedOnWeekends: false
+        )
+    }
+}
+
+public struct DefaultCreateHabitUseCase: CreateHabitUseCase {
     private let repository: any HabitRepository
     private let notificationScheduler: any HabitNotificationScheduler
     private let makeID: @Sendable () -> UUID
     private let now: @Sendable () -> Date
 
-    init(
+    public init(
         repository: any HabitRepository,
         notificationScheduler: any HabitNotificationScheduler,
         makeID: @escaping @Sendable () -> UUID = { UUID() },
@@ -39,7 +60,7 @@ struct DefaultCreateHabitUseCase: CreateHabitUseCase {
         self.now = now
     }
 
-    func execute(
+    public func execute(
         name: String,
         color: String,
         icon: String,

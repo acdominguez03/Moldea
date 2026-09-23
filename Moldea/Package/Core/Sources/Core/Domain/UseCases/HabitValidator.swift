@@ -1,11 +1,9 @@
 //
 //  HabitValidator.swift
-//  Habits
+//  Core
 //
-//  Created by Ismael Cordón Domínguez on 22/9/26.
+//  Created by Ismael Cordón Domínguez on 21/9/26.
 //
-
-import Core
 
 enum HabitValidator {
     private static let weekdays = 1...7
@@ -18,27 +16,27 @@ enum HabitValidator {
         repetitionsPerDay: Int
     ) throws {
         guard !trimmedName.isEmpty else {
-            throw CreateHabitError.emptyName
+            throw CreateHabitErrorEnum.emptyName
         }
         guard isHexColor(color) else {
-            throw CreateHabitError.invalidColor
+            throw CreateHabitErrorEnum.invalidColor
         }
         guard repetitionsPerDay >= 1 else {
-            throw CreateHabitError.invalidRepetitionsPerDay
+            throw CreateHabitErrorEnum.invalidRepetitionsPerDay
         }
         switch frequency {
         case .daily:
             break
         case .weeklyCount(let timesPerWeek):
             guard Self.timesPerWeek.contains(timesPerWeek) else {
-                throw CreateHabitError.invalidTimesPerWeek
+                throw CreateHabitErrorEnum.invalidTimesPerWeek
             }
         case .fixedDays(let weekdays):
             guard !weekdays.isEmpty else {
-                throw CreateHabitError.emptyWeekdays
+                throw CreateHabitErrorEnum.emptyWeekdays
             }
             guard weekdays.allSatisfy(Self.weekdays.contains) else {
-                throw CreateHabitError.invalidWeekdays
+                throw CreateHabitErrorEnum.invalidWeekdays
             }
         }
     }

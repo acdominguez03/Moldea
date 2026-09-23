@@ -15,6 +15,9 @@ public enum HabitsTextsEnum {
         )
     }
 
+    /// Para textos con argumentos: la clave del catálogo lleva el especificador (`"clave %lld"`).
+    /// Nombre distinto a `resource` a propósito: con el mismo, un literal con interpolación se
+    /// resolvería como `String` y perdería el argumento.
     private static func localized(_ value: String.LocalizationValue) -> LocalizedStringResource {
         LocalizedStringResource(value, bundle: .atURL(Bundle.module.bundleURL))
     }
