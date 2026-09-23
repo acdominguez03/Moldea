@@ -273,6 +273,40 @@
         }
       }
     },
+    "settings_notifications_permission_disabled_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications disabled"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notificaciones deshabilitadas"
+          }
+        }
+      }
+    },
+    "settings_notifications_permission_disabled_description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You won't receive notifications for your habits. Tap here to enable them from Settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No recibirás notificaciones de tus hábitos. Toca aquí para activarlas desde Ajustes."
+          }
+        }
+      }
+    },
     "settings_screen_title" : {
       "extractionState" : "manual",
       "localizations" : {

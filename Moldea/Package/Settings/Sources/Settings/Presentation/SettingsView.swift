@@ -6,13 +6,16 @@
 //
 
 import SwiftUI
+import UIKit
 import Core
 
 public struct SettingsView: View {
     @State private var settingsViewModel: SettingsViewModel
     @State private var habitToEditReminder: Habit?
     @HabitsQuery private var habits: [Habit]
-    
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
+
     private let habitRepository: any HabitRepository
     private let userDefaultsRepository: UserDefaultsRepository
     
@@ -38,8 +41,21 @@ public struct SettingsView: View {
                 setIsNotificationsEnabledUseCase: SetIsNotificationsEnabledUseCase(
                     userDefaultsRepository: userDefaultsRepository
                 ),
+                getIsNotificationPermissionAllowedUseCase: GetIsNotificationPermissionAllowedUseCase(
+                    userDefaultsRepository: userDefaultsRepository
+                ),
+                requestNotificationAuthorizationUseCase: DefaultRequestNotificationAuthorizationUseCase(
+                    notificationPermissionRepository: UNUserNotificationCenterPermissionRepository(),
+                    userDefaultsRepository: userDefaultsRepository
+                ),
             )
         )
+    }
+
+    private func openNotificationSettings() {
+        let urlString = UIApplication.openNotificationSettingsURLString
+        guard let url = URL(string: urlString) else { return }
+        openURL(url)
     }
     
     private var activeHabits: [Habit] {
@@ -54,47 +70,58 @@ public struct SettingsView: View {
     public var body: some View {
         NavigationStack {
             List {
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Toggle(
-                            isOn: isNotificationsEnabledBinding,
-                            label : {
-                                Text(SettingsTextsEnum.allowAnnouncements)
-                                    .bold()
-                                
-                                Text(
-                                    settingsViewModel.isNotificationsEnabled || activeRemindersCount == 0 ?
-                                        SettingsTextsEnum
-                                            .habitThatAnnounce(
-                                                activeHabits.count,
-                                                activeRemindersCount,
-                                            )
-                                    : SettingsTextsEnum.everythingMuted
-                                )
-                            },
-                        )
-                    }
-                } header: {
-                    Text(SettingsTextsEnum.notifications)
-                        .textCase(.uppercase)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-                if !habits.isEmpty && settingsViewModel.isNotificationsEnabled {
+                if settingsViewModel.isNotificationPermissionAllowed {
                     Section {
-                        ForEach(activeHabits) { habit in
-                            HabitReminderRow(
-                                habit: habit,
-                                onReminderToggled: {
-                                    Task { await settingsViewModel.onHabitReminderToggled(habit) }
+                        VStack(alignment: .leading, spacing: 8) {
+                            Toggle(
+                                isOn: isNotificationsEnabledBinding,
+                                label : {
+                                    Text(SettingsTextsEnum.allowAnnouncements)
+                                        .bold()
+
+                                    Text(
+                                        settingsViewModel.isNotificationsEnabled || activeRemindersCount == 0 ?
+                                            SettingsTextsEnum
+                                                .habitThatAnnounce(
+                                                    activeHabits.count,
+                                                    activeRemindersCount,
+                                                )
+                                        : SettingsTextsEnum.everythingMuted
+                                    )
                                 },
-                                onRowTapped: {
-                                    habitToEditReminder = habit
-                                }
                             )
                         }
-                    } header : {
-                        Text(SettingsTextsEnum.chooseHabitsAnnouncements)
+                    } header: {
+                        Text(SettingsTextsEnum.notifications)
+                            .textCase(.uppercase)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    if !habits.isEmpty && settingsViewModel.isNotificationsEnabled {
+                        Section {
+                            ForEach(activeHabits) { habit in
+                                HabitReminderRow(
+                                    habit: habit,
+                                    onReminderToggled: {
+                                        Task { await settingsViewModel.onHabitReminderToggled(habit) }
+                                    },
+                                    onRowTapped: {
+                                        habitToEditReminder = habit
+                                    }
+                                )
+                            }
+                        } header : {
+                            Text(SettingsTextsEnum.chooseHabitsAnnouncements)
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } else {
+                    Section {
+                        NotificationPermissionDisabledRow(onRowTapped: openNotificationSettings)
+                    } header: {
+                        Text(SettingsTextsEnum.notifications)
+                            .textCase(.uppercase)
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -113,6 +140,11 @@ public struct SettingsView: View {
                         )
                     )
                 )
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    Task { await settingsViewModel.refreshNotificationPermissionStatus() }
+                }
             }
         }
     }

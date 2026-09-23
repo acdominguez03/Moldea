@@ -22,6 +22,7 @@ struct MoldeaApp: App {
     private let modelContainer: ModelContainer
     private let habitRepository: any HabitRepository
     private let userDefaultsRepository: any UserDefaultsRepository
+    private let requestNotificationAuthorizationUseCase: any RequestNotificationAuthorizationUseCase
 
     init() {
         do {
@@ -29,6 +30,10 @@ struct MoldeaApp: App {
             modelContainer = container
             habitRepository = SwiftDataHabitRepository(modelContainer: container)
             userDefaultsRepository = UserDefaultsRepositoryImpl()
+            requestNotificationAuthorizationUseCase = DefaultRequestNotificationAuthorizationUseCase(
+                notificationPermissionRepository: UNUserNotificationCenterPermissionRepository(),
+                userDefaultsRepository: userDefaultsRepository
+            )
         } catch {
             fatalError("No se pudo crear el ModelContainer: \(error)")
         }
@@ -58,6 +63,9 @@ struct MoldeaApp: App {
                             .presentationDetents([.medium, .large])
                     }
                 }
+            }
+            .task {
+                await requestNotificationAuthorizationUseCase.execute()
             }
         }
         .modelContainer(modelContainer)

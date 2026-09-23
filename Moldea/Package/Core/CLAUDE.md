@@ -26,8 +26,12 @@ Sources/Core/
 │   │   ├── Habit.swift
 │   │   ├── HabitSchedule.swift
 │   │   └── HabitFrequency.swift
-│   └── Repository/
-│       └── HabitRepository.swift
+│   ├── Repository/
+│   │   ├── HabitRepository.swift
+│   │   ├── UserDefaultsRepository.swift
+│   │   └── NotificationPermissionRepository.swift
+│   └── UseCases/
+│       └── RequestNotificationAuthorizationUseCase.swift
 ├── Data/
 │   ├── Model/
 │   │   ├── HabitEntity.swift
@@ -37,7 +41,10 @@ Sources/Core/
 │   ├── Mappers/
 │   │   └── HabitMapper.swift
 │   ├── MoldeaSchema.swift
-│   └── SwiftDataHabitRepository.swift
+│   ├── SwiftDataHabitRepository.swift
+│   ├── PreferencesKey.swift
+│   ├── UserDefaultsRepositoryImpl.swift
+│   └── UNUserNotificationCenterPermissionRepository.swift
 └── Presentation/
     ├── Enums/
     │   ├── CoreTextsEnum.swift
@@ -81,6 +88,23 @@ Recibe y devuelve solo tipos de dominio. Tiene `create(_:)`, `delete(id:)`,
 se añadirá cuando `Today` y `Statistics` lo necesiten, y con él habrá que decidir qué hacer con
 una fila corrupta al listar (saltarla y registrarla, o propagar el error).
 
+`UserDefaultsRepository` es el protocolo genérico de preferencias (`getBool`/`saveBool` sobre
+un `PreferenceKey`). `NotificationPermissionRepository` es el protocolo del permiso de
+notificaciones del sistema: un único método, `requestAuthorization() async -> Bool`. Su
+implementación con `UNUserNotificationCenter` vive en `Data` (`UNUserNotificationCenterPermissionRepository`)
+para que `Domain` no importe `UserNotifications`.
+
+**Casos de uso** (`Domain/UseCases`): primer uso de esta carpeta en `Core`. Vive aquí, y no en
+una feature, porque lo dispara la composición raíz (`MoldeaApp`), no una pantalla concreta.
+`RequestNotificationAuthorizationUseCase` (protocolo + `DefaultRequestNotificationAuthorizationUseCase`)
+pide el permiso al `NotificationPermissionRepository` y guarda el resultado con
+`userDefaultsRepository.saveBool(.isNotificationPermissionAllowed, _:)`, devolviendo también el
+`Bool` para que quien lo llama pueda actualizar su propio estado sin tener que releer
+`UserDefaults`. Como `UNUserNotificationCenter.requestAuthorization` no vuelve a mostrar el
+diálogo del sistema una vez que el usuario ya respondió, este caso de uso es seguro de invocar
+en cada arranque **y** cada vez que hay que resincronizar el estado (p. ej. al volver de
+Ajustes): en ambos casos solo consulta el estado real y lo persiste, sin re-preguntar.
+
 ## Data
 
 Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
@@ -111,6 +135,16 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
     `HabitMapper.apply(_:to:)`, que también lo usa `create` por dentro. Al cambiar de
     frecuencia deja a `nil` los campos de la anterior (`timesPerWeek` o `fixedWeekdays`), para
     no dejar datos sueltos de una frecuencia que ya no aplica.
+- **`PreferenceKey`** (`public enum`, raw `String`): claves de `UserDefaults`. Hoy tiene
+  `isNotificationsEnabled` (preferencia de producto: "quiero que mis hábitos avisen", la que
+  controla `Settings`) e `isNotificationPermissionAllowed` (espejo del permiso real del
+  sistema). Son independientes a propósito: el permiso del sistema puede estar concedido y el
+  usuario, aun así, tener los avisos apagados dentro de la app.
+- **`UserDefaultsRepositoryImpl`** (`public struct`): implementación directa sobre
+  `UserDefaults.standard`.
+- **`UNUserNotificationCenterPermissionRepository`** (`public struct`): envuelve
+  `UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])`;
+  si la llamada lanza, devuelve `false` en vez de propagar el error.
 
 ## Colores: `HexColorConverter`
 
@@ -197,5 +231,15 @@ contexto, o el proceso de tests se cae. Los `*Entity` se ven con `@testable impo
   `rollback()` de un `save()` fallido.
 - `HexColorConverterTests`: parseo, entradas inválidas, ida y vuelta con los 13 hex de la
   paleta, mayúsculas y recorte de rango.
+- `RequestNotificationAuthorizationUseCaseTests`: guarda y devuelve el resultado tanto cuando
+  el permiso se concede como cuando se deniega, con `FakeNotificationPermissionRepository`
+  (`actor`) y un `FakeUserDefaultsRepository` (`final class @unchecked Sendable`, no `actor`,
+  porque `UserDefaultsRepository` declara métodos síncronos y un `actor` no puede satisfacer
+  una conformidad síncrona sin volverse `nonisolated`).
 
 `CoreTests.swift` es todavía la plantilla generada.
+
+**Aviso:** `SwiftDataHabitRepositoryTests.swift` está roto de antes (no es de esta feature):
+`Habit.init` pide hoy un argumento `reminder` que esos tests no pasan, así que `xcodebuild test
+-scheme Core` falla al compilar el target de tests aunque el resto de tests estén en verde.
+Hace falta arreglarlo aparte.
