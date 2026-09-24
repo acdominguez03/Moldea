@@ -60,6 +60,7 @@ Sources/Core/
 │   │   │   └── HabitCommandInstructions.swift
 │   │   ├── FoundationModelsHabitCommandParser.swift
 │   │   ├── FoundationModelsErrorMapper.swift
+│   │   ├── FoundationModelsDeviceEligibility.swift  # público: ¿el hardware admite Apple Intelligence?
 │   │   └── HabitCommandSamples.swift        # #if DEBUG, incluye HabitCommandKindEnum
 │   ├── FoundationModelsHabitCompletionRecognizer.swift
 │   ├── HabitsQuery.swift

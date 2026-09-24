@@ -14,15 +14,18 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
     private let tabContent: (MainTab) -> Content
     private let sheetContent: () -> SheetContent
     private let selection: Binding<MainTab>
+    private let showsMicrophoneTab: Bool
 
     @State private var isSheetPresented = false
 
     public init(
         selection: Binding<MainTab>,
+        showsMicrophoneTab: Bool,
         @ViewBuilder tabContent: @escaping (MainTab) -> Content,
         @ViewBuilder sheetContent: @escaping () -> SheetContent
     ) {
         self.selection = selection
+        self.showsMicrophoneTab = showsMicrophoneTab
         self.tabContent = tabContent
         self.sheetContent = sheetContent
     }
@@ -38,11 +41,13 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
                 }
             }
 
-            Tab(value: MainTab.microphone, role: prominentRole) {
-                EmptyView()
-            } label: {
-                Label(MainTab.microphone.description, systemImage: MainTab.microphone.icon)
-                    .environment(\.symbolVariants, .none)
+            if showsMicrophoneTab {
+                Tab(value: MainTab.microphone, role: prominentRole) {
+                    EmptyView()
+                } label: {
+                    Label(MainTab.microphone.description, systemImage: MainTab.microphone.icon)
+                        .environment(\.symbolVariants, .none)
+                }
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
@@ -80,7 +85,7 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
 }
 
 #Preview {
-    MainTabsView(selection: .constant(.today)) { tab in
+    MainTabsView(selection: .constant(.today), showsMicrophoneTab: true) { tab in
         switch tab {
         case .today:
             Text("Hoy")

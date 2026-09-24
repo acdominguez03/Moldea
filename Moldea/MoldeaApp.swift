@@ -24,6 +24,7 @@ struct MoldeaApp: App {
     private let userDefaultsRepository: any UserDefaultsRepository
     private let requestNotificationAuthorizationUseCase: any RequestNotificationAuthorizationUseCase
     private let requestMicrophoneAuthorizationUseCase: any RequestMicrophoneAuthorizationUseCase
+    private let isDeviceEligibleForAppleIntelligence = FoundationModelsDeviceEligibility.isDeviceEligible
 
     init() {
         do {
@@ -61,7 +62,10 @@ struct MoldeaApp: App {
                     //TODO: Crear la pantalla de splash
                     EmptyView()
                 case .tabView:
-                    MainTabsView(selection: $tabRouter.selectedTab) { tab in
+                    MainTabsView(
+                        selection: $tabRouter.selectedTab,
+                        showsMicrophoneTab: isDeviceEligibleForAppleIntelligence
+                    ) { tab in
                         tabContent(for: tab)
                     } sheetContent: {
                         SpeechToTextView(

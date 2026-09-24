@@ -59,6 +59,16 @@ inferior). Usa estas APIs de la tab bar:
   sistema. `.prominent` es de iOS 27, así que hay un `#available` que cae a `.search` en iOS 26
   (que el sistema también fija al extremo final).
 
+### Cuándo aparece el tab del micrófono
+
+`MainTabsView` recibe `showsMicrophoneTab: Bool` y solo pinta `.microphone` si es `true`.
+`Navigation` no importa `FoundationModels`: quien decide es `MoldeaApp`, que le pasa
+`FoundationModelsDeviceEligibility.isDeviceEligible` de `Core`. Ese valor solo es `false` con
+`.unavailable(.deviceNotEligible)` (el hardware no admite Apple Intelligence). Con
+`appleIntelligenceNotEnabled` o `modelNotReady` el tab sí se muestra, porque el usuario puede
+arreglarlo, y `HabitCommandView` explica el motivo. Se lee una vez al arrancar: que un
+dispositivo sea compatible no cambia mientras la app está abierta.
+
 ### El tab destacado no navega
 
 `.microphone` no tiene pantalla: su contenido es `EmptyView`. La selección del `TabView` pasa por
