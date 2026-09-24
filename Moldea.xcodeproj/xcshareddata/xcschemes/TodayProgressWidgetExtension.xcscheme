@@ -17,8 +17,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "72A2304A306440B00035F6D2"
-               BuildableName = "TodayCompletedPercentageWidgetExtension.appex"
-               BlueprintName = "TodayCompletedPercentageWidgetExtension"
+               BuildableName = "TodayProgressWidgetExtension.appex"
+               BlueprintName = "TodayProgressWidgetExtension"
                ReferencedContainer = "container:Moldea.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -60,8 +60,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "72A2304A306440B00035F6D2"
-            BuildableName = "TodayCompletedPercentageWidgetExtension.appex"
-            BlueprintName = "TodayCompletedPercentageWidgetExtension"
+            BuildableName = "TodayProgressWidgetExtension.appex"
+            BlueprintName = "TodayProgressWidgetExtension"
             ReferencedContainer = "container:Moldea.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

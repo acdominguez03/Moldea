@@ -1,6 +1,6 @@
 //
-//  TodayCompletedPercentageWidget.swift
-//  TodayCompletedPercentageWidget
+//  TodayProgressWidget.swift
+//  TodayProgressWidget
 //
 //  Created by Ismael Cordón Domínguez on 23/9/26.
 //
@@ -58,7 +58,7 @@ struct TodayProgressEntry: TimelineEntry {
     let percentage: Double
 }
 
-struct TodayCompletedPercentageWidgetEntryView : View {
+struct TodayProgressWidgetEntryView : View {
     var entry: Provider.Entry
     
     var body: some View {
@@ -75,15 +75,15 @@ struct TodayCompletedPercentageWidgetEntryView : View {
     }
 }
 
-struct TodayCompletedPercentageWidget: Widget {
-    let kind: String = "TodayCompletedPercentageWidget"
+struct TodayProgressWidget: Widget {
+    let kind: String = "TodayProgressWidget"
     
     var body: some WidgetConfiguration {
         StaticConfiguration(
             kind: kind,
             provider: Provider(),
             content: { entry in
-                TodayCompletedPercentageWidgetEntryView(entry: entry)
+                TodayProgressWidgetEntryView(entry: entry)
                     .containerBackground(.fill.tertiary, for: .widget)
             }
         )
@@ -92,7 +92,7 @@ struct TodayCompletedPercentageWidget: Widget {
 }
 
 #Preview(as: .systemSmall) {
-    TodayCompletedPercentageWidget()
+    TodayProgressWidget()
 } timeline: {
     TodayProgressEntry(date: .now, percentage: 1 )
 }

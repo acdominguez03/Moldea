@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		72A2304D306440B10035F6D2 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72A2304C306440B00035F6D2 /* WidgetKit.framework */; };
 		72A2304F306440B10035F6D2 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72A2304E306440B10035F6D2 /* SwiftUI.framework */; };
-		72A2305E306440B40035F6D2 /* TodayCompletedPercentageWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 72A2304B306440B00035F6D2 /* TodayCompletedPercentageWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		72A2305E306440B40035F6D2 /* TodayProgressWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 72A2304B306440B00035F6D2 /* TodayProgressWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		72A23065306456C40035F6D2 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 72A23064306456C40035F6D2 /* Core */; };
 		7EB9EBCF305D87C000520D21 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 7EB9EBCE305D87C000520D21 /* Core */; };
 		7EB9EBD1305D87C000520D21 /* Navigation in Frameworks */ = {isa = PBXBuildFile; productRef = 7EB9EBD0305D87C000520D21 /* Navigation */; };
@@ -25,7 +25,7 @@
 			containerPortal = 7EB9EB7E305D853D00520D21 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 72A2304A306440B00035F6D2;
-			remoteInfo = TodayCompletedPercentageWidgetExtension;
+			remoteInfo = TodayProgressWidgetExtension;
 		};
 		7EB9EB96305D853E00520D21 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -50,7 +50,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				72A2305E306440B40035F6D2 /* TodayCompletedPercentageWidgetExtension.appex in Embed Foundation Extensions */,
+				72A2305E306440B40035F6D2 /* TodayProgressWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -58,7 +58,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		72A2304B306440B00035F6D2 /* TodayCompletedPercentageWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TodayCompletedPercentageWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		72A2304B306440B00035F6D2 /* TodayProgressWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TodayProgressWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		72A2304C306440B00035F6D2 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		72A2304E306440B10035F6D2 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		7EB9EB86305D853D00520D21 /* Moldea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Moldea.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -67,12 +67,12 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		72A23063306440B40035F6D2 /* Exceptions for "TodayCompletedPercentageWidget" folder in "TodayCompletedPercentageWidgetExtension" target */ = {
+		72A23063306440B40035F6D2 /* Exceptions for "TodayProgressWidget" folder in "TodayProgressWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 72A2304A306440B00035F6D2 /* TodayCompletedPercentageWidgetExtension */;
+			target = 72A2304A306440B00035F6D2 /* TodayProgressWidgetExtension */;
 		};
 		7EB9EBCB305D85EE00520D21 /* Exceptions for "Moldea" folder in "Moldea" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -90,12 +90,12 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		72A23050306440B10035F6D2 /* TodayCompletedPercentageWidget */ = {
+		72A23050306440B10035F6D2 /* TodayProgressWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				72A23063306440B40035F6D2 /* Exceptions for "TodayCompletedPercentageWidget" folder in "TodayCompletedPercentageWidgetExtension" target */,
+				72A23063306440B40035F6D2 /* Exceptions for "TodayProgressWidget" folder in "TodayProgressWidgetExtension" target */,
 			);
-			path = TodayCompletedPercentageWidget;
+			path = TodayProgressWidget;
 			sourceTree = "<group>";
 		};
 		7EB9EB88305D853D00520D21 /* Moldea */ = {
@@ -165,7 +165,7 @@
 				7EB9EB88305D853D00520D21 /* Moldea */,
 				7EB9EB98305D853E00520D21 /* MoldeaTests */,
 				7EB9EBA2305D853E00520D21 /* MoldeaUITests */,
-				72A23050306440B10035F6D2 /* TodayCompletedPercentageWidget */,
+				72A23050306440B10035F6D2 /* TodayProgressWidget */,
 				7EB9EBCD305D87C000520D21 /* Frameworks */,
 				7EB9EB87305D853D00520D21 /* Products */,
 			);
@@ -177,7 +177,7 @@
 				7EB9EB86305D853D00520D21 /* Moldea.app */,
 				7EB9EB95305D853E00520D21 /* MoldeaTests.xctest */,
 				7EB9EB9F305D853E00520D21 /* MoldeaUITests.xctest */,
-				72A2304B306440B00035F6D2 /* TodayCompletedPercentageWidgetExtension.appex */,
+				72A2304B306440B00035F6D2 /* TodayProgressWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -194,9 +194,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		72A2304A306440B00035F6D2 /* TodayCompletedPercentageWidgetExtension */ = {
+		72A2304A306440B00035F6D2 /* TodayProgressWidgetExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 72A23062306440B40035F6D2 /* Build configuration list for PBXNativeTarget "TodayCompletedPercentageWidgetExtension" */;
+			buildConfigurationList = 72A23062306440B40035F6D2 /* Build configuration list for PBXNativeTarget "TodayProgressWidgetExtension" */;
 			buildPhases = (
 				72A23047306440B00035F6D2 /* Sources */,
 				72A23048306440B00035F6D2 /* Frameworks */,
@@ -207,14 +207,14 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				72A23050306440B10035F6D2 /* TodayCompletedPercentageWidget */,
+				72A23050306440B10035F6D2 /* TodayProgressWidget */,
 			);
-			name = TodayCompletedPercentageWidgetExtension;
+			name = TodayProgressWidgetExtension;
 			packageProductDependencies = (
 				72A23064306456C40035F6D2 /* Core */,
 			);
-			productName = TodayCompletedPercentageWidgetExtension;
-			productReference = 72A2304B306440B00035F6D2 /* TodayCompletedPercentageWidgetExtension.appex */;
+			productName = TodayProgressWidgetExtension;
+			productReference = 72A2304B306440B00035F6D2 /* TodayProgressWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		7EB9EB85305D853D00520D21 /* Moldea */ = {
@@ -333,7 +333,7 @@
 				7EB9EB85305D853D00520D21 /* Moldea */,
 				7EB9EB94305D853E00520D21 /* MoldeaTests */,
 				7EB9EB9E305D853E00520D21 /* MoldeaUITests */,
-				72A2304A306440B00035F6D2 /* TodayCompletedPercentageWidgetExtension */,
+				72A2304A306440B00035F6D2 /* TodayProgressWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -403,7 +403,7 @@
 /* Begin PBXTargetDependency section */
 		72A2305D306440B40035F6D2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 72A2304A306440B00035F6D2 /* TodayCompletedPercentageWidgetExtension */;
+			target = 72A2304A306440B00035F6D2 /* TodayProgressWidgetExtension */;
 			targetProxy = 72A2305C306440B40035F6D2 /* PBXContainerItemProxy */;
 		};
 		7EB9EB97305D853E00520D21 /* PBXTargetDependency */ = {
@@ -428,8 +428,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4JHW2UJ2DM;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodayCompletedPercentageWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TodayCompletedPercentageWidget;
+				INFOPLIST_FILE = TodayProgressWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TodayProgressWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -438,7 +438,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.Moldea.TodayCompletedPercentageWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.Moldea.TodayProgressWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -463,8 +463,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4JHW2UJ2DM;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodayCompletedPercentageWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TodayCompletedPercentageWidget;
+				INFOPLIST_FILE = TodayProgressWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TodayProgressWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -473,7 +473,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.Moldea.TodayCompletedPercentageWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.acdominguez.Moldea.TodayProgressWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -777,7 +777,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		72A23062306440B40035F6D2 /* Build configuration list for PBXNativeTarget "TodayCompletedPercentageWidgetExtension" */ = {
+		72A23062306440B40035F6D2 /* Build configuration list for PBXNativeTarget "TodayProgressWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				72A23060306440B40035F6D2 /* Debug */,
