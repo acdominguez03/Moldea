@@ -183,4 +183,9 @@ public enum CoreTextsEnum {
             bundle: .atURL(Bundle.module.bundleURL)
         )
     }
+    
+    // MARK: Widgets
+    public static let quickCheck = resource("quick_check")
+    public static let habitsPlannedForToday = resource("habits_planned_for_today")
+    public static let noHabitsForToday = resource("no_habits_for_today")
 }

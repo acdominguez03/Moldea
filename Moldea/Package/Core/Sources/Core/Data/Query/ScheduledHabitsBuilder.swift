@@ -8,6 +8,17 @@
 import Foundation
 
 enum ScheduledHabitsBuilder {
+    static func isScheduled(_ frequency: HabitFrequency, on weekday: Int) -> Bool {
+        switch frequency {
+        case .daily:
+            true
+        case .fixedDays(let weekdays):
+            weekdays.contains(weekday)
+        case .weeklyCount:
+            false
+        }
+    }
+
     static func habits(
         from entities: [HabitEntity],
         with completions: [HabitCompletionEntity],

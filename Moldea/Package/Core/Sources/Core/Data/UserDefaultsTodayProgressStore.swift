@@ -8,8 +8,6 @@
 import Foundation
 
 public struct UserDefaultsTodayProgressStore: TodayProgressStore {
-    public static let appGroupIdentifier = "group.com.cordondevs.moldea"
-
     private enum Key {
         static let fraction = "todayProgress.fraction"
         static let day = "todayProgress.day"
@@ -19,7 +17,7 @@ public struct UserDefaultsTodayProgressStore: TodayProgressStore {
     private let calendar: Calendar
 
     public init(
-        suiteName: String = appGroupIdentifier,
+        suiteName: String = AppGroup.identifier,
         calendar: Calendar = .current
     ) {
         self.suiteName = suiteName

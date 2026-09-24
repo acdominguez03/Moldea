@@ -400,6 +400,23 @@
         }
       }
     },
+    "habits_planned_for_today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habits planned for today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hábitos planeados para hoy"
+          }
+        }
+      }
+    },
     "habits_summary_every_day" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -551,6 +568,23 @@
         }
       }
     },
+    "no_habits_for_today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No habits for today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Sin hábitos para hoy"
+          }
+        }
+      }
+    },
     "notification_habit_daily_multiple_body %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -615,6 +649,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu objetivo es %lld veces esta semana. Si hoy te encaja, adelante."
+          }
+        }
+      }
+    },
+    "quick_check" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Check"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcado rápido"
           }
         }
       }

@@ -39,18 +39,7 @@ public struct TodayHabitsQuery: DynamicProperty {
             with: todayCompletions,
             referenceDay: referenceDay
         ) { frequency in
-            Self.isScheduled(frequency, on: weekday)
-        }
-    }
-
-    static func isScheduled(_ frequency: HabitFrequency, on weekday: Int) -> Bool {
-        switch frequency {
-        case .daily:
-            true
-        case .fixedDays(let weekdays):
-            weekdays.contains(weekday)
-        case .weeklyCount:
-            false
+            ScheduledHabitsBuilder.isScheduled(frequency, on: weekday)
         }
     }
 }
