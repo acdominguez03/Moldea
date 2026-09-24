@@ -68,6 +68,7 @@ public struct TodayView: View {
                             Text("\(TodayTabEnum.weekly.title) \(weeklyHabits.count)").tag(TodayTabEnum.weekly)
                         }
                         .pickerStyle(.segmented)
+                        
 
                         VStack(spacing: 5) {
                             HStack {

@@ -63,13 +63,16 @@ struct MoldeaApp: App {
                             habitRepository: habitRepository,
                             userDefaultsRepository: userDefaultsRepository
                         )
-                            .presentationDetents([.medium])
+                        .fittingSheetDetents()
                     }
                 }
             }
             .task {
                 await requestNotificationAuthorizationUseCase.execute()
             }
+            /*.task {
+                try? SampleDataSeeder.seed(in: modelContainer)
+            }*/
         }
         .modelContainer(modelContainer)
     }

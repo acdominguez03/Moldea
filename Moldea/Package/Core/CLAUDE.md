@@ -221,6 +221,11 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
       `HabitMapper.apply(_:to:)`, que también lo usa `create` por dentro. Al cambiar de
       frecuencia deja a `nil` los campos de la anterior (`timesPerWeek` o `fixedWeekdays`), para
       no dejar datos sueltos de una frecuencia que ya no aplica.
+- **`@AllHabitsInPeriodQuery`** (`public`, `Data/Query`): todos los hábitos con sus completions
+  de un periodo. Tiene dos `init`: `init(_ component: Calendar.Component, date:)` (semana, mes,
+  año de `Calendar.current`) e `init(_ interval: DateInterval, date:)` para rangos que no son un
+  componente del calendario, como los 10 últimos días de la vista diaria de `Statistics`. El
+  primero calcula su intervalo y delega en el segundo.
 - **`PreferenceKey`** (`public enum`, raw `String`): claves de `UserDefaults`. Hoy tiene
   `isNotificationsEnabled` (preferencia de producto: "quiero que mis hábitos avisen", la que
   controla `Settings`) e `isNotificationPermissionAllowed` (espejo del permiso real del

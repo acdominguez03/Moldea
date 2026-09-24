@@ -38,14 +38,25 @@ public struct CalculateHabitsProgressUseCase: CalculateHabitsProgressUseCaseProt
     ) -> (done: Int, total: Int)? {
         switch scope {
         case .daily:
-            let total = max(todayHabit.habit.schedule.repetitionsPerDay, 1)
-            return (min(todayHabit.completedToday, total), total)
+            return dailyTarget(for: todayHabit)
         case .weekly:
-            guard case .weeklyCount(let timesPerWeek) = todayHabit.habit.schedule.frequency else {
-                return nil
-            }
-            let total = max(timesPerWeek, 1) * max(todayHabit.habit.schedule.repetitionsPerDay, 1)
-            return (min(todayHabit.completedRepetitionsThisWeek, total), total)
+            return weeklyTarget(for: todayHabit)
+        case .all:
+            return weeklyTarget(for: todayHabit) ?? dailyTarget(for: todayHabit)
         }
     }
+    
+    private func dailyTarget(for todayHabit: TodayHabit) -> (done: Int, total: Int) {
+        let total = max(todayHabit.habit.schedule.repetitionsPerDay, 1)
+        return (min(todayHabit.completedToday, total), total)
+    }
+    
+    private func weeklyTarget(for todayHabit: TodayHabit) -> (done: Int, total: Int)? {
+        guard case .weeklyCount(let timesPerWeek) = todayHabit.habit.schedule.frequency else {
+            return nil
+        }
+        let total = max(timesPerWeek, 1) * max(todayHabit.habit.schedule.repetitionsPerDay, 1)
+        return (min(todayHabit.completedRepetitionsThisWeek, total), total)
+    }
+
 }

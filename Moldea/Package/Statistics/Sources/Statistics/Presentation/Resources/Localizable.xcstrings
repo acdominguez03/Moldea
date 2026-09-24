@@ -1,6 +1,24 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "statistics_day_chart_summary" : {
+      "comment" : "Follows the overall percentage of the selected day, as in \"45 % completed this day\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "completed this day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cumplido este día"
+          }
+        }
+      }
+    },
     "statistics_empty_state" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18,6 +36,132 @@
         }
       }
     },
+    "statistics_filter_day" : {
+      "comment" : "Segmented control option: show the statistics of the current day.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día"
+          }
+        }
+      }
+    },
+    "statistics_filter_month" : {
+      "comment" : "Segmented control option: show the statistics of the current month.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes"
+          }
+        }
+      }
+    },
+    "statistics_filter_week" : {
+      "comment" : "Segmented control option: show the statistics of the current week.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semana"
+          }
+        }
+      }
+    },
+    "statistics_filter_year" : {
+      "comment" : "Segmented control option: show the statistics of the current year.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año"
+          }
+        }
+      }
+    },
+    "statistics_habits_header" : {
+      "comment" : "Header of the list that shows the progress of each habit in the selected period. Displayed in uppercase.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By habit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por hábito"
+          }
+        }
+      }
+    },
+    "statistics_month_chart_summary" : {
+      "comment" : "Follows the overall percentage of the month, as in \"45 % completed this month\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "completed this month"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cumplido este mes"
+          }
+        }
+      }
+    },
+    "statistics_month_chart_week_mark %lld" : {
+      "comment" : "Short label for each of the four week bars of the month chart, as in \"W1\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W%lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%lld"
+          }
+        }
+      }
+    },
     "statistics_screen_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -31,6 +175,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Datos"
+          }
+        }
+      }
+    },
+    "statistics_week_chart_summary" : {
+      "comment" : "Follows the overall percentage of the week, as in \"45 % completed this week\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "completed this week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cumplido esta semana"
+          }
+        }
+      }
+    },
+    "statistics_week_chart_weekly_mark" : {
+      "comment" : "Short label for the extra bar that shows the progress of habits with a weekly target, next to the seven weekday bars.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wk"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem"
+          }
+        }
+      }
+    },
+    "statistics_year_chart_summary" : {
+      "comment" : "Follows the overall percentage of the year, as in \"45 % completed this year\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "completed this year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cumplido este año"
           }
         }
       }

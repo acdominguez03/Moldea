@@ -39,7 +39,7 @@ public struct TodayHabitsQuery: DynamicProperty {
             with: todayCompletions,
             referenceDay: referenceDay
         ) { frequency in
-            ScheduledHabitsBuilder.isScheduled(frequency, on: weekday)
+            frequency.isScheduled(on: weekday)
         }
     }
 }

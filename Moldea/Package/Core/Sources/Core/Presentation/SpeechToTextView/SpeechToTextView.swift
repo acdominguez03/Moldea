@@ -84,7 +84,8 @@ public struct SpeechToTextView: View {
                 .font(.body)
                 .multilineTextAlignment(.leading)
         }
-        .padding(20)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 40)
         .navigationTitle(CoreTextsEnum.listening)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: isPresentingCommand) {

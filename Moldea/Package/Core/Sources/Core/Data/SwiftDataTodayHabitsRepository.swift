@@ -30,7 +30,7 @@ public actor SwiftDataTodayHabitsRepository: TodayHabitsRepository {
             with: completions,
             referenceDay: start
         ) { frequency in
-            ScheduledHabitsBuilder.isScheduled(frequency, on: weekday)
+            frequency.isScheduled(on: weekday)
         }
     }
 }

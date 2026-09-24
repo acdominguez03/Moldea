@@ -8,4 +8,5 @@
 public enum HabitProgressScopeEnum: Sendable, Equatable {
     case daily
     case weekly
+    case all
 }

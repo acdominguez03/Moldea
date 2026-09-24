@@ -1,0 +1,48 @@
+//
+//  WeekChartView.swift
+//  Statistics
+//
+//  Created by Andrés on 24/09/2026.
+//
+
+import SwiftUI
+import Core
+
+struct WeekChartView: View {
+
+    @AllHabitsInPeriodQuery(.weekOfYear) private var weeklyHabits: [TodayHabit]
+    
+    @State private var weekChartViewModel: WeekChartViewModel
+    
+    init(weekChartViewModel: WeekChartViewModel) {
+        self.weekChartViewModel = weekChartViewModel
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ProgressSummaryHeader(
+                percentage: weekChartViewModel.totalProgress,
+                summary: StatisticsTextsEnum.weekChartSummary
+            )
+
+            ProgressBarChart(statistics: weekChartViewModel.chartData)
+            
+            HabitProgressList(habits: weeklyHabits) {
+                weekChartViewModel.percentage(for: $0)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .onChange(of: chartInput, initial: true) {
+            weekChartViewModel.getWeeklyPercentages(habits: weeklyHabits)
+        }
+    }
+    
+    private var chartInput: [Int] {
+        weeklyHabits.map(\.completions.count) + [weeklyHabits.count]
+    }
+    }
+
+
+#Preview {
+    WeekChartView(weekChartViewModel: WeekChartViewModel(calculateHabitProgressUseCase: CalculateHabitsProgressUseCase()))
+}
