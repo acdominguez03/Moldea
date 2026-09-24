@@ -67,7 +67,8 @@ Sources/Core/
 │   ├── SwiftDataHabitRepository.swift
 │   ├── PreferencesKey.swift
 │   ├── UserDefaultsRepositoryImpl.swift
-│   └── UNUserNotificationCenterPermissionRepository.swift
+│   ├── UNUserNotificationCenterPermissionRepository.swift
+│   └── AVAudioApplicationMicrophonePermissionRepository.swift
 └── Presentation/
     ├── Components/
     │   ├── HabitCardView.swift
@@ -228,14 +229,22 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
   primero calcula su intervalo y delega en el segundo.
 - **`PreferenceKey`** (`public enum`, raw `String`): claves de `UserDefaults`. Hoy tiene
   `isNotificationsEnabled` (preferencia de producto: "quiero que mis hábitos avisen", la que
-  controla `Settings`) e `isNotificationPermissionAllowed` (espejo del permiso real del
-  sistema). Son independientes a propósito: el permiso del sistema puede estar concedido y el
+  controla `Settings`), `isNotificationPermissionAllowed` (espejo del permiso real del
+  sistema) e `isMicrophonePermissionAllowed` (ídem para el micrófono). Son independientes a propósito: el permiso del sistema puede estar concedido y el
   usuario, aun así, tener los avisos apagados dentro de la app.
 - **`UserDefaultsRepositoryImpl`** (`public struct`): implementación directa sobre
   `UserDefaults.standard`.
 - **`UNUserNotificationCenterPermissionRepository`** (`public struct`): envuelve
   `UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])`;
   si la llamada lanza, devuelve `false` en vez de propagar el error.
+- **`AVAudioApplicationMicrophonePermissionRepository`** (`public struct`): el mismo patrón
+  para el micrófono, sobre `AVAudioApplication.requestRecordPermission()` (no lanza).
+  `DefaultRequestMicrophoneAuthorizationUseCase` guarda el resultado en
+  `isMicrophonePermissionAllowed`, como su equivalente de notificaciones.
+- **Los dos permisos se piden al arrancar**, en un único `.task` de `MoldeaApp`, uno detrás de
+  otro (el sistema no muestra dos alertas a la vez). `LiveTranscriptionModel` ya no pide el
+  permiso al abrir el sheet: solo comprueba `AVAudioApplication.shared.recordPermission ==
+  .granted`, que no muestra alerta, y si no lo está lanza `microphoneNotAuthorized`.
 
 ## Colores: `HexColorConverter`
 
@@ -902,6 +911,8 @@ contexto, o el proceso de tests se cae. Los `*Entity` se ven con `@testable impo
   (`actor`) y un `FakeUserDefaultsRepository` (`final class @unchecked Sendable`, no `actor`,
   porque `UserDefaultsRepository` declara métodos síncronos y un `actor` no puede satisfacer
   una conformidad síncrona sin volverse `nonisolated`).
+- `RequestMicrophoneAuthorizationUseCaseTests`: lo mismo para el micrófono, con
+  `FakeMicrophonePermissionRepository`.
 - `CreateHabitUseCaseTests` / `DeleteHabitUseCaseTests`: el `Habit` que recibe el repositorio con
   las tres frecuencias, el nombre recortado, las 13 entradas inválidas y la propagación del error
   del repositorio. Vinieron de `HabitsTests` al bajar los casos de uso a `Core`.

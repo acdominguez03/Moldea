@@ -23,6 +23,7 @@ struct MoldeaApp: App {
     private let habitRepository: any HabitRepository
     private let userDefaultsRepository: any UserDefaultsRepository
     private let requestNotificationAuthorizationUseCase: any RequestNotificationAuthorizationUseCase
+    private let requestMicrophoneAuthorizationUseCase: any RequestMicrophoneAuthorizationUseCase
 
     init() {
         do {
@@ -32,6 +33,10 @@ struct MoldeaApp: App {
             userDefaultsRepository = UserDefaultsRepositoryImpl()
             requestNotificationAuthorizationUseCase = DefaultRequestNotificationAuthorizationUseCase(
                 notificationPermissionRepository: UNUserNotificationCenterPermissionRepository(),
+                userDefaultsRepository: userDefaultsRepository
+            )
+            requestMicrophoneAuthorizationUseCase = DefaultRequestMicrophoneAuthorizationUseCase(
+                microphonePermissionRepository: AVAudioApplicationMicrophonePermissionRepository(),
                 userDefaultsRepository: userDefaultsRepository
             )
         } catch {
@@ -69,6 +74,7 @@ struct MoldeaApp: App {
             }
             .task {
                 await requestNotificationAuthorizationUseCase.execute()
+                await requestMicrophoneAuthorizationUseCase.execute()
             }
             /*.task {
                 try? SampleDataSeeder.seed(in: modelContainer)

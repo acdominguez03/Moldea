@@ -120,7 +120,7 @@ final class LiveTranscriptionModel {
             return
         }
         
-        guard await AVAudioApplication.requestRecordPermission() else {
+        guard AVAudioApplication.shared.recordPermission == .granted else {
             throw TranscriptionErrorEnum.microphoneNotAuthorized
         }
         let transcriber = try await run(.deviceSupport) {
