@@ -28,7 +28,8 @@ public struct TodayView: View {
                 toggleHabitCompletionUseCase: DefaultToggleHabitCompletionUseCase(
                     repository: habitRepository
                 ),
-                calculateHabitsProgressUseCase: CalculateHabitsProgressUseCase()
+                calculateHabitsProgressUseCase: CalculateHabitsProgressUseCase(),
+                todayProgressStore: UserDefaultsTodayProgressStore()
             )
         )
     }
@@ -44,6 +45,10 @@ public struct TodayView: View {
 
     private var progress: HabitsProgress {
         todayViewModel.progress(for: habits)
+    }
+
+    private var dailyProgress: HabitsProgress {
+        todayViewModel.dailyProgress(for: dailyHabits)
     }
 
     public var body: some View {
@@ -95,6 +100,9 @@ public struct TodayView: View {
             .listStyle(.grouped)
             .navigationTitle(todayViewModel.selectedTab == .daily ? TodayTextsEnum.screenTitle : TodayTextsEnum.tabWeekly)
             .navigationBarTitleDisplayMode(.large)
+            .onChange(of: dailyProgress, initial: true) {
+                todayViewModel.publishDailyProgress(for: dailyHabits)
+            }
         }
     }
 }

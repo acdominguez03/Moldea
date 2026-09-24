@@ -2,10 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleLocalizations</key>
+	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>en</string>
-		<string>es</string>
+		<string>group.com.cordondevs.moldea</string>
 	</array>
 </dict>
 </plist>

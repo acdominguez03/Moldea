@@ -55,6 +55,16 @@ final class FakeCalculateHabitsProgressUseCase: CalculateHabitsProgressUseCasePr
     }
 }
 
+final class FakeTodayProgressStore: TodayProgressStore, @unchecked Sendable {
+    private(set) var saved: [(fraction: Double, day: Date)] = []
+
+    func save(fraction: Double, on day: Date) {
+        saved.append((fraction, day))
+    }
+
+    func fraction(on day: Date) -> Double { 0 }
+}
+
 struct UseCaseFailure: Error, Equatable {}
 
 @MainActor
@@ -88,11 +98,13 @@ struct TodayViewModelTests {
     private func makeViewModel(
         toggleHabitCompletionUseCase: any ToggleHabitCompletionUseCase,
         calculateHabitsProgressUseCase: any CalculateHabitsProgressUseCaseProtocol
-            = FakeCalculateHabitsProgressUseCase()
+            = FakeCalculateHabitsProgressUseCase(),
+        todayProgressStore: any TodayProgressStore = FakeTodayProgressStore()
     ) -> TodayViewModel {
         TodayViewModel(
             toggleHabitCompletionUseCase: toggleHabitCompletionUseCase,
-            calculateHabitsProgressUseCase: calculateHabitsProgressUseCase
+            calculateHabitsProgressUseCase: calculateHabitsProgressUseCase,
+            todayProgressStore: todayProgressStore
         )
     }
 
@@ -159,5 +171,30 @@ struct TodayViewModelTests {
         _ = viewModel.progress(for: [])
 
         #expect(progressUseCase.receivedScopes == [.weekly])
+    }
+
+    @Test func publishDailyProgressSavesTheDailyFractionEvenOnTheWeeklyTab() {
+        let progressUseCase = FakeCalculateHabitsProgressUseCase(
+            progress: HabitsProgress(
+                completedHabits: 1,
+                totalHabits: 2,
+                completedUnits: 1,
+                totalUnits: 4
+            )
+        )
+        let store = FakeTodayProgressStore()
+        let viewModel = makeViewModel(
+            toggleHabitCompletionUseCase: FakeToggleHabitCompletionUseCase(),
+            calculateHabitsProgressUseCase: progressUseCase,
+            todayProgressStore: store
+        )
+
+        viewModel.onTabSelect(newTab: .weekly)
+        viewModel.publishDailyProgress(for: [], on: referenceDay)
+
+        #expect(progressUseCase.receivedScopes == [.daily])
+        #expect(store.saved.count == 1)
+        #expect(store.saved.first?.fraction == 0.25)
+        #expect(store.saved.first?.day == referenceDay)
     }
 }

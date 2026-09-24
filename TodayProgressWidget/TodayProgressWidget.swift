@@ -10,9 +10,11 @@ import SwiftUI
 import Core
 
 struct Provider: TimelineProvider {
-    let getTodayProgressUseCase: any GetTodayProgressUseCase = DefaultGetTodayProgressUseCase()
-    
     typealias Entry = TodayProgressEntry
+    
+    private let getTodayProgressUseCase: any GetTodayProgressUseCase = DefaultGetTodayProgressUseCase(
+        store: UserDefaultsTodayProgressStore()
+    )
     
     func placeholder(in context: Context) -> TodayProgressEntry {
         Entry(date: Date(), percentage: 1)
@@ -22,34 +24,24 @@ struct Provider: TimelineProvider {
         in context: Context,
         completion: @escaping @Sendable (TodayProgressEntry) -> Void
     ) {
-        completion(Entry(date: Date(), percentage: 1))
+        completion(Entry(date: .now, percentage: getTodayProgressUseCase.execute(on: .now)))
     }
     
     func getTimeline(
         in context: Context,
         completion: @escaping @Sendable (Timeline<TodayProgressEntry>) -> Void
     ) {
-        Task {
-            let percentage = try? await getTodayProgressUseCase.execute()
-            
-            completion(
-                Timeline(
-                    entries: [TodayProgressEntry(
-                        date: Date(),
-                        percentage: percentage ?? 0
-                    )],
-                    policy:
-                            .after(
-                                Calendar.current
-                                    .date(
-                                        byAdding: .minute,
-                                        value: 10,
-                                        to: .now
-                                    )!
-                            )
-                )
-            )
-        }
+        let calendar = Calendar.current
+        let now = Date.now
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) ?? now
+        let midnight = calendar.startOfDay(for: tomorrow)
+        
+        let entries = [
+            Entry(date: now, percentage: getTodayProgressUseCase.execute(on: now)),
+            Entry(date: midnight, percentage: getTodayProgressUseCase.execute(on: midnight))
+        ]
+        
+        completion(Timeline(entries: entries, policy: .after(midnight)))
     }
 }
 

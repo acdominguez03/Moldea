@@ -17,8 +17,8 @@ struct GetTodayProgressIntent: AppIntent {
     static let openAppWhenRun = false
 
     func perform() async throws -> some IntentResult & ReturnsValue<Double> & ProvidesDialog {
-        // TODO: inyectar con @Dependency cuando el caso de uso lea datos reales.
-        let progress = try await DefaultGetTodayProgressUseCase().execute()
+        let progress = DefaultGetTodayProgressUseCase(store: UserDefaultsTodayProgressStore())
+            .execute(on: .now)
         let percentage = progress.formatted(.percent.precision(.fractionLength(0)))
 
         return .result(

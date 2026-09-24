@@ -17,6 +17,22 @@
         }
       }
     },
+    "Tells you the percentage of today's habits you have completed." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tells you the percentage of today's habits you have completed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te dice el porcentaje de hábitos de hoy que has completado."
+          }
+        }
+      }
+    },
     "Today you have completed %@ of your habits." : {
       "localizations" : {
         "en" : {
@@ -45,22 +61,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Progreso de hoy"
-          }
-        }
-      }
-    },
-    "Tells you the percentage of today's habits you have completed." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tells you the percentage of today's habits you have completed."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Te dice el porcentaje de hábitos de hoy que has completado."
           }
         }
       }

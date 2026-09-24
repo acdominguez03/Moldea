@@ -2,19 +2,23 @@
 //  GetTodayProgressUseCase.swift
 //  Core
 //
-//  Created by Ismael Cordón Domínguez on 23/9/26.
+//  Created by Ismael Cordón Domínguez on 24/9/26.
 //
 
-/// Progreso de hoy como fracción de 0 a 1 (0.9 = 90 %).
+import Foundation
+
 public protocol GetTodayProgressUseCase: Sendable {
-    func execute() async throws -> Double
+    func execute(on day: Date) -> Double
 }
 
-/// Provisional: devuelve un valor aleatorio hasta que exista la lógica real.
 public struct DefaultGetTodayProgressUseCase: GetTodayProgressUseCase {
-    public init() {}
+    private let store: any TodayProgressStore
 
-    public func execute() async throws -> Double {
-        Double.random(in: 0...1)
+    public init(store: any TodayProgressStore) {
+        self.store = store
+    }
+
+    public func execute(on day: Date = .now) -> Double {
+        store.fraction(on: day)
     }
 }
