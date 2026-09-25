@@ -39,8 +39,8 @@ Sources/Core/
 │   │   └── HabitRepository.swift
 │   ├── UseCases/
 │   │   ├── CreateHabitUseCase.swift      # protocolo + DefaultCreateHabitUseCase
-│   │   └── DeleteHabitUseCase.swift      # protocolo + DefaultDeleteHabitUseCase
-│   ├── HabitCompletionRecognizing.swift
+│   │   ├── DeleteHabitUseCase.swift      # protocolo + DefaultDeleteHabitUseCase
+│   │   └── CompleteHabitsUseCase.swift   # protocolo + DefaultCompleteHabitsUseCase
 │   └── HabitCommandParsing.swift
 ├── Data/
 │   ├── Model/
@@ -62,7 +62,6 @@ Sources/Core/
 │   │   ├── FoundationModelsErrorMapper.swift
 │   │   ├── FoundationModelsDeviceEligibility.swift  # público: ¿el hardware admite Apple Intelligence?
 │   │   └── HabitCommandSamples.swift        # #if DEBUG, incluye HabitCommandKindEnum
-│   ├── FoundationModelsHabitCompletionRecognizer.swift
 │   ├── HabitsQuery.swift
 │   ├── MoldeaSchema.swift
 │   ├── SwiftDataHabitRepository.swift
@@ -123,7 +122,8 @@ las valida el caso de uso.
   días como `Set<Int>` de `Calendar.weekday` (1 = domingo … 7 = sábado).
 
 - `HabitCommandEnum`: lo que el usuario ha pedido por voz, ya interpretado —`.create(NewHabitDraft)`,
-  `.delete(habitID:)` o `.listCompleted`—. No importa `FoundationModels`.
+  `.delete(habitID:)` o `.complete(habitIDs:)`—. No importa `FoundationModels`. `.complete` solo
+  lleva los hábitos mencionados: cuáles ya estaban completos lo decide `CompleteHabitsUseCase`.
 - `NewHabitDraft`: `name`, `frequency` y `repetitionsPerDay`. **No lleva color ni icono**,
   porque al hablar no se dicen: los pone `HabitAppearanceDefaultsEnum`.
 - `HabitAppearanceDefaultsEnum`: `colorHex` (`#5B6470`) e `icon` (`drop`) con los que nace un hábito
@@ -323,10 +323,10 @@ parser y arrancar la escucha), `stop()`, `finishAndRecognize()` —el que congel
 `transcriptForAI` y enciende `isPresentingCommand`— y `dismissCommand()`. `canFinish` y
 `canClose` sustituyen a los `disabled` calculados en la vista.
 
-El view model también posee las dependencias que `HabitCommandView` necesita (`recognizer`,
-`parser` y los dos casos de uso) y las expone como `let`, que es el motivo por el que el `init`
-sigue recibiendo solo el `habitRepository`. El reconocedor y el parser entran por el `init` con
-la implementación real por defecto, así que la pantalla se puede previsualizar con dobles.
+El view model también posee las dependencias que `HabitCommandView` necesita (`parser` y los
+casos de uso de crear, borrar y completar) y las expone como `let`, que es el motivo por el que
+el `init` sigue recibiendo solo el `habitRepository`. El parser entra por el `init` con la
+implementación real por defecto, así que la pantalla se puede previsualizar con dobles.
 
 `isPresentingCommand` es `private(set)`, como todo el estado publicado del proyecto, así que la
 vista construye a mano el `Binding` de `navigationDestination(isPresented:)`: el `get` lee la
@@ -414,25 +414,25 @@ resultados parciales ni se abre el micrófono; es solo el texto puesto a mano.
 
 ## Comandos de voz: `HabitCommandView`
 
-La pantalla a la que se llega desde _Terminar_. Interpreta el transcrito como **un comando** y
-pide confirmación antes de tocar nada:
+La pantalla a la que se llega desde _Terminar_. Interpreta el transcrito como **un comando**;
+crear y borrar piden confirmación antes de tocar nada:
 
 ```
 SpeechToTextView ──Terminar──► HabitCommandView            (única pantalla)
                                  ├─ .create        → Confirmar → CreateHabitUseCase
                                  ├─ .delete        → Confirmar → DeleteHabitUseCase
-                                 └─ .listCompleted → HabitCompletionRecognizing → tarjetas
+                                 └─ .complete      → CompleteHabitsUseCase → resultado
 ```
 
 **Los tres comandos se resuelven en la misma pantalla.** Hubo una `HabitsRecognizerView`
-aparte para los resultados de listar y se borró: era un tercer nivel de navegación sin ninguna
+aparte para los resultados del antiguo comando de listar y se borró: era un tercer nivel de navegación sin ninguna
 decisión dentro —se entraba automáticamente— y obligaba a arrastrar un closure `onRepeat` para
 poder volver desde dos niveles de profundidad.
 
-**Se confirma lo que escribe en la base de datos, y solo eso.** Crear y borrar piden
-confirmación: una transcripción mala no puede borrar un hábito. Listar no escribe nada, así que
-el view model encadena el reconocimiento justo después del parseo y la pantalla pasa del spinner
-a las tarjetas sin intervención.
+**Se confirma lo que no se deshace con un toque.** Crear y borrar piden confirmación: una
+transcripción mala no puede borrar un hábito. Completar escribe, pero se deshace desde Today,
+así que el view model guarda justo después del parseo y la pantalla pasa del spinner al
+resultado sin intervención (detalle en _Completar hábitos_, más abajo).
 
 ### El estado es una fase, no un puñado de banderas
 
@@ -442,9 +442,7 @@ a las tarjetas sin intervención.
 | ------------------------------------------------------- | --------------------------------------------------------------- |
 | `.parsing`                                              | spinner + «Interpretando lo que has pedido…»                    |
 | `.confirmingCreate(draft)` / `.confirmingDelete(habit)` | título, tarjeta y `[Repetir｜Confirmar]`                        |
-| `.recognizing`                                          | spinner + «Comprobando qué hábitos has mencionado…»             |
-| `.recognized([Habit])`                                  | una tarjeta por hábito, o el mensaje de vacío si no hay ninguno |
-| `.done(outcome)`                                        | mensaje de creado/borrado y su tarjeta                          |
+| `.done(outcome)`                                        | creado/borrado con su tarjeta, o completados + «ya completado»  |
 | `.failed`                                               | el mensaje de error                                             |
 
 El view model tenía antes `command`, `outcome` e `isParsing` sueltos, y al absorber el
@@ -473,8 +471,8 @@ no se anuncia un éxito que no ha pasado.
 ### Volver a hablar
 
 `Repetir` hace `dismiss()`, que saca la pantalla empujada y deja `SpeechToTextView`, cuyo
-`.task` reinicia la escucha. Aparece en **todas las fases terminales** (`.recognized`, `.done` y
-`.failed`, además de la confirmación): tras crear un hábito significa «crear otro», y en
+`.task` reinicia la escucha. Aparece en la confirmación, en `.failed` y en `.done(.completed)`
+(crear y borrar cierran la hoja al terminar): tras completar significa «completar otro», y en
 `.failed` es la única salida que no es el chevron de la barra.
 
 Con la pantalla de resultados fuera ya no hace falta el closure `onRepeat` que había que pasar
@@ -482,7 +480,7 @@ de `SpeechToTextView` a `HabitCommandView` y de ahí a la tercera pantalla.
 
 ### Dos etapas, no una
 
-`parseCommand(in:from:)` hace **dos peticiones**, no una, y cada etapa lleva sus propias
+`parseCommand(in:from:today:)` hace **dos peticiones**, no una, y cada etapa lleva sus propias
 instrucciones elegidas en Swift:
 
 1. **Intención** → `respond(generating: GenerableCommandDecision.self)`. Una elección entre tres
@@ -490,13 +488,15 @@ instrucciones elegidas en Swift:
 2. **Argumentos**, según la intención:
     - `.create` → `respond(generating: GenerableHabitDraft.self)`.
     - `.delete` → `respond(schema:)` con el `GenerationSchema` que construye `HabitNameSchema`, y
-      se lee con `content.value(String.self, forProperty: "habit")`.
-    - `.listCompleted` → no hay segunda petición; el comando no lleva carga.
+      se leen `activity` y `habit` con `content.value(String.self, forProperty:)`. Después, una
+      petición más de verificación (`GenerableActivityMatch`, ver _V2_ más abajo).
+    - `.complete` → `respond(schema:)` con `HabitNameSchema.makeCompletionSchema`, se lee `done`
+      con `content.value([GeneratedContent].self, forProperty:)` y cada par se verifica.
 
 El motivo de partirlo en dos no es estético: Apple pide **convertir los `if-else` del prompt en
 lógica de programación**, así que el modelo nunca lee condiciones que no aplican a la petición
-que tiene delante. Es la misma lección que ya estaba pagada con el reconocedor (partir en
-peticiones pequeñas gana a una petición que lo hace todo).
+que tiene delante. Es la misma lección que ya estaba pagada con el antiguo reconocedor (partir
+en peticiones pequeñas gana a una petición que lo hace todo).
 
 Como en el reconocedor, **una sesión nueva por petición**: `LanguageModelSession` acumula
 historial y reutilizarla arrastra la respuesta anterior hasta `contextSizeExceeded`.
@@ -518,6 +518,58 @@ Tres cosas medidas que conviene no volver a pagar:
   lanza `.habitNotFound`, en vez de confiar en que el esquema falle.
 - **La lista de hábitos va también en el prompt**, no solo en el `anyOf`: es un dato que el
   usuario ha dicho, no metadato de formato.
+
+### Borrar: razonar antes de elegir, y siempre con salida
+
+Síntoma medido: al borrar, el modelo **elegía siempre el primer hábito de la lista**. Dos causas
+que se sumaban:
+
+1. El `anyOf` solo tenía los nombres y el prompt decía «elige siempre uno», así que si ningún
+   hábito cuadraba el modelo estaba obligado a inventarse la coincidencia.
+2. Con `sampling: .greedy` y el esquema cerrado, el primer token que escribía el modelo **ya era
+   el nombre**: no tenía dónde razonar antes de comprometerse, y ganaba el primero.
+
+Arreglo, solo en el esquema y el prompt (la elección la sigue haciendo el modelo, sin filtro en
+Swift):
+
+- **El esquema lleva `reasoning` antes de `habit`**, por la misma razón que
+  `GenerableCommandDecision`: el modelo escribe primero qué actividad menciona la frase y solo
+  después elige.
+- **`anyOf` incluye `HabitNameSchema.noneOption` («ninguno»).** «ninguno» no está en la lista de
+  hábitos, así que `GenerableHabitMapper.habitID` lo convierte en `.habitNotFound` sin tratarlo
+  aparte. Si el usuario tiene un hábito llamado exactamente «ninguno», `options(for:)` no lo
+  duplica y se resuelve a ese hábito.
+- El prompt dice explícitamente que el orden de la lista no importa y trae un ejemplo con el
+  último hábito y otro con «ninguno».
+
+#### V2: extraer la actividad y verificar
+
+Con V1 el eval pasaba, pero **solo porque la lista del eval era la misma que la del ejemplo del
+prompt**. Con otra lista (_Meditar, Estudiar inglés, Andar 3 km, Beber muchas agua, Correr 5 min,
+Tomar vitaminas_), «borra el hábito de nadar» y «ya no quiero ir al gimnasio» devolvían un hábito
+parecido (agua, correr) en vez de «ninguno». La regla «acepta sinónimos» empujaba a casar
+cualquier cosa relacionada.
+
+`habitToDeleteV2` cambia tres cosas:
+
+- **El esquema pide `activity` en vez de `reasoning`**: la actividad con las palabras de la frase,
+  sin «borra» ni «el hábito de». Es un razonamiento con forma fija, y luego sirve para verificar.
+- **Parecido no es lo mismo**: el prompt da contraejemplos explícitos (nadar ≠ beber agua,
+  gimnasio ≠ correr) y dice que «ninguno» es a menudo la respuesta correcta.
+- **Los ejemplos usan hábitos que no están en el eval** (_Pasear al perro, Dormir 8 horas, Tocar
+  el piano_), para que el eval mida el prompt y no la copia del ejemplo.
+
+Y el parser añade una **tercera petición de verificación**: con el hábito elegido, pregunta
+`sameActivityV1` —«actividad del usuario» frente a «hábito», `GenerableActivityMatch` con
+`reasoning` y `isSameActivity: Bool`— y si sale `false` lanza `.habitNotFound`. Es la forma que
+ya estaba medida como fiable en el antiguo reconocedor (un `Bool` suelto por pregunta), aplicada
+a un solo candidato, así que cuesta una petición y no N. Sigue decidiendo el modelo: Swift no
+compara textos. «Ante la duda, no son la misma» es a propósito: un falso «no» se arregla
+repitiendo; un falso «sí» propone borrar otro hábito.
+
+`habitToDeleteV1` se queda para comparar las dos versiones con el eval, como pide
+_Instrucciones versionadas_. **V2 está sin medir**: la línea base de V1 (2 fallos de 5 negativos
+en la lista nueva) sí se midió en el simulador 27.0.
 
 ### `@Generable`: campos obligatorios y campo de razonamiento
 
@@ -583,7 +635,8 @@ nada.
 ### Instrucciones versionadas
 
 `HabitCommandInstructions` tiene una función por etapa con la versión en el nombre
-(`intentV1`, `newHabitV1`, `habitToDeleteV1`), separadas de la lógica. Apple recomienda no
+(`intentV1`, `newHabitV1`, `habitToDeleteV2`, `sameActivityV1`, `habitsToCompleteV2`),
+separadas de la lógica. Apple recomienda no
 llevar los prompts hardcodeados para poder comparar la salida cuando cambie la versión del modelo
 base; esto es esa idea sin montar la carga de un recurso de bundle (`Core/Package.swift` no
 declara `resources:`, así que un `.json` obligaría a añadirlo y a manejar un fallo de lectura que
@@ -592,30 +645,21 @@ no puede pasar).
 Al añadir una versión nueva, se añade la función `…V2` y se pasa
 `HabitCommandPromptEvalTests` con las dos para comparar, en vez de sustituir y confiar.
 
-A diferencia del reconocedor, la etapa 1 **sí lleva ejemplos** (`frase -> comando`). La lección
+A diferencia del antiguo reconocedor, la etapa 1 **sí lleva ejemplos** (`frase -> comando`). La lección
 real del reconocedor era _nada de ejemplos con una forma de salida que ya no existe_; Apple sí
 recomienda ejemplos en las instrucciones, y una clasificación pura es donde encajan. La etapa 2
 no los lleva: la generación guiada ya fija la forma.
 
 ### Precalentado
 
-`SpeechToTextView.task` precalienta **el parser**, porque es quien recibe la primera petición.
-
-El `prepare()` del reconocedor lo dispara `HabitCommandViewModel` **al arrancar el parseo**, no
-al saber ya el comando. Antes se hacía al publicar un `.listCompleted`, contando con que el
-usuario tardase en leer la confirmación; al quitar esa pantalla (listar ya no se confirma) esa
-ventana desapareció y el `prewarm()` habría quedado pegado al `respond`, que es justo el trabajo
-tirado que documenta este fichero más abajo. El parseo tarda 1-3 s, así que da la ventana de
-≥1 s que pide la documentación.
-
-**El precio, que es real:** en los comandos de crear y borrar ese precalentado se tira. Se
-aceptó porque listar es el caso común y un `prewarm()` desperdiciado no rompe nada. Si algún día
-la proporción cambia, el sitio donde mirar es `HabitCommandViewModel.parse`.
+`SpeechToTextView.task` precalienta **el parser**, porque es quien recibe la primera petición
+(la de intención). Las segundas etapas crean su sesión sin precalentar: la ventana de ≥1 s que
+pide la documentación no existe entre una petición y la siguiente.
 
 ### Composición
 
 `SpeechToTextView.init(habitRepository:)` recibe el repositorio y construye los casos de uso por
-dentro, igual que ya construía `FoundationModelsHabitCompletionRecognizer()` por defecto. `MoldeaApp` le
+dentro (`DefaultCompleteHabitsUseCase(repository:)` incluido). `MoldeaApp` le
 pasa el `habitRepository` que ya tenía.
 
 ### Frases de ejemplo: andamio con fecha de caducidad
@@ -645,101 +689,94 @@ Dos detalles que no son opcionales:
   para vistas y quien llama es una clase `@Observable`— y el `% all.count` protege de un índice
   guardado mayor que el catálogo si algún día se borran frases.
 
-## Reconocimiento de hábitos: `HabitCompletionRecognizing`
+## Completar hábitos: `.complete`
 
-El trabajo del comando `.listCompleted`: coger lo transcrito y preguntar al modelo on-device
-cuáles de los hábitos que el usuario ya tiene ha mencionado. Lo consume
-`HabitCommandViewModel`; la pantalla es `HabitCommandView`, descrita más arriba.
+El trabajo del comando `.complete`: marcar como hechos los hábitos de hoy que el usuario dice
+haber hecho. Es la **segunda etapa del parser**, con la misma forma que el borrado.
 
 ```
-Presentation              HabitCommandViewModel
-                            │ any HabitCompletionRecognizing
-Domain                 HabitCompletionRecognizing
-                            ▲            LanguageModelErrorEnum
-Data      FoundationModelsHabitCompletionRecognizer    LanguageModelAvailabilityEnum
+HabitCommandView ── @HabitsQuery + @TodayHabitsQuery ──► HabitCommandViewModel.handle
+  → FoundationModelsHabitCommandParser.parseCommand(in:from:today:)
+      1. intención → .complete
+      2. respond(schema: HabitNameSchema.makeCompletionSchema) → [(activity, habit)]
+      3. isSameActivity(activity, as: habit) por cada par         → .complete(habitIDs:)
+  → CompleteHabitsUseCase.execute(habitIDs:in:)                   → CompleteHabitsResult
+  → .done(.completed(completed:alreadyCompleted:))
 ```
 
-- `HabitCompletionRecognizing` (`Domain`) es el protocolo `@MainActor` que ve el view model. El
-  reconocedor entra por el `init` de la vista con la implementación real por defecto, así que
-  se puede previsualizar y testear con un doble sin Apple Intelligence.
-- `FoundationModelsHabitCompletionRecognizer` (`Data`) arma el prompt, hace la generación guiada y
-  traduce los errores con `FoundationModelsErrorMapper`. `Domain` no importa
-  `FoundationModels`: los `@Generable` de la primera versión (`HabitCheck` / `HabitReport`) se
-  borraron, y con ellos ese `import`.
-- El view model no conoce `SystemLanguageModel`. Expone `unavailableMessage` como valor
-  **derivado** de `availability` —no estado— para que la vista pinte el motivo sin esperar al
-  `.task`.
+- **La IA solo dice qué hábitos se mencionan como hechos; el estado lo decide el caso de uso.**
+  Antes el prompt llevaba el progreso (`Beber agua (1/3)`) y el modelo repartía entre
+  `toComplete` y `alreadyCompleted`. Se equivocaba: en el eval, con todo a 0, metía hábitos en
+  `alreadyCompleted`, y en la app salía «ya completado» con un hábito a medias. Si un hábito
+  está lleno o no es un dato, no algo que interpretar, así que es una regla de negocio y va en
+  `Domain`.
+- **`CompleteHabitsUseCase` reparte**: un hábito es «ya completado» (`alreadyCompleted`, no se
+  guarda) si `isCompletedToday` —todas las repeticiones del día hechas, no se puede sumar más
+  hoy— **o** si es `.weeklyCount(n)` y `completedDaysThisWeek >= n`. Si no, suma una repetición y
+  va a `completed`. Quita ids repetidos y los que no son de hoy.
+- **`makeCompletionSchema(for:)`**: `reasoning` primero y después `done`, un
+  `DynamicGenerationSchema(arrayOf:)` de objetos `{ activity: String, habit: anyOf nombres }`.
+  La actividad va por hábito por lo mismo que en el borrado: es lo que se verifica después. No
+  hay «ninguno»: «ninguno» es la lista vacía.
+- **Cada par se verifica** con `isSameActivity(_:as:)` y `sameActivityV1`, igual que en el
+  borrado; los `false` se descartan. Es una petición más por hábito elegido, no por hábito de la
+  lista. El prompt (`habitsToCompleteV2`) lleva solo los nombres y las mismas reglas que
+  `habitToDeleteV2`: parecido no es igual, lo negado no cuenta, ejemplos con hábitos fuera del
+  eval.
+- **En pantalla**: los `completed` llevan título + card; los `alreadyCompleted`, solo el texto
+  «ya ha sido completado hoy», sin card. Si todo estaba completo, no sale ninguna card.
+- **Solo los hábitos de hoy** (`@TodayHabitsQuery`, lo que toca según el patrón). Un hábito que
+  hoy no toca no se ofrece al modelo.
+- **Sin hábitos hoy no se llama al modelo**: el parser devuelve la lista vacía, igual que
+  el borrado comprueba la lista antes de construir el `anyOf` (que vacío falla distinto según el
+  runtime).
+- **La lista vacía es `.failed`** con `HabitCommandErrorEnum.noHabitsMentioned`, que se
+  pinta como «No se ha mencionado ningún hábito de tu lista». Distinto de `.habitNotFound`, que
+  es del borrado («Ese hábito no está en tu lista»).
+- **Los mensajes van encima del botón, en gris.** `HabitCommandMessage` (secundario, centrado,
+  sin rojo ni `footnote`) es el mismo componente para los errores y para «ya completado». En
+  `.failed` se pinta encima de `Repetir`; en la confirmación, entre la card y los botones. Antes
+  el error iba en rojo y debajo de todo.
+- **Sin confirmación.** Es la excepción a «se confirma lo que escribe»: completar es reversible
+  desde Today con un toque, y crear o borrar no.
+- **`CompleteHabitsUseCase` suma una repetición** con `setCompletions(count: min(completedToday + 1, total))`,
+  igual que un toque en Today (1/3 → 2/3). **No reutiliza `ToggleHabitCompletionUseCase`**
+  porque el toggle vuelve a 0 al llegar al total: con un error del modelo, un «completar» podría
+  descompletar. El `min` no decide nada, solo impide pasarse.
+- **Cierre automático** solo si no hay `alreadyCompleted`: si hay avisos de «ya ha sido
+  completado hoy», la pantalla se queda con `Repetir` para que dé tiempo a leerlos.
 
-La lista de hábitos contra la que casar **no** está en las instrucciones: entra por parámetro
-(`recognizeCompletions(in:from:)`). La vista la lee con `@HabitsQuery`, que mapea los
-`HabitEntity` de SwiftData a dominio.
+### Riesgo conocido: una petición con la lista entera
 
-### Una petición por hábito
-
-`recognizeCompletions` **no hace una petición con la lista entera: hace una por hábito**, en
-secuencia, cada una con su sesión nueva. Cada petición es una pregunta sí/no sobre un solo
-hábito y devuelve un `Bool` con `respond(generating: Bool.self, options:)` — sin esquema, sin
-numeración y sin array que terminar.
-
-No es la primera forma que se probó, y las otras dos **están medidas y no funcionan**. Con los
-hábitos _Andar 3 km_, _Estudiar día a día_, _Beber muchas agua_ y _Correr 5 min_ y la frase del
-simulador (_"He bebido dos litros de agua, he caminado veinte minutos y he salido a correr
-media hora"_), donde lo correcto es todos menos _Estudiar_:
+Esto sustituye a `FoundationModelsHabitCompletionRecognizer`, que hacía **una petición `Bool`
+por hábito** porque las formas con la lista entera estaban medidas y fallaban. Con los hábitos
+_Andar 3 km_, _Estudiar día a día_, _Beber muchas agua_ y _Correr 5 min_ y la frase _"He bebido
+dos litros de agua, he caminado veinte minutos y he salido a correr media hora"_ (correctos:
+todos menos _Estudiar_):
 
 | Forma de la salida                                               | Resultado                                        |
 | ---------------------------------------------------------------- | ------------------------------------------------ |
 | Un `Bool` por hábito (`h1`…`hN`) en un `DynamicGenerationSchema` | solo _Beber_                                     |
 | Una propiedad `realizados: [Int]` con los números                | _Beber_ y _Andar_; se dejaba _Correr_            |
-| **Una petición por hábito, `Bool` suelto**                       | **las tres correctas, en tres pasadas seguidas** |
+| Una petición por hábito, `Bool` suelto                           | las tres correctas, en tres pasadas seguidas     |
 
-Dos cosas que costaron encontrar y conviene no volver a pagar:
+La forma actual es distinta de las dos que fallaron (nombres en `anyOf` en vez de claves opacas
+o números, `reasoning` antes de las listas y la lista también en el prompt), pero **está sin
+medir en dispositivo**. `HabitCommandPromptEvalTests` trae el caso de varios hábitos para
+comprobarlo; si se deja hábitos, la vuelta atrás es la petición por hábito.
 
-- **El esquema no llega al prompt como texto.** Con `includeSchemaInPrompt: true`, lo único
-  que aparece en el `transcript` es `Response Format: HabitReport`; las `description` de las
-  propiedades **no se ven**. Por eso las claves `h1`…`hN` eran opacas: el modelo tenía que
-  emitir N booleanos sin saber a qué hábito correspondía cada uno. **Todo lo que el modelo
-  tiene que leer va en el prompt o en las instrucciones, nunca solo en el esquema.** Se
-  comprobó imprimiendo `session.transcript`, que es la forma de ver lo que se manda de verdad.
-- **Con la lista entera, el modelo se deja hábitos.** Ni el muestreo (igual con `greedy` y con
-  el default), ni el prompt (se imprimió y llegaba íntegro), ni un ejemplo de pocas muestras,
-  ni un recordatorio final lo arreglaron. Es el modelo, no el plumbing.
+Lecciones de aquella medición que siguen valiendo:
 
-El precio es la latencia: N peticiones secuenciales en vez de una. Se van en secuencia y no en
-paralelo para no provocar `rateLimited`. Entre hábito y hábito hay un
-`try Task.checkCancellation()`, y `isCompleted(_:in:)` **relanza `CancellationError` tal cual**
-en vez de traducirlo: si no, salir de la pantalla a mitad de las N peticiones pintaría un error
-en vez de no pintar nada.
-
-### Una sesión por petición
-
-`LanguageModelSession` **acumula el historial**: cada `respond(...)` añade el prompt y la
-respuesta a su `transcript`, y la petición siguiente lo ve entero. Reutilizar la sesión hacía
-que el modelo arrastrase su respuesta anterior y que el contexto creciera hasta
-`contextSizeExceeded`. Así que **cada petición usa una sesión nueva** —una por hábito— y no se
-guarda nada entre llamadas.
-
-`prepare()` no es una excepción a esa regla: crea la sesión, la `prewarm()` y la deja
-_pendiente_; la primera petición la **consume** (la coge y pone la propiedad a `nil`) y las
-demás crean la suya. Una sesión preparada se usa una vez y nunca se reutiliza.
-
-El `prewarm()` lo dispara **`SpeechToTextView`** en su `.task`, no la pantalla de IA: la
-doc exige una ventana de al menos un segundo antes del `respond`, y llamarlo en la propia
-pantalla de IA —justo antes de la petición— era trabajo tirado. Por eso `SpeechToTextView`
-posee el reconocedor y se lo pasa a `HabitCommandView` por el `init`.
+- **El esquema no llega al prompt como texto.** Con `includeSchemaInPrompt: true`, lo único que
+  aparece en el `transcript` es `Response Format: …`; las `description` de las propiedades **no
+  se ven**. **Todo lo que el modelo tiene que leer va en el prompt o en las instrucciones, nunca
+  solo en el esquema.** Se comprueba imprimiendo `session.transcript`.
+- **Una sesión nueva por petición**: `LanguageModelSession` acumula historial y reutilizarla
+  arrastra la respuesta anterior hasta `contextSizeExceeded`. `prepare()` deja una sesión
+  preparada que consume la primera petición (la de intención) y nunca se reutiliza.
 
 ### Instrucciones y prompt
 
-- **Las instrucciones describen la clasificación de UN hábito**, no de una lista. La regla que
-  más pesa es la 3: la frase puede mencionar varias actividades y basta con que una sea el
-  hábito. Sin ella el modelo se despista con lo demás que hay en la frase.
-- **Nada de ejemplos con una forma de salida que no existe.** El que había (`1 → true,
-2 → false`) era residuo del diseño de `HabitReport.checks` y peleaba contra la generación
-  guiada: Apple avisa de que el modelo on-device repite o alucina a partir de los ejemplos que
-  le das. Con un `Bool` suelto no hace falta ejemplo ninguno.
-- **Se quitó la regla "ante la duda, marca solo el más específico".** Provocaba falsos
-  negativos en pares como _andar_ / _correr_, que es justo lo que menciona la frase del
-  simulador. Con una petición por hábito la regla además no tendría sentido: no hay lista que
-  comparar.
 - **El prompt se compone con `@PromptBuilder`, en segmentos**, no con un `"""` interpolado: el
   hábito, la frase y la pregunta son tres segmentos. Con interpolación, un nombre de hábito o
   un transcrito con una comilla o un salto de línea rompía el marco del prompt. Además
@@ -858,7 +895,6 @@ Claves actuales:
 | `ai_command_parsing`                            | Working out what you asked for…                           | Interpretando lo que has pedido…                                 |
 | `ai_command_create_title %@`                    | Create the habit “%@”?                                    | ¿Crear el hábito «%@»?                                           |
 | `ai_command_delete_title %@`                    | Delete the habit “%@”?                                    | ¿Borrar el hábito «%@»?                                          |
-| `ai_recognizing_habits`                         | Checking which habits you mentioned…                      | Comprobando qué hábitos has mencionado…                          |
 | `ai_command_frequency_daily`                    | Every day                                                 | Todos los días                                                   |
 | `ai_command_frequency_weekly %lld`              | %lld times a week                                         | %lld veces por semana                                            |
 | `ai_command_frequency_fixed_days %@`            | On %@                                                     | Los %@                                                           |
@@ -866,6 +902,8 @@ Claves actuales:
 | `ai_command_confirm`                            | Confirm                                                   | Confirmar                                                        |
 | `ai_command_created %@`                         | Habit “%@” created.                                       | Hábito «%@» creado.                                              |
 | `ai_command_deleted %@`                         | Habit “%@” deleted.                                       | Hábito «%@» borrado.                                             |
+| `ai_command_completed %@`                       | Habit “%@” completed.                                     | Hábito «%@» completado.                                          |
+| `ai_command_already_completed %@`               | You’ve already completed “%@” today.                      | El hábito de «%@» ya ha sido completado hoy.                     |
 | `ai_error_not_understood`                       | We couldn't work out what you asked for. …                | No hemos entendido lo que has pedido. …                          |
 | `ai_error_habit_not_found`                      | That habit isn't on your list.                            | Ese hábito no está en tu lista.                                  |
 | `ai_error_invalid_command`                      | The command came back incomplete. …                       | El comando ha llegado incompleto. …                              |
@@ -930,31 +968,31 @@ contexto, o el proceso de tests se cae. Los `*Entity` se ven con `@testable impo
   espacios, `.habitNotFound`, y nombre duplicado resuelto al primero.
 - `HabitCommandViewModelTests`: cubre **todas las transiciones de `HabitCommandPhaseEnum**`, que
 es lo que impide que vuelvan los bugs de esta pantalla. `.parsing`de salida; modelo no
-disponible sin preguntar nada; parseo de crear y de borrar a su confirmación, con el`Habit`ya resuelto; borrar un hábito que no está en la lista →`.failed`; listar pasando por
-`.recognizing`(observado desde dentro del doble, que es la única forma de ver la fase
-intermedia) y acabando en`.recognized`, **vacío incluido**, que es lo único que autoriza el
-mensaje de «no hay hábitos»; errores de parser y de reconocedor traducidos; cancelación que
-se queda en `.parsing` sin error; confirmar crear/borrar llamando al caso de uso con el color
-  e icono por defecto; un fallo del caso de uso que **conserva la confirmación** en vez de
-  anunciar un éxito que no ha pasado; el precalentado al arrancar el parseo; y una segunda
-  pasada que limpia lo anterior.
+disponible sin preguntar nada; parseo de crear y de borrar a su confirmación, con el `Habit` ya
+  resuelto; borrar un hábito que no está en la lista → `.failed`; completar pasando los ids
+  al caso de uso y acabando en `.done(.completed)` con los que este informa como ya completados
+  aparte; la lista vacía (o ids que no son de hoy) → `.failed` con el mensaje de «no hay hábitos»; errores de
+  parser y del caso de uso traducidos; cancelación que se queda en `.parsing` sin error;
+  confirmar crear/borrar llamando al caso de uso con el color e icono por defecto; un fallo del
+  caso de uso que **conserva la confirmación** en vez de anunciar un éxito que no ha pasado; el
+  cierre automático solo sin avisos de «ya completado»; y una segunda pasada que limpia lo
+  anterior.
+- `CompleteHabitsUseCaseTests`: suma una repetición por hábito en el `startOfDay` de
+  `referenceDay`; con el día lleno o la meta semanal alcanzada no guarda y lo devuelve en
+  `alreadyCompleted`; un semanal sin meta alcanzada se marca; un id repetido se marca una vez;
+  ignora ids que no son de hoy y propaga el error del repositorio.
 - `HabitCommandSamplesTests`: el catálogo tiene al menos una frase de cada `HabitCommandKindEnum`,
   sin repetidas ni vacías, y la rotación recorre las N antes de repetir y sobrevive a un índice
   guardado mayor que el catálogo. Usa un `UserDefaults(suiteName:)` propio por test, no
   `.standard`, para no ensuciar los ajustes del simulador ni encadenar un test con el anterior.
-- `HabitNameSchemaTests`: el esquema resuelve con N hábitos y con dos que comparten nombre, y la
-  deduplicación conserva el orden. `GenerationSchema` no expone sus opciones en iOS 26 (`name` es
+- `HabitNameSchemaTests`: el esquema resuelve con N hábitos y con dos que comparten nombre, la
+  deduplicación conserva el orden y «ninguno» se añade al final sin duplicarse; el esquema de
+  completar se construye con nombres repetidos y con un hábito llamado «ninguno». `GenerationSchema` no expone sus opciones en iOS 26 (`name` es
   de iOS 27), así que no se puede afirmar más que eso.
 - `FoundationModelsErrorMapperTests`: la rama de **iOS 26**
   (`LanguageModelSession.GenerationError`), que es la versión mínima soportada y la que se
   quedaría sin traducir si alguien borrase el `else` del `#available`, más `SchemaError` y el
   fallback.
-- `HabitCommandViewModelTests`: modelo no disponible → no se pregunta y hay `unavailableMessage`;
-  los tres comandos se publican; el precalentado del reconocedor solo en `.listCompleted`;
-  confirmar `.create` llama al caso de uso con el color y el icono por defecto; confirmar
-  `.delete` con el `id` correcto; confirmar `.listCompleted` no toca ningún caso de uso; un fallo
-  del caso de uso **conserva el comando** y no anuncia un éxito que no ha pasado; cancelación sin
-  error pintado; y un segundo parseo limpia el resultado anterior.
 - `TestDoubles.swift`: `FakeHabitRepository` (`actor`, porque el protocolo es `Sendable`),
   `RepositoryFailure` y `makeHabit(...)`, compartidos por varias suites.
 
@@ -970,14 +1008,15 @@ Es la que hay que volver a pasar cada vez que se toque una palabra de
   `SystemLanguageModel.default` directamente. Con `MainActor.assumeIsolated` el runner de tests
   se cae antes de arrancar, sin ningún ✘ útil.
 - `.serialized`, porque peticiones en paralelo al modelo provocan `rateLimited`. Es la misma
-  razón por la que el reconocedor va en secuencia.
+  razón por la que el antiguo reconocedor iba en secuencia.
 - La tabla de casos es `HabitCommandSamples.all`, **la misma que usa el simulador**, con los
   frontera a propósito: negación («hoy no he corrido»), varias actividades en una frase, «quita»
-  (que es borrar, no listar) y tres frases en inglés. `PromptEvalSupport.swift` se quedó solo con
+  (que es borrar, no completar) y tres frases en inglés. `PromptEvalSupport.swift` se quedó solo con
   `PromptEvalSupport`.
 - Además del reparto de intención, comprueba el **contenido**: que los días salgan con los
   valores de `Calendar.weekday`, que el nombre no arrastre la cantidad y que el número de veces
-  por semana sea el que dice la frase.
+  por semana sea el que dice la frase, y en completar qué hábitos van a cada lista (varios en
+  una frase, negación, uno ya completado, ninguno y sin hábitos hoy).
 - Tarda ~40 s. No está en el test plan por defecto; se pasa con
   `-only-testing:CoreTests/HabitCommandPromptEvalTests`.
 

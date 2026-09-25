@@ -39,7 +39,8 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
 
     func parseCommand(
         in transcript: String,
-        from knownHabits: [Habit]
+        from knownHabits: [Habit],
+        today todayHabits: [TodayHabit]
     ) async throws -> HabitCommandEnum {
         guard case .available = availability else {
             throw LanguageModelErrorEnum.sessionUnavailable
@@ -51,8 +52,8 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
         }
 
         switch try await intent(for: phrase) {
-        case .listCompleted:
-            return .listCompleted
+        case .complete:
+            return try await completion(for: phrase, in: todayHabits)
         case .create:
             return .create(try await draft(for: phrase))
         case .delete:
@@ -113,9 +114,9 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
             throw HabitCommandErrorEnum.schemaFailed
         }
 
-        let session = makeSession(instructions: HabitCommandInstructions.habitToDeleteV1())
+        let session = makeSession(instructions: HabitCommandInstructions.habitToDeleteV2())
 
-        let name: String = try await mappingErrors {
+        let (activity, name): (String, String) = try await mappingErrors {
             let response = try await session.respond(
                 schema: schema,
                 options: GenerationOptions(sampling: .greedy)
@@ -124,16 +125,103 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
 
                 "Frase del usuario: \(phrase)"
 
-                "¿A qué hábito de la lista se refiere?"
+                "¿Qué hábito de la lista es la actividad que quiere borrar? Si no es ninguno de la lista, elige \(HabitNameSchema.noneOption)."
             }
 
-            return try response.content.value(
-                String.self,
-                forProperty: HabitNameSchema.habitPropertyKey
+            return (
+                try response.content.value(String.self, forProperty: HabitNameSchema.activityPropertyKey),
+                try response.content.value(String.self, forProperty: HabitNameSchema.habitPropertyKey)
             )
         }
 
-        return try GenerableHabitMapper.habitID(forName: name, in: knownHabits)
+        let habitID = try GenerableHabitMapper.habitID(forName: name, in: knownHabits)
+
+        let target = Self.singleLine(activity)
+        guard try await isSameActivity(target.isEmpty ? phrase : target, as: name) else {
+            throw HabitCommandErrorEnum.habitNotFound
+        }
+
+        return habitID
+    }
+
+    private func isSameActivity(_ activity: String, as habitName: String) async throws -> Bool {
+        let session = makeSession(instructions: HabitCommandInstructions.sameActivityV1())
+
+        return try await mappingErrors {
+            let response = try await session.respond(
+                generating: GenerableActivityMatch.self,
+                options: GenerationOptions(sampling: .greedy)
+            ) {
+                "Actividad del usuario: \(activity)"
+
+                "Hábito: \(Self.singleLine(habitName))"
+
+                "¿Son la misma actividad?"
+            }
+
+            return response.content.isSameActivity
+        }
+    }
+
+    private func completion(
+        for phrase: String,
+        in todayHabits: [TodayHabit]
+    ) async throws -> HabitCommandEnum {
+        let habits = todayHabits.map(\.habit)
+        let names = HabitNameSchema.uniqueNames(of: habits)
+        guard !names.isEmpty else {
+            return .complete(habitIDs: [])
+        }
+
+        let schema: GenerationSchema
+        do {
+            schema = try HabitNameSchema.makeCompletionSchema(for: habits)
+        } catch {
+            throw HabitCommandErrorEnum.schemaFailed
+        }
+
+        let session = makeSession(instructions: HabitCommandInstructions.habitsToCompleteV2())
+
+        let done: [(activity: String, habit: String)] = try await mappingErrors {
+            let response = try await session.respond(
+                schema: schema,
+                options: GenerationOptions(sampling: .greedy)
+            ) {
+                "Hábitos de hoy del usuario: \(names.map(Self.singleLine).joined(separator: "; "))"
+
+                "Frase del usuario: \(phrase)"
+
+                "¿Qué hábitos de la lista son actividades que dice haber hecho?"
+            }
+
+            return try response.content
+                .value([GeneratedContent].self, forProperty: HabitNameSchema.donePropertyKey)
+                .map { entry in
+                    (
+                        activity: try entry.value(String.self, forProperty: HabitNameSchema.activityPropertyKey),
+                        habit: try entry.value(String.self, forProperty: HabitNameSchema.habitPropertyKey)
+                    )
+                }
+        }
+
+        var seen = Set<Habit.ID>()
+        var habitIDs: [Habit.ID] = []
+        for entry in done {
+            guard let habitID = try? GenerableHabitMapper.habitID(forName: entry.habit, in: habits),
+                  !seen.contains(habitID) else {
+                continue
+            }
+
+            let activity = Self.singleLine(entry.activity)
+            guard try await isSameActivity(activity.isEmpty ? phrase : activity, as: entry.habit) else {
+                continue
+            }
+
+            seen.insert(habitID)
+            habitIDs.append(habitID)
+        }
+
+        return .complete(habitIDs: habitIDs)
     }
 
     // MARK: - Sesión

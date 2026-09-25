@@ -18,9 +18,10 @@ struct HabitCommandView: View {
 
     init(
         transcript: String,
-        recognizer: any HabitCompletionRecognizing,
         createHabitUseCase: any CreateHabitUseCase,
         deleteHabitUseCase: any DeleteHabitUseCase,
+        completeHabitsUseCase: any CompleteHabitsUseCase,
+        getTodayHabitsUseCase: any GetTodayHabitsUseCase,
         onFinish: @escaping () -> Void,
         parser: any HabitCommandParsing = FoundationModelsHabitCommandParser()
     ) {
@@ -29,9 +30,10 @@ struct HabitCommandView: View {
         _viewModel = State(
             initialValue: HabitCommandViewModel(
                 parser: parser,
-                recognizer: recognizer,
                 createHabitUseCase: createHabitUseCase,
-                deleteHabitUseCase: deleteHabitUseCase
+                deleteHabitUseCase: deleteHabitUseCase,
+                completeHabitsUseCase: completeHabitsUseCase,
+                getTodayHabitsUseCase: getTodayHabitsUseCase
             )
         )
     }
@@ -45,10 +47,6 @@ struct HabitCommandView: View {
                     GlassEffectContainer(spacing: 16) {
                         VStack(spacing: 16) {
                             phaseContent
-
-                            if let errorMessage = viewModel.errorMessage {
-                                HabitCommandMessage(text: errorMessage)
-                            }
                         }
                     }
                 }
@@ -75,11 +73,10 @@ struct HabitCommandView: View {
         switch viewModel.phase {
         case .parsing:
             HabitCommandProgress(text: CoreTextsEnum.aiCommandParsing)
-        case .recognizing:
-            HabitCommandProgress(text: CoreTextsEnum.aiRecognizingHabits)
         case .confirmingCreate(let draft):
             HabitCommandConfirmation(
                 title: CoreTextsEnum.aiCommandCreateTitle(draft.name),
+                message: viewModel.errorMessage,
                 isConfirming: viewModel.isLoading,
                 onRepeat: { dismiss() },
                 onConfirm: confirm
@@ -89,17 +86,24 @@ struct HabitCommandView: View {
         case .confirmingDelete(let habit):
             HabitCommandConfirmation(
                 title: CoreTextsEnum.aiCommandDeleteTitle(habit.name),
+                message: viewModel.errorMessage,
                 isConfirming: viewModel.isLoading,
                 onRepeat: { dismiss() },
                 onConfirm: confirm
             ) {
                 HabitCardView(habit: habit)
             }
-        case .recognized(let habits):
-            HabitCommandRecognizedHabits(habits: habits, onRepeat: { dismiss() })
         case .done(let outcome):
             HabitCommandOutcomeSummary(outcome: outcome)
+
+            if case .completed = outcome {
+                HabitCommandRepeatButton(onRepeat: { dismiss() })
+            }
         case .failed:
+            if let errorMessage = viewModel.errorMessage {
+                HabitCommandMessage(text: errorMessage)
+            }
+
             HabitCommandRepeatButton(onRepeat: { dismiss() })
         }
     }
@@ -126,6 +130,7 @@ private struct HabitCommandProgress: View {
 
 private struct HabitCommandConfirmation<Card: View>: View {
     let title: LocalizedStringResource
+    let message: LocalizedStringResource?
     let isConfirming: Bool
     let onRepeat: () -> Void
     let onConfirm: () -> Void
@@ -135,6 +140,10 @@ private struct HabitCommandConfirmation<Card: View>: View {
         HabitCommandTitle(text: title)
 
         HabitCommandCard { card }
+
+        if let message {
+            HabitCommandMessage(text: message)
+        }
 
         HStack(spacing: 12) {
             Button(action: onRepeat) {
@@ -152,45 +161,26 @@ private struct HabitCommandConfirmation<Card: View>: View {
     }
 }
 
-private struct HabitCommandRecognizedHabits: View {
-    let habits: [Habit]
-    let onRepeat: () -> Void
-
-    var body: some View {
-        if habits.isEmpty {
-            Text(CoreTextsEnum.aiNoHabitsRecognized)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        } else {
-            ForEach(habits) { habit in
-                HabitCommandCard {
-                    HabitCardView(habit: habit)
-                }
-            }
-        }
-
-        HabitCommandRepeatButton(onRepeat: onRepeat)
-    }
-}
-
 private struct HabitCommandOutcomeSummary: View {
     let outcome: HabitCommandOutcomeEnum
 
     var body: some View {
-        HabitCommandTitle(text: title)
-
-        HabitCommandCard {
-            switch outcome {
-            case .created(let draft): HabitCardView(draft: draft)
-            case .deleted(let habit): HabitCardView(habit: habit)
-            }
-        }
-    }
-
-    private var title: LocalizedStringResource {
         switch outcome {
-        case .created(let draft): CoreTextsEnum.aiCommandCreated(draft.name)
-        case .deleted(let habit): CoreTextsEnum.aiCommandDeleted(habit.name)
+        case .created(let draft):
+            HabitCommandTitle(text: CoreTextsEnum.aiCommandCreated(draft.name))
+            HabitCommandCard { HabitCardView(draft: draft) }
+        case .deleted(let habit):
+            HabitCommandTitle(text: CoreTextsEnum.aiCommandDeleted(habit.name))
+            HabitCommandCard { HabitCardView(habit: habit) }
+        case .completed(let completed, let alreadyCompleted):
+            ForEach(completed) { habit in
+                HabitCommandTitle(text: CoreTextsEnum.aiCommandCompleted(habit.name))
+                HabitCommandCard { HabitCardView(habit: habit) }
+            }
+
+            ForEach(alreadyCompleted) { habit in
+                HabitCommandMessage(text: CoreTextsEnum.aiCommandAlreadyCompleted(habit.name))
+            }
         }
     }
 }
@@ -232,8 +222,7 @@ private struct HabitCommandMessage: View {
 
     var body: some View {
         Text(text)
-            .font(.footnote)
-            .foregroundStyle(.red)
+            .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
     }
 }

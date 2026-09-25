@@ -8,6 +8,7 @@
 enum HabitCommandErrorEnum: Error, Equatable {
     case notUnderstood
     case habitNotFound
+    case noHabitsMentioned
     case missingFrequencyData
     case schemaFailed
 }

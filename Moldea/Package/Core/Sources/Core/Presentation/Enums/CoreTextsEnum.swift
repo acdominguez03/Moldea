@@ -80,7 +80,6 @@ public enum CoreTextsEnum {
 
     public static let aiCommandTitle = resource("ai_command_title")
     public static let aiCommandParsing = resource("ai_command_parsing")
-    public static let aiRecognizingHabits = resource("ai_recognizing_habits")
     public static let aiCommandFrequencyDaily = resource("ai_command_frequency_daily")
     public static let aiCommandConfirm = resource("ai_command_confirm")
     public static let aiCommandRepeat = resource("ai_command_repeat")
@@ -130,6 +129,20 @@ public enum CoreTextsEnum {
     public static func aiCommandDeleted(_ name: String) -> LocalizedStringResource {
         LocalizedStringResource(
             "ai_command_deleted \(name)",
+            bundle: .atURL(Bundle.module.bundleURL)
+        )
+    }
+
+    public static func aiCommandCompleted(_ name: String) -> LocalizedStringResource {
+        LocalizedStringResource(
+            "ai_command_completed \(name)",
+            bundle: .atURL(Bundle.module.bundleURL)
+        )
+    }
+
+    public static func aiCommandAlreadyCompleted(_ name: String) -> LocalizedStringResource {
+        LocalizedStringResource(
+            "ai_command_already_completed \(name)",
             bundle: .atURL(Bundle.module.bundleURL)
         )
     }

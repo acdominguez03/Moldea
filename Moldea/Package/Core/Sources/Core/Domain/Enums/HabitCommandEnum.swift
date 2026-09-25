@@ -8,5 +8,5 @@
 public enum HabitCommandEnum: Sendable, Equatable {
     case create(NewHabitDraft)
     case delete(habitID: Habit.ID)
-    case listCompleted
+    case complete(habitIDs: [Habit.ID])
 }

@@ -14,10 +14,11 @@ final class SpeechToTextViewModel {
     private(set) var isPresentingCommand = false
     private(set) var transcriptForAI = ""
 
-    let recognizer: any HabitCompletionRecognizing
     let parser: any HabitCommandParsing
     let createHabitUseCase: any CreateHabitUseCase
     let deleteHabitUseCase: any DeleteHabitUseCase
+    let completeHabitsUseCase: any CompleteHabitsUseCase
+    let getTodayHabitsUseCase: any GetTodayHabitsUseCase
 
     private let transcription = LiveTranscriptionModel()
 
@@ -31,11 +32,10 @@ final class SpeechToTextViewModel {
 
     init(
         habitRepository: any HabitRepository,
+        todayHabitsRepository: any TodayHabitsRepository,
         notificationScheduler: any HabitNotificationScheduler,
-        recognizer: any HabitCompletionRecognizing = FoundationModelsHabitCompletionRecognizer(),
         parser: any HabitCommandParsing = FoundationModelsHabitCommandParser()
     ) {
-        self.recognizer = recognizer
         self.parser = parser
         createHabitUseCase = DefaultCreateHabitUseCase(
             repository: habitRepository,
@@ -45,6 +45,8 @@ final class SpeechToTextViewModel {
             repository: habitRepository,
             notificationScheduler: notificationScheduler
         )
+        completeHabitsUseCase = DefaultCompleteHabitsUseCase(repository: habitRepository)
+        getTodayHabitsUseCase = DefaultGetTodayHabitsUseCase(repository: todayHabitsRepository)
     }
 
     func start() async {

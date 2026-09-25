@@ -21,6 +21,7 @@ struct MoldeaApp: App {
     @State private var router = AppRouter(initialFlow: .tabView)
     private let modelContainer: ModelContainer
     private let habitRepository: any HabitRepository
+    private let todayHabitsRepository: any TodayHabitsRepository
     private let userDefaultsRepository: any UserDefaultsRepository
     private let requestNotificationAuthorizationUseCase: any RequestNotificationAuthorizationUseCase
     private let requestMicrophoneAuthorizationUseCase: any RequestMicrophoneAuthorizationUseCase
@@ -31,6 +32,7 @@ struct MoldeaApp: App {
             let container = try MoldeaSchema.makeModelContainer(inMemory: Self.usesInMemoryStore)
             modelContainer = container
             habitRepository = SwiftDataHabitRepository(modelContainer: container)
+            todayHabitsRepository = SwiftDataTodayHabitsRepository(modelContainer: container)
             userDefaultsRepository = UserDefaultsRepositoryImpl()
             requestNotificationAuthorizationUseCase = DefaultRequestNotificationAuthorizationUseCase(
                 notificationPermissionRepository: UNUserNotificationCenterPermissionRepository(),
@@ -70,6 +72,7 @@ struct MoldeaApp: App {
                     } sheetContent: {
                         SpeechToTextView(
                             habitRepository: habitRepository,
+                            todayHabitsRepository: todayHabitsRepository,
                             userDefaultsRepository: userDefaultsRepository
                         )
                         .fittingSheetDetents()

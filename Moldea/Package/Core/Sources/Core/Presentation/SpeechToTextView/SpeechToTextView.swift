@@ -22,10 +22,15 @@ public struct SpeechToTextView: View {
         )
     }
 
-    public init(habitRepository: any HabitRepository, userDefaultsRepository: any UserDefaultsRepository) {
+    public init(
+        habitRepository: any HabitRepository,
+        todayHabitsRepository: any TodayHabitsRepository,
+        userDefaultsRepository: any UserDefaultsRepository
+    ) {
         _viewModel = State(
             initialValue: SpeechToTextViewModel(
                 habitRepository: habitRepository,
+                todayHabitsRepository: todayHabitsRepository,
                 notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
                     userDefaultsRepository: userDefaultsRepository
                 )
@@ -91,9 +96,10 @@ public struct SpeechToTextView: View {
         .navigationDestination(isPresented: isPresentingCommand) {
             HabitCommandView(
                 transcript: viewModel.transcriptForAI,
-                recognizer: viewModel.recognizer,
                 createHabitUseCase: viewModel.createHabitUseCase,
                 deleteHabitUseCase: viewModel.deleteHabitUseCase,
+                completeHabitsUseCase: viewModel.completeHabitsUseCase,
+                getTodayHabitsUseCase: viewModel.getTodayHabitsUseCase,
                 onFinish: {
                     viewModel.stop()
                     dismiss()

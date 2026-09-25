@@ -11,7 +11,7 @@ import Foundation
 enum HabitCommandKindEnum: Sendable, Equatable, CaseIterable {
     case create
     case delete
-    case listCompleted
+    case complete
 }
 
 extension HabitCommandEnum {
@@ -19,7 +19,7 @@ extension HabitCommandEnum {
         switch self {
         case .create: .create
         case .delete: .delete
-        case .listCompleted: .listCompleted
+        case .complete: .complete
         }
     }
 }
@@ -41,16 +41,16 @@ enum HabitCommandSamples {
         .init(phrase: "borra el hábito de correr", expected: .delete),
         .init(phrase: "quita el hábito de leer", expected: .delete),
         .init(phrase: "ya no quiero beber agua", expected: .delete),
-        .init(phrase: "hoy he bebido dos litros de agua", expected: .listCompleted),
+        .init(phrase: "hoy he bebido dos litros de agua", expected: .complete),
         .init(
             phrase: "he bebido dos litros de agua, he caminado veinte minutos y he salido a correr media hora",
-            expected: .listCompleted
+            expected: .complete
         ),
-        .init(phrase: "hoy no he corrido", expected: .listCompleted),
-        .init(phrase: "qué he completado esta semana", expected: .listCompleted),
+        .init(phrase: "hoy no he corrido", expected: .complete),
+        .init(phrase: "marca leer como hecho", expected: .complete),
         .init(phrase: "I want to create a habit of reading every day", expected: .create),
         .init(phrase: "delete the running habit", expected: .delete),
-        .init(phrase: "I drank two litres of water today", expected: .listCompleted),
+        .init(phrase: "I drank two litres of water today", expected: .complete),
     ]
 
     static let rotationKey = "com.moldea.debug.habitCommandSampleIndex"

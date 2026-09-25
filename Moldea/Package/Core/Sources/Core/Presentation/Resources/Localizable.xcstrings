@@ -1,6 +1,42 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "ai_command_already_completed %@" : {
+      "comment" : "Aviso al completar por voz un hábito que ya estaba completado hoy. La variable es el nombre del hábito.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’ve already completed “%@” today."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El hábito de «%@» ya ha sido completado hoy."
+          }
+        }
+      }
+    },
+    "ai_command_completed %@" : {
+      "comment" : "Resultado de completar un hábito por voz. La variable es el nombre del hábito.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habit “%@” completed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hábito «%@» completado."
+          }
+        }
+      }
+    },
     "ai_command_confirm" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -276,23 +312,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No se ha mencionado ningún hábito de tu lista."
-          }
-        }
-      }
-    },
-    "ai_recognizing_habits" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Checking which habits you mentioned…"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comprobando qué hábitos has mencionado…"
           }
         }
       }

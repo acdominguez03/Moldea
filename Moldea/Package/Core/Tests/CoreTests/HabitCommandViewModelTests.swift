@@ -11,7 +11,9 @@ private final class FakeHabitCommandParser: HabitCommandParsing {
 
     init(
         availability: LanguageModelAvailabilityEnum = .available,
-        result: Result<HabitCommandEnum, any Error> = .success(.listCompleted)
+        result: Result<HabitCommandEnum, any Error> = .success(
+            .complete(habitIDs: [])
+        )
     ) {
         self.availability = availability
         self.result = result
@@ -21,31 +23,45 @@ private final class FakeHabitCommandParser: HabitCommandParsing {
         prepareCount += 1
     }
 
-    func parseCommand(in transcript: String, from knownHabits: [Habit]) async throws -> HabitCommandEnum {
+    func parseCommand(
+        in transcript: String,
+        from knownHabits: [Habit],
+        today todayHabits: [TodayHabit]
+    ) async throws -> HabitCommandEnum {
         parsedTranscripts.append(transcript)
         return try result.get()
     }
 }
 
-@MainActor
-private final class FakeHabitsRecognizer: HabitCompletionRecognizing {
-    var availability: LanguageModelAvailabilityEnum = .available
-    var result: Result<[Habit], any Error>
-    private(set) var prepareCount = 0
+private actor FakeCompleteHabitsUseCase: CompleteHabitsUseCase {
+    private(set) var calls: [[Habit.ID]] = []
+    private let alreadyCompleted: Set<Habit.ID>
+    private let error: (any Error)?
 
-    var whileResponding: (() -> Void)?
-
-    init(result: Result<[Habit], any Error> = .success([])) {
-        self.result = result
+    init(alreadyCompleted: Set<Habit.ID> = [], error: (any Error)? = nil) {
+        self.alreadyCompleted = alreadyCompleted
+        self.error = error
     }
 
-    func prepare() {
-        prepareCount += 1
+    func execute(habitIDs: [Habit.ID], in todayHabits: [TodayHabit]) async throws -> CompleteHabitsResult {
+        calls.append(habitIDs)
+        if let error { throw error }
+        return CompleteHabitsResult(
+            completed: habitIDs.filter { !alreadyCompleted.contains($0) },
+            alreadyCompleted: habitIDs.filter { alreadyCompleted.contains($0) }
+        )
+    }
+}
+
+private actor FakeGetTodayHabitsUseCase: GetTodayHabitsUseCase {
+    private let habits: [TodayHabit]
+
+    init(habits: [TodayHabit]) {
+        self.habits = habits
     }
 
-    func recognizeCompletions(in transcript: String, from knownHabits: [Habit]) async throws -> [Habit] {
-        whileResponding?()
-        return try result.get()
+    func execute(on day: Date) async throws -> [TodayHabit] {
+        habits
     }
 }
 
@@ -107,18 +123,24 @@ private struct UseCaseFailure: Error {}
 @MainActor
 struct HabitCommandViewModelTests {
     private let leer = makeHabit(name: "Leer")
+    private let correr = makeHabit(name: "Correr")
+
+    private var todayHabits: [TodayHabit] {
+        [leer, correr].map { TodayHabit(habit: $0, completions: [], referenceDay: .now) }
+    }
 
     private func makeViewModel(
         parser: FakeHabitCommandParser = FakeHabitCommandParser(),
-        recognizer: FakeHabitsRecognizer = FakeHabitsRecognizer(),
         createHabitUseCase: FakeCreateHabitUseCase = FakeCreateHabitUseCase(),
-        deleteHabitUseCase: FakeDeleteHabitUseCase = FakeDeleteHabitUseCase()
+        deleteHabitUseCase: FakeDeleteHabitUseCase = FakeDeleteHabitUseCase(),
+        completeHabitsUseCase: FakeCompleteHabitsUseCase = FakeCompleteHabitsUseCase()
     ) -> HabitCommandViewModel {
         HabitCommandViewModel(
             parser: parser,
-            recognizer: recognizer,
             createHabitUseCase: createHabitUseCase,
-            deleteHabitUseCase: deleteHabitUseCase
+            deleteHabitUseCase: deleteHabitUseCase,
+            completeHabitsUseCase: completeHabitsUseCase,
+            getTodayHabitsUseCase: FakeGetTodayHabitsUseCase(habits: todayHabits)
         )
     }
 
@@ -151,13 +173,11 @@ struct HabitCommandViewModelTests {
 
     @Test func `Does not ask the model when it is unavailable`() async {
         let parser = FakeHabitCommandParser(availability: .unavailable(.modelNotReady))
-        let recognizer = FakeHabitsRecognizer()
-        let viewModel = makeViewModel(parser: parser, recognizer: recognizer)
+        let viewModel = makeViewModel(parser: parser)
 
         await viewModel.handle(transcript: "borra leer", knownHabits: [leer])
 
         #expect(parser.parsedTranscripts.isEmpty)
-        #expect(recognizer.prepareCount == 0)
         #expect(viewModel.phase == .parsing)
     }
 
@@ -192,36 +212,66 @@ struct HabitCommandViewModelTests {
         #expect(viewModel.errorMessage != nil)
     }
 
-    // MARK: Listar
+    // MARK: Completar
 
-    @Test func `Listing goes through recognizing and ends recognized`() async {
-        let recognizer = FakeHabitsRecognizer(result: .success([leer]))
-        let viewModel = makeViewModel(recognizer: recognizer)
-        var phaseWhileWorking: HabitCommandPhaseEnum?
-        recognizer.whileResponding = { phaseWhileWorking = viewModel.phase }
-
-        await viewModel.handle(transcript: "he leído hoy", knownHabits: [leer])
-
-        #expect(phaseWhileWorking == .recognizing)
-        #expect(viewModel.phase == .recognized([leer]))
-    }
-
-    @Test func `Listing with no results ends recognized and empty`() async {
-        let viewModel = makeViewModel()
-
-        await viewModel.handle(transcript: "hola", knownHabits: [leer])
-
-        #expect(viewModel.phase == .recognized([]))
-        #expect(viewModel.errorMessage == nil)
-    }
-
-    @Test func `A recognizer error fails with a message`() async {
-        let recognizer = FakeHabitsRecognizer(
-            result: .failure(LanguageModelErrorEnum.rateLimited)
+    @Test func `Completing saves the habits and ends done`() async {
+        let completeHabitsUseCase = FakeCompleteHabitsUseCase()
+        let parser = FakeHabitCommandParser(
+            result: .success(.complete(habitIDs: [leer.id, correr.id]))
         )
-        let viewModel = makeViewModel(recognizer: recognizer)
+        let viewModel = makeViewModel(parser: parser, completeHabitsUseCase: completeHabitsUseCase)
 
-        await viewModel.handle(transcript: "he leído hoy", knownHabits: [leer])
+        await viewModel.handle(transcript: "he leído y he corrido", knownHabits: [leer, correr])
+
+        #expect(await completeHabitsUseCase.calls == [[leer.id, correr.id]])
+        #expect(viewModel.phase == .done(.completed(completed: [leer, correr], alreadyCompleted: [])))
+    }
+
+    @Test func `Shows the already completed habits the use case reports apart`() async {
+        let completeHabitsUseCase = FakeCompleteHabitsUseCase(alreadyCompleted: [leer.id])
+        let parser = FakeHabitCommandParser(
+            result: .success(.complete(habitIDs: [leer.id, correr.id]))
+        )
+        let viewModel = makeViewModel(parser: parser, completeHabitsUseCase: completeHabitsUseCase)
+
+        await viewModel.handle(transcript: "he leído y he corrido", knownHabits: [leer, correr])
+
+        #expect(await completeHabitsUseCase.calls == [[leer.id, correr.id]])
+        #expect(viewModel.phase == .done(.completed(completed: [correr], alreadyCompleted: [leer])))
+    }
+
+    @Test func `Mentioning no habit fails with a message and saves nothing`() async {
+        let completeHabitsUseCase = FakeCompleteHabitsUseCase()
+        let viewModel = makeViewModel(completeHabitsUseCase: completeHabitsUseCase)
+
+        await viewModel.handle(transcript: "he nadado", knownHabits: [leer])
+
+        #expect(await completeHabitsUseCase.calls.isEmpty)
+        #expect(viewModel.phase == .failed)
+        #expect(viewModel.errorMessage == CoreTextsEnum.aiNoHabitsRecognized)
+    }
+
+    @Test func `Ignores ids that are not habits of today`() async {
+        let parser = FakeHabitCommandParser(
+            result: .success(.complete(habitIDs: [UUID()]))
+        )
+        let viewModel = makeViewModel(parser: parser)
+
+        await viewModel.handle(transcript: "he nadado", knownHabits: [leer])
+
+        #expect(viewModel.phase == .failed)
+    }
+
+    @Test func `A complete use case error fails with a message`() async {
+        let parser = FakeHabitCommandParser(
+            result: .success(.complete(habitIDs: [leer.id]))
+        )
+        let viewModel = makeViewModel(
+            parser: parser,
+            completeHabitsUseCase: FakeCompleteHabitsUseCase(error: UseCaseFailure())
+        )
+
+        await viewModel.handle(transcript: "he leído", knownHabits: [leer])
 
         #expect(viewModel.phase == .failed)
         #expect(viewModel.errorMessage != nil)
@@ -259,22 +309,6 @@ struct HabitCommandViewModelTests {
         #expect(viewModel.errorMessage == nil)
     }
 
-    // MARK: Precalentado
-
-    @Test(arguments: [
-        HabitCommandEnum.listCompleted,
-        .create(NewHabitDraft(name: "Correr", frequency: .daily, repetitionsPerDay: 1)),
-    ])
-    func `Prewarms the recognizer when the parse starts`(command: HabitCommandEnum) async {
-        let recognizer = FakeHabitsRecognizer()
-        let parser = FakeHabitCommandParser(result: .success(command))
-        let viewModel = makeViewModel(parser: parser, recognizer: recognizer)
-
-        await viewModel.handle(transcript: "lo que sea", knownHabits: [leer])
-
-        #expect(recognizer.prepareCount == 1)
-    }
-
     // MARK: Confirmación
 
     @Test func `Creates the habit with the default color and icon`() async {
@@ -308,10 +342,14 @@ struct HabitCommandViewModelTests {
         #expect(viewModel.phase == .done(.deleted(leer)))
     }
 
-    @Test func `Confirming the recognized list touches no use case`() async {
+    @Test func `Confirming after completing touches no other use case`() async {
         let createHabitUseCase = FakeCreateHabitUseCase()
         let deleteHabitUseCase = FakeDeleteHabitUseCase()
+        let parser = FakeHabitCommandParser(
+            result: .success(.complete(habitIDs: [leer.id]))
+        )
         let viewModel = makeViewModel(
+            parser: parser,
             createHabitUseCase: createHabitUseCase,
             deleteHabitUseCase: deleteHabitUseCase
         )
@@ -321,7 +359,7 @@ struct HabitCommandViewModelTests {
 
         #expect(await createHabitUseCase.calls.isEmpty)
         #expect(await deleteHabitUseCase.ids.isEmpty)
-        #expect(viewModel.phase == .recognized([]))
+        #expect(viewModel.phase == .done(.completed(completed: [leer], alreadyCompleted: [])))
     }
 
     @Test func `Confirming while still parsing does nothing`() async {
@@ -364,16 +402,32 @@ struct HabitCommandViewModelTests {
 
     // MARK: Cierre automático
 
-    @Test func `Auto dismisses when the list has results`() async {
-        let recognizer = FakeHabitsRecognizer(result: .success([leer]))
-        let viewModel = makeViewModel(recognizer: recognizer)
+    @Test func `Auto dismisses after completing habits`() async {
+        let parser = FakeHabitCommandParser(
+            result: .success(.complete(habitIDs: [leer.id]))
+        )
+        let viewModel = makeViewModel(parser: parser)
 
         await viewModel.handle(transcript: "he leído hoy", knownHabits: [leer])
 
         #expect(viewModel.shouldAutoDismiss)
     }
 
-    @Test func `Does not auto dismiss when the list is empty`() async {
+    @Test func `Does not auto dismiss when a habit was already completed`() async {
+        let parser = FakeHabitCommandParser(
+            result: .success(.complete(habitIDs: [correr.id, leer.id]))
+        )
+        let viewModel = makeViewModel(
+            parser: parser,
+            completeHabitsUseCase: FakeCompleteHabitsUseCase(alreadyCompleted: [leer.id])
+        )
+
+        await viewModel.handle(transcript: "he leído y he corrido", knownHabits: [leer, correr])
+
+        #expect(viewModel.shouldAutoDismiss == false)
+    }
+
+    @Test func `Does not auto dismiss when no habit was mentioned`() async {
         let viewModel = makeViewModel()
 
         await viewModel.handle(transcript: "hola", knownHabits: [leer])
@@ -423,10 +477,10 @@ struct HabitCommandViewModelTests {
         await viewModel.confirm()
         #expect(viewModel.phase == .done(.created(draft)))
 
-        parser.result = .success(.listCompleted)
+        parser.result = .success(.complete(habitIDs: [leer.id]))
         await viewModel.handle(transcript: "he leído hoy", knownHabits: [leer])
 
-        #expect(viewModel.phase == .recognized([]))
+        #expect(viewModel.phase == .done(.completed(completed: [leer], alreadyCompleted: [])))
         #expect(parser.parsedTranscripts == ["crea correr", "he leído hoy"])
     }
 }

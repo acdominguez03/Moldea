@@ -11,7 +11,7 @@ import FoundationModels
 enum GenerableCommandIntent {
     case create
     case delete
-    case listCompleted
+    case complete
 }
 
 @Generable
@@ -20,6 +20,14 @@ struct GenerableCommandDecision {
 
     @Guide(description: "El comando, y nada más")
     var command: GenerableCommandIntent
+}
+
+@Generable
+struct GenerableActivityMatch {
+    var reasoning: String
+
+    @Guide(description: "true solo si la actividad y el hábito son la misma actividad")
+    var isSameActivity: Bool
 }
 
 @Generable

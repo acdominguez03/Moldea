@@ -11,5 +11,9 @@ protocol HabitCommandParsing {
 
     func prepare()
 
-    func parseCommand(in transcript: String, from knownHabits: [Habit]) async throws -> HabitCommandEnum
+    func parseCommand(
+        in transcript: String,
+        from knownHabits: [Habit],
+        today todayHabits: [TodayHabit]
+    ) async throws -> HabitCommandEnum
 }

@@ -15,9 +15,10 @@ final class HabitCommandViewModel: BaseViewModel {
     private(set) var errorMessage: LocalizedStringResource?
 
     private let parser: any HabitCommandParsing
-    private let recognizer: any HabitCompletionRecognizing
     private let createHabitUseCase: any CreateHabitUseCase
     private let deleteHabitUseCase: any DeleteHabitUseCase
+    private let completeHabitsUseCase: any CompleteHabitsUseCase
+    private let getTodayHabitsUseCase: any GetTodayHabitsUseCase
 
     var availability: LanguageModelAvailabilityEnum { parser.availability }
 
@@ -27,20 +28,22 @@ final class HabitCommandViewModel: BaseViewModel {
     }
 
     var shouldAutoDismiss: Bool {
-        guard case .recognized(let habits) = phase else { return false }
-        return !habits.isEmpty
+        guard case .done(.completed(_, let alreadyCompleted)) = phase else { return false }
+        return alreadyCompleted.isEmpty
     }
 
     init(
         parser: any HabitCommandParsing,
-        recognizer: any HabitCompletionRecognizing,
         createHabitUseCase: any CreateHabitUseCase,
-        deleteHabitUseCase: any DeleteHabitUseCase
+        deleteHabitUseCase: any DeleteHabitUseCase,
+        completeHabitsUseCase: any CompleteHabitsUseCase,
+        getTodayHabitsUseCase: any GetTodayHabitsUseCase
     ) {
         self.parser = parser
-        self.recognizer = recognizer
         self.createHabitUseCase = createHabitUseCase
         self.deleteHabitUseCase = deleteHabitUseCase
+        self.completeHabitsUseCase = completeHabitsUseCase
+        self.getTodayHabitsUseCase = getTodayHabitsUseCase
     }
 
     func setLoading(_ isLoading: Bool) {
@@ -52,17 +55,18 @@ final class HabitCommandViewModel: BaseViewModel {
     }
 
     func handle(transcript: String, knownHabits: [Habit]) async {
-        guard phase != .recognizing else { return }
-
         errorMessage = nil
         phase = .parsing
 
         guard case .available = availability else { return }
 
-        recognizer.prepare()
-
         do {
-            phase = try await resolve(transcript: transcript, knownHabits: knownHabits)
+            let todayHabits = try await getTodayHabitsUseCase.execute(on: .now)
+            phase = try await resolve(
+                transcript: transcript,
+                knownHabits: knownHabits,
+                todayHabits: todayHabits
+            )
         } catch is CancellationError {
         } catch let error as HabitCommandErrorEnum {
             fail(with: Self.message(for: error))
@@ -95,16 +99,23 @@ final class HabitCommandViewModel: BaseViewModel {
             if errorMessage == nil {
                 phase = .done(.deleted(habit))
             }
-        case .parsing, .recognizing, .recognized, .done, .failed:
+        case .parsing, .done, .failed:
             break
         }
     }
 
     private func resolve(
         transcript: String,
-        knownHabits: [Habit]
+        knownHabits: [Habit],
+        todayHabits: [TodayHabit]
     ) async throws -> HabitCommandPhaseEnum {
-        switch try await parser.parseCommand(in: transcript, from: knownHabits) {
+        let command = try await parser.parseCommand(
+            in: transcript,
+            from: knownHabits,
+            today: todayHabits
+        )
+
+        switch command {
         case .create(let draft):
             return .confirmingCreate(draft)
         case .delete(let habitID):
@@ -112,12 +123,29 @@ final class HabitCommandViewModel: BaseViewModel {
                 throw HabitCommandErrorEnum.habitNotFound
             }
             return .confirmingDelete(habit)
-        case .listCompleted:
-            phase = .recognizing
-            return .recognized(
-                try await recognizer.recognizeCompletions(in: transcript, from: knownHabits)
+        case .complete(let habitIDs):
+            let habits = todayHabits.map(\.habit)
+            let mentioned = habitIDs.filter { id in habits.contains { $0.id == id } }
+
+            guard !mentioned.isEmpty else {
+                throw HabitCommandErrorEnum.noHabitsMentioned
+            }
+
+            let result = try await completeHabitsUseCase.execute(
+                habitIDs: mentioned,
+                in: todayHabits
+            )
+            return .done(
+                .completed(
+                    completed: Self.habits(result.completed, in: habits),
+                    alreadyCompleted: Self.habits(result.alreadyCompleted, in: habits)
+                )
             )
         }
+    }
+
+    private static func habits(_ ids: [Habit.ID], in habits: [Habit]) -> [Habit] {
+        ids.compactMap { id in habits.first { $0.id == id } }
     }
 
     private func fail(with message: LocalizedStringResource) {
@@ -141,6 +169,7 @@ final class HabitCommandViewModel: BaseViewModel {
         switch error {
         case .notUnderstood: CoreTextsEnum.aiErrorNotUnderstood
         case .habitNotFound: CoreTextsEnum.aiErrorHabitNotFound
+        case .noHabitsMentioned: CoreTextsEnum.aiNoHabitsRecognized
         case .missingFrequencyData, .schemaFailed: CoreTextsEnum.aiErrorInvalidCommand
         }
     }
