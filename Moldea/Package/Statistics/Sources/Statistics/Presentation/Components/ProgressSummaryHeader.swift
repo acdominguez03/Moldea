@@ -17,7 +17,7 @@ struct ProgressSummaryHeader: View {
     }
 
     var body: some View {
-        HStack(spacing: 5) {
+        HStack(alignment: .bottom, spacing: 10) {
             Text(percentage, format: .percent)
                 .font(.title)
                 .fontWeight(.bold)
@@ -29,6 +29,7 @@ struct ProgressSummaryHeader: View {
                 .foregroundStyle(.secondary)
         }
         .accessibilityElement(children: .combine)
+        .lineLimit(1)
     }
 }
 

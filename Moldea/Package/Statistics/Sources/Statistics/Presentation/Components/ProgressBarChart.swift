@@ -43,7 +43,7 @@ struct ProgressBarChart: View {
         .chartLegend(.hidden)
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)
-        .frame(height: 200)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

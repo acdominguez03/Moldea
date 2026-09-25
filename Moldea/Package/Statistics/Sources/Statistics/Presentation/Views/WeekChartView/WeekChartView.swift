@@ -19,7 +19,7 @@ struct WeekChartView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 20) {
             ProgressSummaryHeader(
                 percentage: weekChartViewModel.totalProgress,
                 summary: StatisticsTextsEnum.weekChartSummary
@@ -40,7 +40,7 @@ struct WeekChartView: View {
     private var chartInput: [Int] {
         weeklyHabits.map(\.completions.count) + [weeklyHabits.count]
     }
-    }
+}
 
 
 #Preview {

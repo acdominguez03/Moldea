@@ -37,10 +37,14 @@ struct HabitProgressCard: View {
                 .tint(color)
                 .frame(maxWidth: 100)
             
-            Text(percentage, format: .percent)
+            Text(100, format: .percent)
+                .hidden()
+                .overlay(alignment: .trailing) {
+                    Text(percentage, format: .percent)
+                }
                 .font(.body)
                 .fontWeight(.medium)
-                .foregroundStyle(.primary)
+                .monospacedDigit()
         }
     }
 }
