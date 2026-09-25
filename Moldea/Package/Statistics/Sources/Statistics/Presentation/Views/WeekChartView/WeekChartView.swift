@@ -43,6 +43,6 @@ struct WeekChartView: View {
 }
 
 
-#Preview {
-    WeekChartView(weekChartViewModel: WeekChartViewModel(calculateHabitProgressUseCase: CalculateHabitsProgressUseCase()))
+#Preview(traits: .moldea) {
+    WeekChartView(weekChartViewModel: StatisticsDependencies.preview.makeWeekChartViewModel())
 }

@@ -9,6 +9,18 @@ import SwiftUI
 import Core
 
 struct HabitFormView: View {
+    @Environment(\.habitsDependencies) private var dependencies
+    var editing: Habit? = nil
+
+    var body: some View {
+        HabitFormContentView(
+            habitFormViewModel: dependencies.makeHabitFormViewModel(editing: editing),
+            iconCatalog: dependencies.iconCatalog
+        )
+    }
+}
+
+struct HabitFormContentView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var habitFormViewModel: HabitFormViewModel
     @State private var isShowingIconChooser = false
@@ -191,25 +203,5 @@ struct HabitFormView: View {
 }
 
 #Preview {
-    HabitFormView(
-        habitFormViewModel: HabitFormViewModel(
-            createHabitUseCase: DefaultCreateHabitUseCase(
-                repository: SwiftDataHabitRepository(
-                    modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
-                ),
-                notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
-                    userDefaultsRepository: UserDefaultsRepositoryImpl()
-                )
-            ),
-            updateHabitUseCase: DefaultUpdateHabitUseCase(
-                repository: SwiftDataHabitRepository(
-                    modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
-                ),
-                notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
-                    userDefaultsRepository: UserDefaultsRepositoryImpl()
-                )
-            )
-        ),
-        iconCatalog: BundleHabitIconCatalog()
-    )
+    HabitFormView()
 }

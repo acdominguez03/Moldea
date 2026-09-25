@@ -43,6 +43,6 @@ struct MonthChartView: View {
 }
 
 
-#Preview {
-    MonthChartView(monthChartViewModel: MonthChartViewModel(calculateHabitProgressUseCase: CalculateHabitsProgressUseCase()))
+#Preview(traits: .moldea) {
+    MonthChartView(monthChartViewModel: StatisticsDependencies.preview.makeMonthChartViewModel())
 }

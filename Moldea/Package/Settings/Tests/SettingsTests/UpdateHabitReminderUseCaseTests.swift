@@ -23,6 +23,8 @@ private actor FakeHabitRepository: HabitRepository {
         updateReminderCalls.append((id: id, reminder: reminder))
     }
 
+    func setCompletions(habitID: Habit.ID, day: Date, count: Int, completedAt: Date) async throws {}
+
     func update(
         id: Habit.ID,
         name: String,

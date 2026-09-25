@@ -8,6 +8,16 @@
 import SwiftUI
 
 public struct SpeechToTextView: View {
+    @Environment(\.coreDependencies) private var dependencies
+
+    public init() {}
+
+    public var body: some View {
+        SpeechToTextContentView(viewModel: dependencies.makeSpeechToTextViewModel())
+    }
+}
+
+struct SpeechToTextContentView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel: SpeechToTextViewModel
@@ -22,23 +32,11 @@ public struct SpeechToTextView: View {
         )
     }
 
-    public init(
-        habitRepository: any HabitRepository,
-        todayHabitsRepository: any TodayHabitsRepository,
-        userDefaultsRepository: any UserDefaultsRepository
-    ) {
-        _viewModel = State(
-            initialValue: SpeechToTextViewModel(
-                habitRepository: habitRepository,
-                todayHabitsRepository: todayHabitsRepository,
-                notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
-                    userDefaultsRepository: userDefaultsRepository
-                )
-            )
-        )
+    init(viewModel: SpeechToTextViewModel) {
+        _viewModel = State(initialValue: viewModel)
     }
-    
-    public var body: some View {
+
+    var body: some View {
         VStack(spacing: 20) {
             Group {
                 if viewModel.hasTranscript {

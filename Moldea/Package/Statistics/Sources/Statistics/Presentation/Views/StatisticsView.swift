@@ -9,6 +9,7 @@ import SwiftUI
 import Core
 
 public struct StatisticsView: View {
+    @Environment(\.statisticsDependencies) private var dependencies
 
     @HabitsQuery private var habits: [Habit]
 
@@ -53,21 +54,19 @@ public struct StatisticsView: View {
 
     @ViewBuilder
     private var filterContent: some View {
-        let calculateHabitProgressUseCase = CalculateHabitsProgressUseCase()
-
         switch filterSelected {
         case .day:
-            DayChartView(dayChartViewModel: DayChartViewModel(calculateHabitProgressUseCase: calculateHabitProgressUseCase))
+            DayChartView(dayChartViewModel: dependencies.makeDayChartViewModel())
         case .week:
-            WeekChartView(weekChartViewModel: WeekChartViewModel(calculateHabitProgressUseCase: calculateHabitProgressUseCase))
+            WeekChartView(weekChartViewModel: dependencies.makeWeekChartViewModel())
         case .month:
-            MonthChartView(monthChartViewModel: MonthChartViewModel(calculateHabitProgressUseCase: calculateHabitProgressUseCase))
+            MonthChartView(monthChartViewModel: dependencies.makeMonthChartViewModel())
         case .year:
-            YearChartView(yearChartViewModel: YearChartViewModel(calculateHabitProgressUseCase: calculateHabitProgressUseCase))
+            YearChartView(yearChartViewModel: dependencies.makeYearChartViewModel())
         }
     }
 }
 
-#Preview {
+#Preview(traits: .moldea) {
     StatisticsView()
 }

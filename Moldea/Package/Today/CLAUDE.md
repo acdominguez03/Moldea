@@ -20,6 +20,7 @@ nada de `Core`.
 
 ```
 Sources/Today/
+├── DI/TodayDependencies.swift   # contenedor + @Entry \.todayDependencies
 ├── Data/           # repositorios y fuentes de datos (vacía por ahora)
 ├── Domain/         # modelos y casos de uso (vacía por ahora)
 └── Presentation/
@@ -47,8 +48,10 @@ completion no necesita recarga: SwiftData republica y la vista se repinta sola.
 ### Progreso de la cabecera
 
 El porcentaje **no se calcula en la vista**: lo da `CalculateHabitsProgressUseCase`, de `Core`
-(la fórmula y su porqué están en el `CLAUDE.md` de `Core`). `TodayView` lo construye en su `init`
-y lo consulta con `todayViewModel.progress(for: habits)`, donde `habits` es la lista de la
+(la fórmula y su porqué están en el `CLAUDE.md` de `Core`). `TodayDependencies.makeTodayViewModel()` se lo
+pasa al view model (con `core.calculateHabitsProgress`, `core.toggleHabitCompletion` y
+`core.todayProgressStore`); `TodayView` es `public init()`, lee `\.todayDependencies` y pinta
+`TodayContentView(viewModel:)`, que lo consulta con `todayViewModel.progress(for: habits)`, donde `habits` es la lista de la
 pestaña activa.
 
 El único trabajo de `TodayViewModel` aquí es traducir su estado de UI al parámetro del caso de

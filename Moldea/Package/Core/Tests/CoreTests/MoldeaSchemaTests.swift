@@ -21,7 +21,7 @@ struct MoldeaSchemaTests {
         let container = try MoldeaSchema.makeModelContainer(inMemory: true)
 
         let entityNames = Set(container.schema.entities.map(\.name))
-        #expect(entityNames == ["HabitEntity", "HabitScheduleEntity", "HabitCompletionEntity"])
+        #expect(entityNames == ["HabitEntity", "HabitScheduleEntity", "HabitCompletionEntity", "HabitReminderEntity"])
     }
 
     @Test func persistsHabitWithScheduleAndCompletions() throws {

@@ -14,7 +14,6 @@ import Today
 import Statistics
 import Habits
 import Settings
-import Core
 
 @main
 struct MoldeaApp: App {
@@ -22,28 +21,14 @@ struct MoldeaApp: App {
     @State private var router = AppRouter(initialFlow: .tabView)
     @Environment(\.scenePhase) private var scenePhase
     private let modelContainer: ModelContainer
-    private let habitRepository: any HabitRepository
-    private let todayHabitsRepository: any TodayHabitsRepository
-    private let userDefaultsRepository: any UserDefaultsRepository
-    private let requestNotificationAuthorizationUseCase: any RequestNotificationAuthorizationUseCase
-    private let requestMicrophoneAuthorizationUseCase: any RequestMicrophoneAuthorizationUseCase
+    private let dependencies: AppDependencies
     private let isDeviceEligibleForAppleIntelligence = FoundationModelsDeviceEligibility.isDeviceEligible
 
     init() {
         do {
             let container = try MoldeaSchema.makeModelContainer(inMemory: Self.usesInMemoryStore)
             modelContainer = container
-            habitRepository = SwiftDataHabitRepository(modelContainer: container)
-            todayHabitsRepository = SwiftDataTodayHabitsRepository(modelContainer: container)
-            userDefaultsRepository = UserDefaultsRepositoryImpl()
-            requestNotificationAuthorizationUseCase = DefaultRequestNotificationAuthorizationUseCase(
-                notificationPermissionRepository: UNUserNotificationCenterPermissionRepository(),
-                userDefaultsRepository: userDefaultsRepository
-            )
-            requestMicrophoneAuthorizationUseCase = DefaultRequestMicrophoneAuthorizationUseCase(
-                microphonePermissionRepository: AVAudioApplicationMicrophonePermissionRepository(),
-                userDefaultsRepository: userDefaultsRepository
-            )
+            dependencies = .live(container: container)
         } catch {
             fatalError("No se pudo crear el ModelContainer: \(error)")
         }
@@ -72,18 +57,19 @@ struct MoldeaApp: App {
                     ) { tab in
                         tabContent(for: tab)
                     } sheetContent: {
-                        SpeechToTextView(
-                            habitRepository: habitRepository,
-                            todayHabitsRepository: todayHabitsRepository,
-                            userDefaultsRepository: userDefaultsRepository
-                        )
-                        .fittingSheetDetents()
+                        SpeechToTextView()
+                            .fittingSheetDetents()
                     }
                 }
             }
+            .environment(\.coreDependencies, dependencies.core)
+            .environment(\.habitsDependencies, dependencies.habits)
+            .environment(\.todayDependencies, dependencies.today)
+            .environment(\.statisticsDependencies, dependencies.statistics)
+            .environment(\.settingsDependencies, dependencies.settings)
             .task {
-                await requestNotificationAuthorizationUseCase.execute()
-                await requestMicrophoneAuthorizationUseCase.execute()
+                await dependencies.core.requestNotificationAuthorization.execute()
+                await dependencies.core.requestMicrophoneAuthorization.execute()
             }
             /*.task {
                 try? SampleDataSeeder.seed(in: modelContainer)
@@ -104,16 +90,13 @@ struct MoldeaApp: App {
     private func tabContent(for tab: MainTab) -> some View {
         switch tab {
         case .today:
-            TodayView(habitRepository: habitRepository)
+            TodayView()
         case .statistics:
             StatisticsView()
         case .habits:
-            HabitsView(habitRepository: habitRepository, userDefaultsRepository: userDefaultsRepository)
+            HabitsView()
         case .settings:
-            SettingsView(
-                habitRepository: habitRepository,
-                userDefaultsRepository: userDefaultsRepository
-            )
+            SettingsView()
         case .microphone:
             EmptyView()
         }

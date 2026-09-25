@@ -117,7 +117,8 @@ Moldea/
 ├── CLAUDE.md                  # este fichero
 ├── Moldea.xcodeproj
 ├── Moldea/                    # target de la app
-│   ├── MoldeaApp.swift        # @main: ModelContainer, repositorio y composición de la navegación
+│   ├── MoldeaApp.swift        # @main: ModelContainer, inyección de dependencias y navegación
+│   ├── DI/AppDependencies.swift  # compone Core y las dependencias de cada feature
 │   ├── Assets.xcassets
 │   └── Package/               # todos los paquetes locales
 │       ├── Core/
@@ -191,13 +192,14 @@ target `Moldea`.
 - Las features dependen como mucho de `Core`. **Nunca entre ellas.** Si dos necesitan lo mismo,
   eso pertenece a `Core`.
 - Solo el target `Moldea` importa features. `MoldeaApp` es el punto de composición: crea el
-  `ModelContainer` y el repositorio, instancia los routers y decide qué vista va en cada
+  `ModelContainer` y `AppDependencies`, inyecta las dependencias en el entorno, instancia los routers y decide qué vista va en cada
   `MainTab`.
 
 ### Las tres capas de un paquete
 
 ```
 Sources/<Paquete>/
+├── DI/             # <Paquete>Dependencies y su @Entry (ver Composición)
 ├── Domain/         # el qué: entidades, casos de uso, protocolos de repositorio
 ├── Data/           # el cómo: implementaciones de repositorio, SwiftData, recursos, red
 └── Presentation/   # la UI: vistas, view models, textos, recursos
@@ -301,10 +303,35 @@ Botón Guardar → HabitFormViewModel.save()
 
 ### Composición
 
-`MoldeaApp` crea el `ModelContainer` una sola vez con `MoldeaSchema.makeModelContainer()`, lo
-propaga con `.modelContainer(_:)` y crea `SwiftDataHabitRepository(modelContainer:)`. Las
-features reciben el repositorio como `any HabitRepository` en su `init` público y construyen sus
-casos de uso por dentro, así que sus tipos de `Data` y de `Domain` siguen siendo `internal`.
+Inyección por entorno, **un contenedor de dependencias por paquete**, cada uno en la carpeta
+`DI/` de su módulo. Solo `Moldea` los conoce todos:
+
+| Paquete    | Contenedor               | Clave de entorno          | Se construye con          |
+| ---------- | ------------------------ | ------------------------- | ------------------------- |
+| Core       | `CoreDependencies`       | `\.coreDependencies`      | `.live(container:)`       |
+| Habits     | `HabitsDependencies`     | `\.habitsDependencies`    | `init(core:)`             |
+| Today      | `TodayDependencies`      | `\.todayDependencies`     | `init(core:)`             |
+| Statistics | `StatisticsDependencies` | `\.statisticsDependencies`| `init(core:)`             |
+| Settings   | `SettingsDependencies`   | `\.settingsDependencies`  | `init(core:)`             |
+| Moldea     | `AppDependencies`        | —                         | `.live(container:)`       |
+
+- **`CoreDependencies`** (`Sendable`) guarda los repositorios compartidos (una sola instancia de
+  cada uno, incluido el `HabitNotificationScheduler`) y expone los casos de uso de `Core` como
+  propiedades calculadas (`createHabit`, `toggleHabitCompletion`…). Las features reciben un
+  `CoreDependencies`, nunca el de otra feature.
+- **Cada `<Feature>Dependencies`** construye con eso sus view models (`makeHabitsViewModel()`,
+  `makeHabitFormViewModel(editing:)`…, `@MainActor` e `internal`) y sus casos de uso propios
+  (los de `Settings`). Los `init` de los view models no cambian: siguen recibiendo protocolos.
+- **`MoldeaApp`** crea el `ModelContainer` una vez, construye `AppDependencies.live(container:)`
+  y aplica sobre `RootView` `.modelContainer(_:)` y los cinco `.environment(\.<clave>, …)`. El
+  sheet de `MainTabsView` los hereda.
+- **Los defaults del `@Entry` son `XDependencies.preview`, un `static let`**, sobre un contenedor
+  en memoria. Tiene que ser estable: SwiftUI reevalúa el default en cada lectura que cae a él, y
+  una instancia nueva invalidaría a todos los lectores con cualquier cambio de entorno (guía de
+  _Environment_ de Apple). Contrapartida: una vista a la que se le olvide la inyección funciona
+  **en silencio** contra el almacén en memoria y pierde los datos.
+- Intents y widgets no usan esto: corren fuera del árbol de vistas y siguen construyendo sus
+  dependencias en línea.
 
 ### Colores de los hábitos
 
@@ -380,9 +407,19 @@ Reglas:
 - Un view model por pantalla, en `Presentation`, nombrado `<Pantalla>ViewModel`.
 - `@Observable`, nunca `ObservableObject`. **Nada de Combine**: `async`/`await` y observación.
 - Estado publicado con `private(set)`; se cambia desde métodos del propio view model.
-- Las dependencias entran por el `init`, siempre como protocolo. Nada de _singletons_.
-- En la vista, `@State private var viewModel = ...` cuando la vista lo posee; por parámetro
-  cuando lo posee quien la presenta.
+- Las dependencias del view model entran por su `init`, siempre como protocolo. Nada de
+  _singletons_.
+- **`XView` / `XContentView`.** `@State` necesita su valor en el `init` de la vista, y el entorno
+  solo está disponible en `body`; así que una vista no puede crear su propio view model a partir
+  del `@Entry`. Por eso la vista pública `XView` (sin parámetros) lee
+  `@Environment(\.<paquete>Dependencies)` y en su `body` pinta
+  `XContentView(viewModel: dependencies.makeXViewModel())`; `XContentView` (interna) guarda el
+  `@State private var viewModel` y toda la UI. Aunque `body` cree un view model en cada pasada,
+  `@State` solo conserva el primero. Hoy: `HabitsView`, `HabitFormView(editing:)`, `TodayView`,
+  `SettingsView` y `SpeechToTextView`.
+- **Si la vista no tiene view model propio no hay `ContentView`:** `StatisticsView` lee el
+  entorno directamente y pasa el view model a cada gráfica (`DayChartView(dayChartViewModel:)`),
+  que es la que guarda el `@State`.
 - Vistas pequeñas y privadas dentro del mismo fichero cuando son de un solo uso; `internal`
   dentro del paquete cuando se comparten entre ficheros del módulo (`WaveAnimation` en `Core`).
 - Nada de `@MainActor` a mano en la vista: ya lo es. Sí en el view model.
@@ -421,6 +458,17 @@ que por eso reciben sus dependencias por protocolo.
   runtime 26.x. Con `xcodebuild -showdestinations -scheme <Paquete>` se ven los válidos; un
   `iPhone` con iOS 18.5 (que sí sale en `simctl`) no sirve.
 - El rollback del repositorio ante un `save()` fallido no tiene test.
+
+### Previews
+
+- **Vistas con queries** (`@HabitsQuery`, `@TodayHabitsQuery`…): `#Preview(traits: .moldea)`.
+  El trait (`MoldeaPreviewModifier`, en `Core/DI`) siembra una vez con `SampleDataSeeder` el
+  contenedor de `CoreDependencies.preview` y aplica `.modelContainer` y `\.coreDependencies`.
+  Como los defaults de las features salen del mismo `CoreDependencies.preview`, todas ven esos
+  datos.
+- **Vistas sin queries**: `#Preview { HabitFormView() }`, que usa el default del `@Entry`.
+- **Una `XContentView` o un componente** que pida un view model:
+  `XDependencies.preview.makeXViewModel()`.
 
 ## Notas de trabajo
 

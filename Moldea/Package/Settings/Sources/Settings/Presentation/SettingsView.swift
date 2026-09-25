@@ -10,15 +10,23 @@ import UIKit
 import Core
 
 public struct SettingsView: View {
+    @Environment(\.settingsDependencies) private var dependencies
+
+    public init() {}
+
+    public var body: some View {
+        SettingsContentView(viewModel: dependencies.makeSettingsViewModel())
+    }
+}
+
+struct SettingsContentView: View {
     @State private var settingsViewModel: SettingsViewModel
     @State private var habitToEditReminder: Habit?
     @HabitsQuery private var habits: [Habit]
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
+    @Environment(\.settingsDependencies) private var dependencies
 
-    private let habitRepository: any HabitRepository
-    private let userDefaultsRepository: UserDefaultsRepository
-    
     private var isNotificationsEnabledBinding: Binding<Bool> {
         Binding(
             get: { settingsViewModel.isNotificationsEnabled },
@@ -26,33 +34,8 @@ public struct SettingsView: View {
         )
     }
     
-    public init(habitRepository: any HabitRepository, userDefaultsRepository: any UserDefaultsRepository) {
-        self.habitRepository = habitRepository
-        self.userDefaultsRepository = userDefaultsRepository
-        
-        _settingsViewModel = State(
-            initialValue: SettingsViewModel(
-                setHabitReminderEnabledUseCase: DefaultSetHabitReminderEnabledUseCase(
-                    repository: habitRepository
-                ),
-                getIsNotificationsEnabledUseCase: GetIsNotificationsEnabledUseCase(
-                    userDefaultsRepository: userDefaultsRepository
-                ),
-                setIsNotificationsEnabledUseCase: SetIsNotificationsEnabledUseCase(
-                    userDefaultsRepository: userDefaultsRepository,
-                    notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
-                        userDefaultsRepository: userDefaultsRepository
-                    )
-                ),
-                getIsNotificationPermissionAllowedUseCase: GetIsNotificationPermissionAllowedUseCase(
-                    userDefaultsRepository: userDefaultsRepository
-                ),
-                requestNotificationAuthorizationUseCase: DefaultRequestNotificationAuthorizationUseCase(
-                    notificationPermissionRepository: UNUserNotificationCenterPermissionRepository(),
-                    userDefaultsRepository: userDefaultsRepository
-                ),
-            )
-        )
+    init(viewModel: SettingsViewModel) {
+        _settingsViewModel = State(initialValue: viewModel)
     }
 
     private func openNotificationSettings() {
@@ -69,8 +52,8 @@ public struct SettingsView: View {
         activeHabits.count(where: \.hasActiveReminder)
     }
     
-    
-    public var body: some View {
+
+    var body: some View {
         NavigationStack {
             List {
                 if settingsViewModel.isNotificationPermissionAllowed {
@@ -136,15 +119,7 @@ public struct SettingsView: View {
             .sheet(item: $habitToEditReminder) { habit in
                 HabitReminderSheet(
                     habit: habit,
-                    habitReminderSheetViewModel: HabitReminderSheetViewModel(
-                        habit: habit,
-                        updateHabitReminderUseCase: DefaultUpdateHabitReminderUseCase(
-                            repository: habitRepository,
-                            notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
-                                userDefaultsRepository: userDefaultsRepository
-                            )
-                        )
-                    )
+                    habitReminderSheetViewModel: dependencies.makeHabitReminderSheetViewModel(habit: habit)
                 )
                 .fittingSheetDetents(extraDetents: [.medium])
             }
@@ -157,11 +132,6 @@ public struct SettingsView: View {
     }
 }
 
-#Preview {
-    SettingsView(
-        habitRepository: SwiftDataHabitRepository(
-            modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
-        ),
-        userDefaultsRepository: UserDefaultsRepositoryImpl()
-    )
+#Preview(traits: .moldea) {
+    SettingsView()
 }

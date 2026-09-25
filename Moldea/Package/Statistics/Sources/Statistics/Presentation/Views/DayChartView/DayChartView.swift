@@ -61,6 +61,6 @@ struct DayChartView: View {
 }
 
 
-#Preview {
-    DayChartView(dayChartViewModel: DayChartViewModel(calculateHabitProgressUseCase: CalculateHabitsProgressUseCase()))
+#Preview(traits: .moldea) {
+    DayChartView(dayChartViewModel: StatisticsDependencies.preview.makeDayChartViewModel())
 }

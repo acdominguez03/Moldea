@@ -9,6 +9,16 @@ import SwiftUI
 import Core
 
 public struct HabitsView: View {
+    @Environment(\.habitsDependencies) private var dependencies
+
+    public init() {}
+
+    public var body: some View {
+        HabitsContentView(viewModel: dependencies.makeHabitsViewModel())
+    }
+}
+
+struct HabitsContentView: View {
     @State private var habitsViewModel: HabitsViewModel
     @State private var isSheetPresented: Bool = false
     @HabitsQuery private var habits: [Habit]
@@ -27,36 +37,11 @@ public struct HabitsView: View {
         )
     }
 
-    private let createHabitUseCase: any CreateHabitUseCase
-    private let updateHabitUseCase: any UpdateHabitUseCase
-
-    public init(habitRepository: any HabitRepository, userDefaultsRepository: any UserDefaultsRepository) {
-        let notificationScheduler = UNUserNotificationCenterHabitNotificationScheduler(
-            userDefaultsRepository: userDefaultsRepository
-        )
-        self.createHabitUseCase = DefaultCreateHabitUseCase(
-            repository: habitRepository,
-            notificationScheduler: notificationScheduler
-        )
-        self.updateHabitUseCase = DefaultUpdateHabitUseCase(
-            repository: habitRepository,
-            notificationScheduler: notificationScheduler
-        )
-        _habitsViewModel = State(
-            initialValue: HabitsViewModel(
-                deleteHabitUseCase: DefaultDeleteHabitUseCase(
-                    repository: habitRepository,
-                    notificationScheduler: notificationScheduler
-                ),
-                setHabitActiveUseCase: DefaultSetHabitActiveUseCase(
-                    repository: habitRepository,
-                    notificationScheduler: notificationScheduler
-                )
-            )
-        )
+    init(viewModel: HabitsViewModel) {
+        _habitsViewModel = State(initialValue: viewModel)
     }
-    
-    public var body: some View {
+
+    var body: some View {
         NavigationStack {
             Group {
                 if habits.isEmpty {
@@ -124,42 +109,15 @@ public struct HabitsView: View {
                 }
             }
             .sheet(isPresented: $isSheetPresented) {
-                HabitFormView(
-                    habitFormViewModel: HabitFormViewModel(
-                        createHabitUseCase: createHabitUseCase,
-                        updateHabitUseCase: updateHabitUseCase
-                    ),
-                    iconCatalog: BundleHabitIconCatalog()
-                )
+                HabitFormView()
             }
             .sheet(item: habitToEdit) { habit in
-                HabitFormView(
-                    habitFormViewModel: HabitFormViewModel(
-                        id: habit.id,
-                        name: habit.name,
-                        color: habit.color,
-                        icon: habit.icon,
-                        frequency: habit.schedule.frequency,
-                        repetitionsPerDay: habit.schedule.repetitionsPerDay,
-                        createHabitUseCase: createHabitUseCase,
-                        updateHabitUseCase: updateHabitUseCase,
-                        isRemindHabitEnabled: habit.reminder?.isEnabled ?? false,
-                        isMutedOnWeekends: habit.reminder?.isMutedOnWeekends ?? false,
-                        reminderTime: habit.reminder?.time ?? HabitFormViewModel
-                            .defaultReminderTime()
-                    ),
-                    iconCatalog: BundleHabitIconCatalog()
-                )
+                HabitFormView(editing: habit)
             }
         }
     }
 }
 
-#Preview {
-    HabitsView(
-        habitRepository: SwiftDataHabitRepository(
-            modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
-        ),
-        userDefaultsRepository: UserDefaultsRepositoryImpl()
-    )
+#Preview(traits: .moldea) {
+    HabitsView()
 }

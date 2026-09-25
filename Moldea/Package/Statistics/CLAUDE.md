@@ -19,6 +19,7 @@ Depende de `Core` (`.package(path: "../Core")`): `@HabitsQuery`, `@AllHabitsInPe
 
 ```
 Sources/Statistics/
+├── DI/StatisticsDependencies.swift   # contenedor + @Entry \.statisticsDependencies
 ├── Data/           # vacía por ahora
 ├── Domain/
 │   └── HabitOccurrencesBuilder.swift
@@ -50,6 +51,12 @@ Es la misma estructura de tres capas que `Core` y que el resto de paquetes de fe
 `StatisticsView` es el punto de entrada público del paquete: un `NavigationStack` con el título en
 grande, un `Picker` segmentado (`StatisticsFilterEnum`) y la vista de la pestaña elegida. La
 compone el target `Moldea` en el caso `.statistics` de `MainTab`.
+
+**Dependencias:** `StatisticsView` lee `\.statisticsDependencies` (`DI/StatisticsDependencies.swift`)
+y construye el view model de la pestaña con `makeDayChartViewModel()`, `makeWeekChartViewModel()`,
+`makeMonthChartViewModel()` o `makeYearChartViewModel()`, todos con `core.calculateHabitsProgress`.
+No hay `StatisticsContentView`: la vista no tiene view model propio, y el `@State` lo guarda cada
+gráfica (`DayChartView(dayChartViewModel:)`…).
 
 **Estado vacío:** si no hay ningún hábito (`@HabitsQuery`), en vez del picker se pinta el
 `ContentUnavailableView` nativo con `statistics_empty_state`, igual que `HabitsView`. Sin hábitos

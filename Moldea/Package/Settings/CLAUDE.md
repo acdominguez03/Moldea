@@ -22,6 +22,7 @@ Depende de `Core` (`.package(path: "../Core")`), de donde salen las entidades de
 
 ```
 Sources/Settings/
+├── DI/SettingsDependencies.swift          # contenedor + @Entry \.settingsDependencies
 ├── Data/                                  # vacía: la persistencia vive en Core
 ├── Domain/
 │   └── UseCases/
@@ -52,12 +53,16 @@ Es la misma estructura de tres capas que `Core` y que el resto de paquetes de fe
 
 `SettingsView` es el punto de entrada público del paquete: un `NavigationStack` con una `List`
 agrupada y el título de pantalla en grande. La compone el target `Moldea` en el caso `.settings`
-de `MainTab`, con `habitRepository` y `userDefaultsRepository` inyectados por `init`.
+de `MainTab` como `SettingsView()`: es `public init()`, lee `\.settingsDependencies` y pinta
+`SettingsContentView(viewModel:)` (patrón `XView` / `XContentView` del `CLAUDE.md` raíz).
 
-Construye internamente `SettingsViewModel` con seis casos de uso: `GetIsNotificationsEnabledUseCase`,
-`SetIsNotificationsEnabledUseCase`, `GetIsNotificationPermissionAllowedUseCase`,
-`RequestNotificationAuthorizationUseCase` (de `Core`) y `DefaultSetHabitReminderEnabledUseCase`,
-así que sus tipos de `Domain` siguen siendo `internal`.
+`DI/SettingsDependencies.swift` recibe un `CoreDependencies` y construye los casos de uso propios
+del paquete a partir de sus repositorios: `makeSettingsViewModel()` con
+`GetIsNotificationsEnabledUseCase`, `SetIsNotificationsEnabledUseCase`,
+`GetIsNotificationPermissionAllowedUseCase`, `RequestNotificationAuthorizationUseCase` (de `Core`)
+y `DefaultSetHabitReminderEnabledUseCase`; y `makeHabitReminderSheetViewModel(habit:)` con
+`DefaultUpdateHabitReminderUseCase`, que `SettingsContentView` usa al abrir la hoja (lee el
+entorno en `body`). Así sus tipos de `Domain` siguen siendo `internal`.
 
 ## Permiso de notificaciones
 

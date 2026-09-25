@@ -9,6 +9,16 @@ import SwiftUI
 import Core
 
 public struct TodayView: View {
+    @Environment(\.todayDependencies) private var dependencies
+
+    public init() {}
+
+    public var body: some View {
+        TodayContentView(viewModel: dependencies.makeTodayViewModel())
+    }
+}
+
+struct TodayContentView: View {
 
     @TodayHabitsQuery private var dailyHabits: [TodayHabit]
     @WeeklyHabitsQuery private var weeklyHabits: [TodayHabit]
@@ -22,16 +32,8 @@ public struct TodayView: View {
         )
     }
     
-    public init(habitRepository: any HabitRepository) {
-        _todayViewModel = State(
-            initialValue: TodayViewModel(
-                toggleHabitCompletionUseCase: DefaultToggleHabitCompletionUseCase(
-                    repository: habitRepository
-                ),
-                calculateHabitsProgressUseCase: CalculateHabitsProgressUseCase(),
-                todayProgressStore: UserDefaultsTodayProgressStore()
-            )
-        )
+    init(viewModel: TodayViewModel) {
+        _todayViewModel = State(initialValue: viewModel)
     }
 
     private var habits: [TodayHabit] {
@@ -51,7 +53,7 @@ public struct TodayView: View {
         todayViewModel.dailyProgress(for: dailyHabits)
     }
 
-    public var body: some View {
+    var body: some View {
         NavigationStack {
             List {
                 Section {
@@ -108,10 +110,6 @@ public struct TodayView: View {
     }
 }
 
-#Preview {
-    TodayView(
-        habitRepository: SwiftDataHabitRepository(
-            modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
-        )
-    )
+#Preview(traits: .moldea) {
+    TodayView()
 }

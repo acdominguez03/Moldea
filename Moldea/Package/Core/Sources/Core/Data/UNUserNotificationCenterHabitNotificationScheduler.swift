@@ -14,7 +14,7 @@ import UserNotifications
 public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificationScheduler {
     private let userDefaultsRepository: any UserDefaultsRepository
 
-    public init(userDefaultsRepository: any UserDefaultsRepository) {
+    nonisolated public init(userDefaultsRepository: any UserDefaultsRepository) {
         self.userDefaultsRepository = userDefaultsRepository
     }
 

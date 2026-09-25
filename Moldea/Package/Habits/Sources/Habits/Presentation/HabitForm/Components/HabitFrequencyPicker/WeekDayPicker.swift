@@ -27,24 +27,7 @@ struct WeekDayPicker: View {
 }
 
 #Preview {
-    @Previewable @State var habitFormViewModel = HabitFormViewModel(
-        createHabitUseCase: DefaultCreateHabitUseCase(
-            repository: SwiftDataHabitRepository(
-                modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
-            ),
-            notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
-                userDefaultsRepository: UserDefaultsRepositoryImpl()
-            )
-        ),
-        updateHabitUseCase: DefaultUpdateHabitUseCase(
-            repository: SwiftDataHabitRepository(
-                modelContainer: try! MoldeaSchema.makeModelContainer(inMemory: true)
-            ),
-            notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
-                userDefaultsRepository: UserDefaultsRepositoryImpl()
-            )
-        )
-    )
+    @Previewable @State var habitFormViewModel = HabitsDependencies.preview.makeHabitFormViewModel()
     
     WeekDayPicker(
         weekdays: habitFormViewModel.weekdayItems,

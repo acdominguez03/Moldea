@@ -21,6 +21,9 @@ antes de tocar `Domain` o `Data`.
 
 ```
 Sources/Core/
+├── DI/
+│   ├── CoreDependencies.swift           # contenedor + @Entry \.coreDependencies
+│   └── MoldeaPreviewModifier.swift      # trait .moldea para previews
 ├── Domain/
 │   ├── Entities/
 │   │   ├── Habit.swift
@@ -246,6 +249,26 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
   otro (el sistema no muestra dos alertas a la vez). `LiveTranscriptionModel` ya no pide el
   permiso al abrir el sheet: solo comprueba `AVAudioApplication.shared.recordPermission ==
   .granted`, que no muestra alerta, y si no lo está lanza `microphoneNotAuthorized`.
+
+## Dependencias: `DI/`
+
+- **`CoreDependencies`** (`public struct`, `Sendable`): el contenedor que reciben todas las
+  features. Guarda una instancia de cada repositorio compartido (`habitRepository`,
+  `todayHabitsRepository`, `userDefaultsRepository`, `notificationScheduler`, los dos de
+  permisos y `todayProgressStore`) y expone los casos de uso de `Core` como propiedades
+  calculadas. `modelContainer` es `internal`: solo lo necesita el trait de previews.
+  - `live(container:)` monta las implementaciones reales; la llama `AppDependencies`.
+  - `preview` es un `static let` sobre `MoldeaSchema.makeModelContainer(inMemory: true)` y es el
+    default de `@Entry var coreDependencies`. Tiene que ser `static let` para que el default sea
+    estable (ver _Composición_ en el `CLAUDE.md` raíz).
+- **`UNUserNotificationCenterHabitNotificationScheduler.init` es `nonisolated`.** El tipo es
+  `@MainActor`, pero el default de un `@Entry` se evalúa fuera del main actor y construye
+  `CoreDependencies.preview`. El `init` solo guarda el `UserDefaultsRepository`; los métodos
+  siguen en el main actor.
+- **`.moldea`** (`MoldeaPreviewModifier`, `PreviewModifier`): `makeSharedContext()` siembra
+  `CoreDependencies.preview` con `SampleDataSeeder` **solo si no hay hábitos**
+  (`fetchCount == 0`), porque el seeder no comprueba si ya ha sembrado; `body` aplica
+  `.modelContainer` y `\.coreDependencies`.
 
 ## Colores: `HexColorConverter`
 
@@ -658,9 +681,11 @@ pide la documentación no existe entre una petición y la siguiente.
 
 ### Composición
 
-`SpeechToTextView.init(habitRepository:)` recibe el repositorio y construye los casos de uso por
-dentro (`DefaultCompleteHabitsUseCase(repository:)` incluido). `MoldeaApp` le
-pasa el `habitRepository` que ya tenía.
+`SpeechToTextView` es `public init()` y lee `\.coreDependencies`; en su `body` pinta
+`SpeechToTextContentView(viewModel: dependencies.makeSpeechToTextViewModel())`, que es la
+pantalla descrita arriba (patrón `XView` / `XContentView` del `CLAUDE.md` raíz).
+`SpeechToTextViewModel.init` no cambia: sigue recibiendo los repositorios y el scheduler y
+construye los casos de uso por dentro. `MoldeaApp` solo escribe `SpeechToTextView()`.
 
 ### Frases de ejemplo: andamio con fecha de caducidad
 
@@ -672,7 +697,7 @@ Tiene dos mitades con vidas distintas:
 
 | Parte                                                                   | Vida                                                       |
 | ----------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `HabitCommandSample` y `all`                                            | **se queda**: es la tabla de `HabitCommandPromptEvalTests` |
+| `HabitCommandSample` y `all`                                            | **se queda**: la valida `HabitCommandSamplesTests`          |
 | `nextPhrase()`, `rotationKey` y `LiveTranscriptionModel.samplePhrase()` | **temporal**: se va con el atajo del simulador             |
 
 Para retirar el andamio: borrar `nextPhrase()` y `rotationKey`, y en `LiveTranscriptionModel` borrar
@@ -934,7 +959,7 @@ memoria (`MoldeaSchema.makeModelContainer(inMemory: true)`) y leen lo guardado c
 `ModelContext`. **Hay que conservar el contenedor en una variable** mientras se use su
 contexto, o el proceso de tests se cae. Los `*Entity` se ven con `@testable import Core`.
 
-- `MoldeaSchemaTests`: el esquema tiene las tres entidades, guardado con relaciones inversas
+- `MoldeaSchemaTests`: el esquema tiene las cuatro entidades (con `HabitReminderEntity`), guardado con relaciones inversas
   bien enlazadas y borrado en cascada.
 - `HabitMapperTests`: ida y vuelta con las tres frecuencias, `fixedWeekdays` ordenado, solo se
   rellenan los campos de la frecuencia, y los tres errores de datos incoherentes.
@@ -1009,25 +1034,20 @@ Es la que hay que volver a pasar cada vez que se toque una palabra de
   se cae antes de arrancar, sin ningún ✘ útil.
 - `.serialized`, porque peticiones en paralelo al modelo provocan `rateLimited`. Es la misma
   razón por la que el antiguo reconocedor iba en secuencia.
-- La tabla de casos es `HabitCommandSamples.all`, **la misma que usa el simulador**, con los
-  frontera a propósito: negación («hoy no he corrido»), varias actividades en una frase, «quita»
-  (que es borrar, no completar) y tres frases en inglés. `PromptEvalSupport.swift` se quedó solo con
-  `PromptEvalSupport`.
-- Además del reparto de intención, comprueba el **contenido**: que los días salgan con los
-  valores de `Calendar.weekday`, que el nombre no arrastre la cantidad y que el número de veces
-  por semana sea el que dice la frase, y en completar qué hábitos van a cada lista (varios en
-  una frase, negación, uno ya completado, ninguno y sin hábitos hoy).
-- Tarda ~40 s. No está en el test plan por defecto; se pasa con
-  `-only-testing:CoreTests/HabitCommandPromptEvalTests`.
+- **Un caso por esquema, no una batería.** Cada test pasa por la etapa de intención y luego por
+  uno de los tres esquemas de la segunda etapa: crear (`GenerableHabitDraft`, «añade nadar tres
+  veces por semana» → `.weeklyCount(3)`), borrar (`HabitNameSchema` + verificación, «borra el
+  hábito de correr» → _Correr 5 min_) y completar (`makeCompletionSchema`, «hoy he bebido dos
+  litros de agua» → _Beber agua_). Además, la frase vacía se rechaza sin llamar al modelo.
+- Se recortó a propósito: la batería anterior (frontera, negación, listas distintas, inglés)
+  tenía 13 casos en rojo en el simulador 27.0 —casi todos borrados que acababan en
+  `.habitNotFound` y completados que devolvían la lista vacía— y medía la calidad del prompt, no
+  si el código funciona. Si se vuelve a afinar el prompt, esos casos son el punto de partida.
+- Se pasa sola con `-only-testing:CoreTests/HabitCommandPromptEvalTests`.
 
 **Hay que pasarla en un simulador con runtime 27.0.** En 26.5 el asset de seguridad del runtime
 (`com.apple.fm.language.instruct_300m.safety`) está roto y toda generación falla con
-`promptTemplateNotFound`, así que los 21 casos dan `.generationFailed` y parece un bug del prompt
+`promptTemplateNotFound`, así que todos los casos dan `.generationFailed` y parece un bug del prompt
 cuando es del runtime. Los tests unitarios sí pasan en los dos.
 
 `CoreTests.swift` es todavía la plantilla generada.
-
-**Aviso:** `SwiftDataHabitRepositoryTests.swift` está roto de antes (no es de esta feature):
-`Habit.init` pide hoy un argumento `reminder` que esos tests no pasan, así que `xcodebuild test
--scheme Core` falla al compilar el target de tests aunque el resto de tests estén en verde.
-Hace falta arreglarlo aparte.

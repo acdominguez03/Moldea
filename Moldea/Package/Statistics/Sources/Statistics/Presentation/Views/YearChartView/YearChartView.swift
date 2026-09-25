@@ -43,6 +43,6 @@ struct YearChartView: View {
 }
 
 
-#Preview {
-    YearChartView(yearChartViewModel: YearChartViewModel(calculateHabitProgressUseCase: CalculateHabitsProgressUseCase()))
+#Preview(traits: .moldea) {
+    YearChartView(yearChartViewModel: StatisticsDependencies.preview.makeYearChartViewModel())
 }

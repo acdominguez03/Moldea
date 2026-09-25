@@ -23,6 +23,7 @@ ve: solo trabaja con tipos de dominio. La arquitectura completa está en el `CLA
 
 ```
 Sources/Habits/
+├── DI/HabitsDependencies.swift          # contenedor + @Entry \.habitsDependencies
 ├── Domain/
 │   ├── HabitIconCatalog.swift           # protocolo
 │   └── HabitIconFamily.swift
@@ -67,10 +68,17 @@ lee con `@HabitsQuery`, de `Core`, y pinta con `HabitView`—, un `ContentUnavai
 no hay ninguno, el título en grande y un botón `+` que presenta `CreateHabitView` en una hoja.
 La compone el target `Moldea` en el caso `.habits` de `MainTab`.
 
-Su `init` público recibe `habitRepository: any HabitRepository`. Construye por dentro
-`DefaultCreateHabitUseCase(repository:)` y crea un `HabitFormViewModel` **nuevo cada vez que se
-abre la hoja**. Así el caso de uso, el view model y `BundleHabitIconCatalog` siguen siendo
-`internal`.
+`HabitsView` es `public init()`: lee `\.habitsDependencies` y pinta
+`HabitsContentView(viewModel: dependencies.makeHabitsViewModel())`, que es la lista (patrón
+`XView` / `XContentView` del `CLAUDE.md` raíz). Las dos hojas presentan `HabitFormView()` (crear)
+y `HabitFormView(editing: habit)` (editar), que a su vez leen el entorno y pintan
+`HabitFormContentView` con un `HabitFormViewModel` **nuevo cada vez que se abre la hoja**.
+
+`DI/HabitsDependencies.swift` recibe un `CoreDependencies` y construye los view models:
+`makeHabitsViewModel()` y `makeHabitFormViewModel(editing:)`, que traduce un `Habit` a los
+parámetros del formulario en modo edición. También guarda el `iconCatalog`
+(`BundleHabitIconCatalog`); el `init` público solo expone `core` porque `HabitIconCatalog` es
+`internal`. Así los view models, el catálogo y los casos de uso siguen siendo `internal`.
 
 ## Guardar un hábito
 
