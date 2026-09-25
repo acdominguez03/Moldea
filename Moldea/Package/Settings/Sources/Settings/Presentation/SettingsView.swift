@@ -146,6 +146,7 @@ public struct SettingsView: View {
                         )
                     )
                 )
+                .fittingSheetDetents(extraDetents: [.medium])
             }
             .onChange(of: scenePhase) { _, newPhase in
                 if newPhase == .active {

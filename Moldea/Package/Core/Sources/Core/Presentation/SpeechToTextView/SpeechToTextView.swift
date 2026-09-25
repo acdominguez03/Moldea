@@ -43,6 +43,7 @@ public struct SpeechToTextView: View {
             Group {
                 if viewModel.hasTranscript {
                     Text(viewModel.styledTranscript)
+                        .lineLimit(10)
                 } else {
                     Text(CoreTextsEnum.speechToTextPlaceholder)
                         .foregroundStyle(.secondary)
@@ -88,6 +89,7 @@ public struct SpeechToTextView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .font(.body)
                 .multilineTextAlignment(.leading)
+                .lineLimit(3)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 40)
