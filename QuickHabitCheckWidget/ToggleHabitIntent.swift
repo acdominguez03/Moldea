@@ -27,19 +27,27 @@ struct ToggleHabitIntent: AppIntent {
         }
 
         let container = try MoldeaSchema.makeModelContainer()
-        let getTodayHabitsUseCase = DefaultGetTodayHabitsUseCase(
+        let getTodayHabits = DefaultGetTodayHabitsUseCase(
             repository: SwiftDataTodayHabitsRepository(modelContainer: container)
         )
-        let useCase = DefaultToggleTodayHabitUseCase(
-            getTodayHabitsUseCase: getTodayHabitsUseCase,
-            toggleHabitCompletionUseCase: DefaultToggleHabitCompletionUseCase(
-                repository: SwiftDataHabitRepository(modelContainer: container)
-            ),
-            calculateHabitsProgressUseCase: CalculateHabitsProgressUseCase(),
-            todayProgressStore: UserDefaultsTodayProgressStore()
+
+        let todayHabits = try await getTodayHabits.execute(on: .now)
+        guard let todayHabit = todayHabits.first(where: { $0.id == id }) else {
+            return .result()
+        }
+
+        try await DefaultToggleHabitCompletionUseCase(
+            repository: SwiftDataHabitRepository(modelContainer: container)
+        ).execute(
+            habitID: todayHabit.id,
+            day: todayHabit.referenceDay,
+            completedCount: todayHabit.completedToday,
+            repetitionsPerDay: todayHabit.habit.schedule.repetitionsPerDay
         )
 
-        try await useCase.execute(habitID: id, on: .now)
+        let updatedHabits = try await getTodayHabits.execute(on: .now)
+        let progress = CalculateHabitsProgressUseCase().execute(habits: updatedHabits, scope: .daily)
+        UserDefaultsTodayProgressStore().save(fraction: progress.fraction, on: .now)
         WidgetCenter.shared.reloadAllTimelines()
         return .result()
     }

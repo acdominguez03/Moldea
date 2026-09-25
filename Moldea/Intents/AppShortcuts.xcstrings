@@ -18,6 +18,56 @@
         }
       }
     },
+    "Check off my habit ${habit} in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check off my habit ${habit} in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tacha mi hábito ${habit} en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Complete a habit in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complete a habit in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completa un hábito en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Complete my habit ${habit} in ${applicationName}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complete my habit ${habit} in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completa mi hábito ${habit} en ${applicationName}"
+          }
+        }
+      }
+    },
     "How are my habits going in ${applicationName}" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -31,6 +81,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cómo van mis hábitos en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Log my habit ${habit} in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log my habit ${habit} in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra mi hábito ${habit} en ${applicationName}"
+          }
+        }
+      }
+    },
+    "Mark a habit as done in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark a habit as done in ${applicationName}"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marca un hábito como hecho en ${applicationName}"
           }
         }
       }

@@ -22,8 +22,9 @@ actor FakeToggleHabitCompletionUseCase: ToggleHabitCompletionUseCase {
         habitID: Habit.ID,
         day: Date,
         completedCount: Int,
-        repetitionsPerDay: Int
-    ) async throws {
+        repetitionsPerDay: Int,
+        mode: ToggleHabitCompletionMode
+    ) async throws -> ToggleHabitCompletionResult {
         if let error { throw error }
         calls.append(
             ToggleCall(
@@ -33,6 +34,7 @@ actor FakeToggleHabitCompletionUseCase: ToggleHabitCompletionUseCase {
                 repetitionsPerDay: repetitionsPerDay
             )
         )
+        return .progressed(done: completedCount + 1, total: repetitionsPerDay)
     }
 }
 

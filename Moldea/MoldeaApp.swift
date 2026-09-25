@@ -5,6 +5,7 @@
 //  Created by Andrés on 18/09/2026.
 //
 
+import AppIntents
 import SwiftUI
 import SwiftData
 import Core
@@ -19,6 +20,7 @@ import Core
 struct MoldeaApp: App {
     @State private var tabRouter = TabRouter()
     @State private var router = AppRouter(initialFlow: .tabView)
+    @Environment(\.scenePhase) private var scenePhase
     private let modelContainer: ModelContainer
     private let habitRepository: any HabitRepository
     private let todayHabitsRepository: any TodayHabitsRepository
@@ -86,6 +88,14 @@ struct MoldeaApp: App {
             /*.task {
                 try? SampleDataSeeder.seed(in: modelContainer)
             }*/
+            .task {
+                MoldeaShortcuts.updateAppShortcutParameters()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .background {
+                    MoldeaShortcuts.updateAppShortcutParameters()
+                }
+            }
         }
         .modelContainer(modelContainer)
     }

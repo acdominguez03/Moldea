@@ -7,8 +7,6 @@
 
 import AppIntents
 
-/// Los App Shortcuts disponibles desde Siri, Spotlight y Atajos en cuanto se instala la app.
-/// Solo puede haber un `AppShortcutsProvider` por app, y como máximo 10 atajos.
 struct MoldeaShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
@@ -21,6 +19,18 @@ struct MoldeaShortcuts: AppShortcutsProvider {
             ],
             shortTitle: "Today's progress",
             systemImageName: "chart.pie"
+        )
+        AppShortcut(
+            intent: CompleteHabitIntent(),
+            phrases: [
+                "Complete my habit \(\.$habit) in \(.applicationName)",
+                "Log my habit \(\.$habit) in \(.applicationName)",
+                "Check off my habit \(\.$habit) in \(.applicationName)",
+                "Complete a habit in \(.applicationName)",
+                "Mark a habit as done in \(.applicationName)"
+            ],
+            shortTitle: "Complete a habit",
+            systemImageName: "checkmark.circle"
         )
     }
 }

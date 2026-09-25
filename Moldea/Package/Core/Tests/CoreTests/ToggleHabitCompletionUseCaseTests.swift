@@ -111,4 +111,45 @@ struct ToggleHabitCompletionUseCaseTests {
             )
         }
     }
+
+    @Test func reportsTheResultOfEachTransition() async throws {
+        let useCase = makeUseCase(repository: FakeHabitRepository())
+
+        #expect(try await useCase.execute(habitID: habitID, day: .now, completedCount: 1, repetitionsPerDay: 4) == .progressed(done: 2, total: 4))
+        #expect(try await useCase.execute(habitID: habitID, day: .now, completedCount: 3, repetitionsPerDay: 4) == .completed(total: 4))
+        #expect(try await useCase.execute(habitID: habitID, day: .now, completedCount: 0, repetitionsPerDay: 1) == .completed(total: 1))
+        #expect(try await useCase.execute(habitID: habitID, day: .now, completedCount: 4, repetitionsPerDay: 4) == .reset(total: 4))
+    }
+
+    @Test func addOnlyNeverUnchecksAnAlreadyCompleteHabit() async throws {
+        let repository = FakeHabitRepository()
+        let useCase = makeUseCase(repository: repository)
+
+        let result = try await useCase.execute(
+            habitID: habitID,
+            day: .now,
+            completedCount: 4,
+            repetitionsPerDay: 4,
+            mode: .addOnly
+        )
+
+        #expect(result == .alreadyCompleted(total: 4))
+        #expect(await repository.setCompletionsCalls.isEmpty)
+    }
+
+    @Test func addOnlyAddsOneRepetitionWhenThereIsRoomLeft() async throws {
+        let repository = FakeHabitRepository()
+        let useCase = makeUseCase(repository: repository)
+
+        let result = try await useCase.execute(
+            habitID: habitID,
+            day: .now,
+            completedCount: 1,
+            repetitionsPerDay: 4,
+            mode: .addOnly
+        )
+
+        #expect(result == .progressed(done: 2, total: 4))
+        #expect(await repository.setCompletionsCalls.map(\.count) == [2])
+    }
 }
