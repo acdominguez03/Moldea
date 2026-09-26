@@ -51,6 +51,10 @@ final class TodayViewModel: BaseViewModel {
         }
     }
     
+    func onErrorDismissed() {
+        setError(nil)
+    }
+
     func onTabSelect(newTab: TodayTabEnum) {
         selectedTab = newTab
     }

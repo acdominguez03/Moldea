@@ -18,7 +18,6 @@ struct NotificationPermissionDisabledRow: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(SettingsTextsEnum.notificationsPermissionDisabledTitle)
-                        .font(.body.weight(.semibold))
                         .foregroundStyle(.primary)
 
                     Text(SettingsTextsEnum.notificationsPermissionDisabledDescription)

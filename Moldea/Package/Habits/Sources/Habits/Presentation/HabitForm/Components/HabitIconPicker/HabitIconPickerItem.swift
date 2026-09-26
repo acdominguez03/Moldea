@@ -6,14 +6,15 @@
 //
 
 import SwiftUI
+import Core
 
 private enum Metrics {
-    static let size: CGFloat = 48
-    static let inset: CGFloat = 5
     static let cornerRadius: CGFloat = 14
 }
 
 struct HabitIconPickerItem: View {
+    @Environment(\.self) private var environment
+
     let systemName: String
     let name: String
     let isSelected: Bool
@@ -27,13 +28,16 @@ struct HabitIconPickerItem: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.title3)
-                .foregroundStyle(isSelected ? Color.white : Color.primary)
+                .font(.title2)
+                .foregroundStyle(
+                    isSelected
+                        ? ContrastingColor.foreground(on: tint, in: environment)
+                        : Color.primary
+                )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(isSelected ? tint : Color.clear, in: shape)
-                .overlay { shape.strokeBorder(Color.primary.opacity(0.15), lineWidth: 1) }
-                .padding(Metrics.inset)
-                .frame(width: Metrics.size, height: Metrics.size)
+                .aspectRatio(1, contentMode: .fit)
+                .background(isSelected ? AnyShapeStyle(tint) : AnyShapeStyle(.fill.tertiary), in: shape)
+                .contentShape(shape)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(name)
@@ -42,6 +46,8 @@ struct HabitIconPickerItem: View {
 }
 
 struct HabitIconPickerMoreItem: View {
+    @Environment(\.self) private var environment
+
     let customIcon: String?
     let tint: Color
     let action: () -> Void
@@ -58,18 +64,24 @@ struct HabitIconPickerMoreItem: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: customIcon ?? "plus")
-                .font(.title3)
-                .foregroundStyle(customIcon == nil ? Color.primary : Color.white)
+                .font(.title2)
+                .foregroundStyle(
+                    customIcon == nil
+                        ? Color.primary
+                        : ContrastingColor.foreground(on: tint, in: environment)
+                )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .aspectRatio(1, contentMode: .fit)
                 .background(customIcon == nil ? Color.clear : tint, in: shape)
                 .overlay {
-                    shape.strokeBorder(
-                        Color.primary.opacity(0.4),
-                        style: StrokeStyle(lineWidth: 1, dash: [4])
-                    )
+                    if customIcon == nil {
+                        shape.strokeBorder(
+                            Color.primary.opacity(0.4),
+                            style: StrokeStyle(lineWidth: 1, dash: [4])
+                        )
+                    }
                 }
-                .padding(Metrics.inset)
-                .frame(width: Metrics.size, height: Metrics.size)
+                .contentShape(shape)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityName)
@@ -82,7 +94,12 @@ struct HabitIconPickerMoreItem: View {
     HStack {
         HabitIconPickerItem(systemName: "drop", name: "Water", isSelected: true, tint: .blue, action: {})
         HabitIconPickerItem(systemName: "book", name: "Book", isSelected: false, tint: .blue, action: {})
+        HabitIconPickerItem(
+            systemName: "drop", name: "Water", isSelected: true,
+            tint: HexColorConverter.color(fromHex: "#DAD7D0") ?? .gray, action: {}
+        )
         HabitIconPickerMoreItem(customIcon: nil, tint: .blue, action: {})
         HabitIconPickerMoreItem(customIcon: "figure.run", tint: .blue, action: {})
     }
+    .padding()
 }

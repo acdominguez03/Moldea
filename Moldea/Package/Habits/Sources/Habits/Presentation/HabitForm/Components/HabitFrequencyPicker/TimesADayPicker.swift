@@ -12,44 +12,39 @@ struct TimesADayPicker: View {
     let selectedTimesADay: Int
     let onIncrementTimesADay: () -> Void
     let onDecrementTimesADay: () -> Void
-    
+
+    private var value: Binding<Int> {
+        Binding(
+            get: { selectedTimesADay },
+            set: { newValue in
+                if newValue > selectedTimesADay {
+                    onIncrementTimesADay()
+                } else if newValue < selectedTimesADay {
+                    onDecrementTimesADay()
+                }
+            }
+        )
+    }
+
     var body: some View {
-        HStack {
-            Text(HabitsTextsEnum.timesADay)
-                .font(.body)
-            
-            Spacer()
-            
-            Button(action: { onDecrementTimesADay() }) {
-                Image(systemName: "minus")
-                    .font(.body.weight(.semibold))
-                    .frame(width: 32, height: 32)
+        Stepper(value: value, in: range) {
+            LabeledContent(HabitsTextsEnum.timesADay) {
+                Text(selectedTimesADay, format: .number)
+                    .monospacedDigit()
             }
-            .disabled(selectedTimesADay <= range.lowerBound)
-            .buttonBorderShape(.circle)
-            .buttonStyle(.glass)
-            
-            Text("\(selectedTimesADay)")
-                .monospacedDigit()
-                .padding(.horizontal, 16)
-            
-            Button(action: { onIncrementTimesADay() }) {
-                Image(systemName: "plus")
-                    .font(.body.weight(.semibold))
-                    .frame(width: 32, height: 32)
-            }
-            .disabled(selectedTimesADay >= range.upperBound)
-            .buttonBorderShape(.circle)
-            .buttonStyle(.glass)
         }
     }
 }
 
 #Preview() {
-    TimesADayPicker(
-        range: 1...20,
-        selectedTimesADay: 0,
-        onIncrementTimesADay: {},
-        onDecrementTimesADay: {}
-    )
+    @Previewable @State var timesADay = 1
+
+    Form {
+        TimesADayPicker(
+            range: 1...20,
+            selectedTimesADay: timesADay,
+            onIncrementTimesADay: { timesADay += 1 },
+            onDecrementTimesADay: { timesADay -= 1 }
+        )
+    }
 }

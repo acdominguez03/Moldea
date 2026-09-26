@@ -29,7 +29,6 @@ struct HabitView: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(habit.name)
-                        .font(.body.weight(habit.isActive ? .bold : .regular))
                         .foregroundStyle(habit.isActive ? .primary : .secondary)
                     
                     subtitle
@@ -39,44 +38,46 @@ struct HabitView: View {
                 
                 Spacer()
                 
-                if(!habit.isActive) {
-                    ZStack {
-                        Text(HabitsTextsEnum.onPause)
-                            .font(.footnote.weight(.semibold))
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        .secondary,
-                        in: RoundedRectangle(cornerRadius: 16)
-                    )
+                if !habit.isActive {
+                    Text(HabitsTextsEnum.onPause)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
-                
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-                    .accessibilityHidden(true)
             }
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
             Button(action: onSetHabitActiveClicked) {
-                Label(
-                    habit.isActive ? HabitsTextsEnum.deactivate : HabitsTextsEnum.activate,
-                    systemImage: habit.isActive ? "pause.circle" : "play.circle"
-                )
+                activeToggleLabel
             }
             .tint(habit.isActive ? .orange : .green)
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            Button(action: onDelete) {
+            Button(role: .destructive, action: onDelete) {
                 Label(HabitsTextsEnum.delete, systemImage: "trash")
             }
-            .tint(.red)
+        }
+        .contextMenu {
+            Button(action: onHabitClicked) {
+                Label(HabitsTextsEnum.edit, systemImage: "pencil")
+            }
+            Button(action: onSetHabitActiveClicked) {
+                activeToggleLabel
+            }
+            Button(role: .destructive, action: onDelete) {
+                Label(HabitsTextsEnum.delete, systemImage: "trash")
+            }
         }
     }
-    
+
+    private var activeToggleLabel: some View {
+        Label(
+            habit.isActive ? HabitsTextsEnum.deactivate : HabitsTextsEnum.activate,
+            systemImage: habit.isActive ? "pause" : "play"
+        )
+    }
+
     private var subtitle: Text {
         switch summary {
         case .everyDay:

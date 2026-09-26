@@ -15,9 +15,6 @@ public enum HabitsTextsEnum {
         )
     }
 
-    /// Para textos con argumentos: la clave del catálogo lleva el especificador (`"clave %lld"`).
-    /// Nombre distinto a `resource` a propósito: con el mismo, un literal con interpolación se
-    /// resolvería como `String` y perdería el argumento.
     private static func localized(_ value: String.LocalizationValue) -> LocalizedStringResource {
         LocalizedStringResource(value, bundle: .atURL(Bundle.module.bundleURL))
     }
@@ -50,6 +47,8 @@ public enum HabitsTextsEnum {
     public static let iconTitle = resource("habits_icon_title")
     public static let iconMore = resource("habits_icon_more")
     public static let chooseIconTitle = resource("habits_choose_icon_title")
+    public static let iconCategories = resource("habits_icon_categories")
+    public static let save = resource("habits_save")
     public static let iconDrop = resource("habits_icon_drop")
     public static let iconBook = resource("habits_icon_book")
     public static let iconBolt = resource("habits_icon_bolt")
@@ -109,6 +108,7 @@ public enum HabitsTextsEnum {
     public static let deactivate = resource("deactivate")
     
     public static let delete = resource("delete")
+    public static let edit = resource("habits_edit")
     public static let confirm = resource("confirm")
     
     // MARK: Delete habit alert
@@ -131,6 +131,6 @@ public enum HabitsTextsEnum {
     
     public static let hour = resource("hour")
     public static func startingFrom(_ hourAndMinute: Date) -> LocalizedStringResource {
-        localized("starting_from \(hourAndMinute, format: .dateTime.hour().minute())")
+        localized("starting_at \(hourAndMinute, format: .dateTime.hour().minute())")
     }
 }

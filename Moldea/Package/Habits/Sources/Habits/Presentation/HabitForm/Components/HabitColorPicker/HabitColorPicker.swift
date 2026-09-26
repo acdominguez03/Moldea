@@ -14,15 +14,10 @@ struct HabitColorPicker: View {
     let selectedHex: String
     let onColorSelected: (String) -> Void
 
-    private let itemsPerRow = 7
-
-    private var firstRow: [HabitPaletteColor] {
-        Array(HabitPaletteColor.allCases.prefix(itemsPerRow))
-    }
-
-    private var secondRow: [HabitPaletteColor] {
-        Array(HabitPaletteColor.allCases.dropFirst(itemsPerRow))
-    }
+    private let columns = Array(
+        repeating: GridItem(.flexible(minimum: 28, maximum: 48), spacing: 8),
+        count: 7
+    )
 
     private var customColor: Color? {
         guard !HabitPaletteColor.allCases.contains(where: { $0.hex == selectedHex }) else {
@@ -32,15 +27,11 @@ struct HabitColorPicker: View {
     }
 
     var body: some View {
-        VStack (spacing: 0) {
-            HStack(spacing: 0) {
-                ForEach(firstRow) { presetItem(for: $0) }
-            }
-            HStack(spacing: 0) {
-                ForEach(secondRow) { presetItem(for: $0) }
-                nativeColorPicker
-            }
+        LazyVGrid(columns: columns, spacing: 8) {
+            ForEach(HabitPaletteColor.allCases) { presetItem(for: $0) }
+            nativeColorPicker
         }
+        .padding(.vertical, 4)
     }
 
     private func presetItem(for paletteColor: HabitPaletteColor) -> some View {
@@ -50,7 +41,6 @@ struct HabitColorPicker: View {
             isSelected: selectedHex == paletteColor.hex,
             action: { onColorSelected(paletteColor.hex) }
         )
-        .frame(maxWidth: .infinity)
     }
 
     private var nativeColorPicker: some View {
@@ -64,7 +54,8 @@ struct HabitColorPicker: View {
             Text(HabitsTextsEnum.colorCustom)
         }
         .labelsHidden()
-        .frame(width: 48, height: 48)
+        .frame(maxWidth: .infinity)
+        .aspectRatio(1, contentMode: .fit)
         .overlay {
             if customColor != nil {
                 Circle()
@@ -73,16 +64,16 @@ struct HabitColorPicker: View {
             }
         }
         .accessibilityAddTraits(customColor != nil ? .isSelected : [])
-        .frame(maxWidth: .infinity)
     }
 }
 
 #Preview {
     @Previewable @State var selectedHex = HabitPaletteColor.gray.hex
 
-    HabitColorPicker(
-        selectedHex: selectedHex,
-        onColorSelected: { selectedHex = $0 }
-    )
-    .padding()
+    Form {
+        HabitColorPicker(
+            selectedHex: selectedHex,
+            onColorSelected: { selectedHex = $0 }
+        )
+    }
 }

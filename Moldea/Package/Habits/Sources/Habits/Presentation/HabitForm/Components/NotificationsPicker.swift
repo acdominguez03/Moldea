@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Core
 
 struct NotificationsPicker: View {
     let isRemindHabitEnabled: Bool
@@ -29,49 +30,31 @@ struct NotificationsPicker: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Toggle(
-                isOn: isRemindHabitEnabledBinding,
-                label: {
-                    VStack(alignment: .leading) {
-                        Text(HabitsTextsEnum.remindMeAboutThisHabit)
-                            .bold()
-                        
-                        Text(
-                            isRemindHabitEnabled
-                                ? HabitsTextsEnum.startingFrom(reminderTime)
-                                : HabitsTextsEnum.youWilNotReceiveNotificationsAboutThisHabit
-                        )
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                    }
-                },
-            )
-            .toggleStyle(.switch)
-            
+        Section {
+            Toggle(HabitsTextsEnum.remindMeAboutThisHabit, isOn: isRemindHabitEnabledBinding)
+
             if isRemindHabitEnabled {
-                HStack {
-                    DatePicker(
-                        "Hora",
-                        selection: reminderTimeBinding,
-                        displayedComponents: .hourAndMinute
-                    )
-                }
-                Toggle(
-                    isOn: isMutedOnWeekendBinding,
-                    label: {
-                        VStack(alignment: .leading) {
-                            Text(HabitsTextsEnum.muteOnWeekends)
-                                .bold()
-                            
-                            Text(
-                                HabitsTextsEnum.saturdaysAndSundaysWithoutNotifications
-                            )
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                        }
-                    }
+                DatePicker(
+                    HabitsTextsEnum.hour,
+                    selection: reminderTimeBinding,
+                    displayedComponents: .hourAndMinute
                 )
+
+                Toggle(HabitsTextsEnum.muteOnWeekends, isOn: isMutedOnWeekendBinding)
+            }
+        } header: {
+            Text(CoreTextsEnum.announcements)
+        } footer: {
+            VStack(alignment: .leading) {
+                if isRemindHabitEnabled {
+                    Text(HabitsTextsEnum.startingFrom(reminderTime))
+
+                    if isMutedOnWeekends {
+                        Text(HabitsTextsEnum.saturdaysAndSundaysWithoutNotifications)
+                    }
+                } else {
+                    Text(HabitsTextsEnum.youWilNotReceiveNotificationsAboutThisHabit)
+                }
             }
         }
     }
@@ -82,19 +65,15 @@ struct NotificationsPicker: View {
     @Previewable @State var isRemindHabitEnabled: Bool = false
     @Previewable @State var isMutedEnabled: Bool = false
     @Previewable @State var reminderTime: Date = Date()
-    
-    NotificationsPicker(
-        isRemindHabitEnabled: isRemindHabitEnabled,
-        isMutedOnWeekends: isMutedEnabled,
-        reminderTime: reminderTime,
-        onRemindHabitToggled: { isActive in
-            isRemindHabitEnabled = !isRemindHabitEnabled
-        },
-        onMuteOnWeekendToggled: { isActive in
-            isMutedEnabled = isActive
-        },
-        onReminderTimeChanged: { newReminderTime in
-            reminderTime = newReminderTime
-        }
-    )
+
+    Form {
+        NotificationsPicker(
+            isRemindHabitEnabled: isRemindHabitEnabled,
+            isMutedOnWeekends: isMutedEnabled,
+            reminderTime: reminderTime,
+            onRemindHabitToggled: { isRemindHabitEnabled = $0 },
+            onMuteOnWeekendToggled: { isMutedEnabled = $0 },
+            onReminderTimeChanged: { reminderTime = $0 }
+        )
+    }
 }

@@ -68,12 +68,10 @@ struct HabitsContentView: View {
                         } footer: {
                             if habits.count < 3 {
                                 Text(HabitsTextsEnum.habitGuidance)
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
-                    .listStyle(.grouped)
+                    .listStyle(.insetGrouped)
                     .alert(
                         HabitsTextsEnum.deleteHabitAlertTitle,
                         isPresented: isShowingDeleteAlert,
@@ -100,12 +98,13 @@ struct HabitsContentView: View {
             .navigationTitle(HabitsTextsEnum.screenTitle)
             .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .primaryAction) {
                     Button {
                         isSheetPresented = true
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel(HabitsTextsEnum.newHabit)
                 }
             }
             .sheet(isPresented: $isSheetPresented) {

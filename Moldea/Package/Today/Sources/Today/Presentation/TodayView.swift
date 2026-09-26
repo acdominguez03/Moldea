@@ -32,6 +32,13 @@ struct TodayContentView: View {
         )
     }
     
+    private var isShowingError: Binding<Bool> {
+        Binding(
+            get: { todayViewModel.errorMessage != nil },
+            set: { if !$0 { todayViewModel.onErrorDismissed() } }
+        )
+    }
+
     init(viewModel: TodayViewModel) {
         _todayViewModel = State(initialValue: viewModel)
     }
@@ -57,52 +64,50 @@ struct TodayContentView: View {
         NavigationStack {
             List {
                 Section {
+                    Picker(TodayTextsEnum.tabPickerLabel, selection: selectedTabBinding) {
+                        ForEach(TodayTabEnum.allCases, id: \.self) { tab in
+                            Text(tab.title).tag(tab)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+
+                Section {
+                    ProgressView(value: progress.fraction) {
+                        Text(
+                            TodayTextsEnum.habitsProgress(
+                                progress.completedHabits,
+                                progress.totalHabits
+                            )
+                        )
+                    } currentValueLabel: {
+                        Text(
+                            progress.fraction,
+                            format: .percent.precision(.fractionLength(0))
+                        )
+                    }
+                }
+
+                Section {
                     ForEach(habits, id: \.id) { todayHabit in
                         TodayCardView(todayHabit: todayHabit) {
                             Task { await todayViewModel.onToggleCompletion(todayHabit) }
                         }
                     }
-                } header: {
-                    VStack(spacing: 20) {
-                        Picker("", selection: selectedTabBinding) {
-                            Text("\(TodayTabEnum.daily.title) \(dailyHabits.count)").tag(TodayTabEnum.daily)
-
-                            Text("\(TodayTabEnum.weekly.title) \(weeklyHabits.count)").tag(TodayTabEnum.weekly)
-                        }
-                        .pickerStyle(.segmented)
-                        
-
-                        VStack(spacing: 5) {
-                            HStack {
-                                Text(
-                                    TodayTextsEnum.habitsProgress(
-                                        progress.completedHabits,
-                                        progress.totalHabits
-                                    )
-                                )
-
-                                Spacer()
-
-                                Text(
-                                    progress.fraction,
-                                    format: .percent.precision(.fractionLength(0))
-                                )
-                                .monospacedDigit()
-                            }
-                            .font(.footnote)
-                            .accessibilityElement(children: .combine)
-
-                            ProgressView(value: progress.fraction)
-                                .progressViewStyle(.linear)
-                                .accessibilityHidden(true)
-                        }
-                    }
-                    .padding(.horizontal, 10)
                 }
             }
-            .listStyle(.grouped)
+            .listStyle(.insetGrouped)
             .navigationTitle(todayViewModel.selectedTab == .daily ? TodayTextsEnum.screenTitle : TodayTextsEnum.tabWeekly)
             .navigationBarTitleDisplayMode(.large)
+            .alert(TodayTextsEnum.errorTitle, isPresented: isShowingError) {
+            } message: {
+                if let errorMessage = todayViewModel.errorMessage {
+                    Text(errorMessage)
+                }
+            }
             .onChange(of: dailyProgress, initial: true) {
                 todayViewModel.publishDailyProgress(for: dailyHabits)
             }

@@ -139,6 +139,17 @@ struct TodayViewModelTests {
         #expect(viewModel.isLoading == false)
     }
 
+    @Test func dismissingTheErrorClearsIt() async {
+        let useCase = FakeToggleHabitCompletionUseCase(error: UseCaseFailure())
+        let viewModel = makeViewModel(toggleHabitCompletionUseCase: useCase)
+        await viewModel.onToggleCompletion(makeTodayHabit(repetitionsPerDay: 1, completedToday: 0))
+        #expect(viewModel.errorMessage != nil)
+
+        viewModel.onErrorDismissed()
+
+        #expect(viewModel.errorMessage == nil)
+    }
+
     @Test func progressUsesTheDailyScopeOnTheDailyTab() {
         let progressUseCase = FakeCalculateHabitsProgressUseCase(
             progress: HabitsProgress(

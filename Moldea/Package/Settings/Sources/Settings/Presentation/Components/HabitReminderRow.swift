@@ -38,11 +38,12 @@ struct HabitReminderRow: View {
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(habit.name)
-                                    .font(.body.weight(.semibold))
                                 
-                                subtitle
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
+                                if let subtitle {
+                                    Text(subtitle)
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                         }
                     }
@@ -52,12 +53,8 @@ struct HabitReminderRow: View {
         }
     }
     
-    private var subtitle: Text {
-        guard let reminder = habit.reminder else {
-            return Text(SettingsTextsEnum.habitReminderDisabled)
-        }
-        
-        return Text(reminder.subtitle)
+    private var subtitle: String? {
+        habit.reminder?.subtitle
     }
 }
 
@@ -74,13 +71,7 @@ extension HabitReminder {
                 .append(String(localized: SettingsTextsEnum.withoutWeekends))
         }
         
-        components.append(String(localized: stateText))
         return components
-    }
-    
-    private var stateText: LocalizedStringResource {
-        isEnabled ? SettingsTextsEnum.habitReminderEnabled
-        : SettingsTextsEnum.habitReminderDisabled
     }
 }
 

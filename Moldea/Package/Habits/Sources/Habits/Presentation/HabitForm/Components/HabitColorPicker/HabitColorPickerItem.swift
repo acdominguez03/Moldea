@@ -18,13 +18,15 @@ struct HabitColorPickerItem: View {
             Circle()
                 .fill(color)
                 .overlay(Circle().strokeBorder(Color.primary.opacity(0.15), lineWidth: 1))
-                .padding(5)
+                .padding(4)
                 .overlay {
                     if isSelected {
                         Circle().strokeBorder(Color.primary, lineWidth: 2)
                     }
                 }
-                .frame(width: 48, height: 48)
+                .frame(maxWidth: .infinity)
+                .aspectRatio(1, contentMode: .fit)
+                .contentShape(Circle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(name)

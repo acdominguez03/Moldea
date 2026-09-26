@@ -19,8 +19,8 @@ struct HabitSummaryView: View {
       }
     
     var body: some View {
-        HStack(spacing: 12) {
-            HabitIconBadge(color: color, icon: icon)
+        HStack(spacing: 16) {
+            HabitIconBadge(color: color, icon: icon, style: .solid, size: .large)
 
             VStack {
                 TextField(
@@ -29,7 +29,8 @@ struct HabitSummaryView: View {
                 ) {
                     Text(HabitsTextsEnum.habitNamePlaceholder)
                 }
-                
+                .font(.title2)
+
                 Divider()
             }
         }

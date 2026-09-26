@@ -48,6 +48,10 @@ struct SettingsContentView: View {
         habits.filter(\.isActive)
     }
     
+    private var showsHabitReminders: Bool {
+        !habits.isEmpty && settingsViewModel.isNotificationsEnabled
+    }
+
     private var activeRemindersCount: Int {
         activeHabits.count(where: \.hasActiveReminder)
     }
@@ -58,32 +62,30 @@ struct SettingsContentView: View {
             List {
                 if settingsViewModel.isNotificationPermissionAllowed {
                     Section {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Toggle(
-                                isOn: isNotificationsEnabledBinding,
-                                label : {
-                                    Text(SettingsTextsEnum.allowAnnouncements)
-                                        .bold()
+                        Toggle(
+                            isOn: isNotificationsEnabledBinding,
+                            label: {
+                                Text(SettingsTextsEnum.allowAnnouncements)
 
-                                    Text(
-                                        settingsViewModel.isNotificationsEnabled || activeRemindersCount == 0 ?
-                                            SettingsTextsEnum
-                                                .habitThatAnnounce(
-                                                    activeHabits.count,
-                                                    activeRemindersCount,
-                                                )
-                                        : SettingsTextsEnum.everythingMuted
-                                    )
-                                },
-                            )
-                        }
+                                Text(
+                                    settingsViewModel.isNotificationsEnabled || activeRemindersCount == 0 ?
+                                        SettingsTextsEnum
+                                            .habitThatAnnounce(
+                                                activeHabits.count,
+                                                activeRemindersCount,
+                                            )
+                                    : SettingsTextsEnum.everythingMuted
+                                )
+                            }
+                        )
                     } header: {
                         Text(SettingsTextsEnum.notifications)
-                            .textCase(.uppercase)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                    } footer: {
+                        if showsHabitReminders {
+                            Text(SettingsTextsEnum.chooseHabitsAnnouncements)
+                        }
                     }
-                    if !habits.isEmpty && settingsViewModel.isNotificationsEnabled {
+                    if showsHabitReminders {
                         Section {
                             ForEach(activeHabits) { habit in
                                 HabitReminderRow(
@@ -96,10 +98,6 @@ struct SettingsContentView: View {
                                     }
                                 )
                             }
-                        } header : {
-                            Text(SettingsTextsEnum.chooseHabitsAnnouncements)
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
                         }
                     }
                 } else {
@@ -107,13 +105,10 @@ struct SettingsContentView: View {
                         NotificationPermissionDisabledRow(onRowTapped: openNotificationSettings)
                     } header: {
                         Text(SettingsTextsEnum.notifications)
-                            .textCase(.uppercase)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
                     }
                 }
             }
-            .listStyle(.grouped)
+            .listStyle(.insetGrouped)
             .navigationTitle(SettingsTextsEnum.screenTitle)
             .navigationBarTitleDisplayMode(.large)
             .sheet(item: $habitToEditReminder) { habit in
@@ -121,7 +116,7 @@ struct SettingsContentView: View {
                     habit: habit,
                     habitReminderSheetViewModel: dependencies.makeHabitReminderSheetViewModel(habit: habit)
                 )
-                .fittingSheetDetents(extraDetents: [.medium])
+                .fittingScrollSheetDetents()
             }
             .onChange(of: scenePhase) { _, newPhase in
                 if newPhase == .active {

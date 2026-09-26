@@ -39,81 +39,70 @@ struct HabitReminderSheet: View {
     }
     
     var body: some View {
-        VStack(alignment:.leading, spacing: 0) {
-            Divider()
-            
-            HStack(spacing: 12) {
-                HabitIconBadge(color: color, icon: habit.icon)
-                Text(habit.name)
-                    .font(.title3.weight(.semibold))
-            }
-            .padding(16)
-            
-            Divider()
-            
-            VStack(spacing: 8) {
-                Toggle(
-                    isOn: isReminderEnabledBinding,
-                    label: {
-                        VStack(alignment: .leading) {
-                            Text(SettingsTextsEnum.habitReminderReceiveTitle)
-                                .bold()
-                            
-                            Text(
-                                habitReminderSheetViewModel.isReminderEnabled
-                                ? SettingsTextsEnum.habitReminderAtTime(
-                                    habitReminderSheetViewModel.reminderTime
-                                )
-                                : SettingsTextsEnum.habitReminderDisabled
-                            )
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                        }
+        NavigationStack {
+            Form {
+                Section {
+                    HStack(spacing: 12) {
+                        HabitIconBadge(color: color, icon: habit.icon, style: .solid)
+                        Text(habit.name)
+                            .font(.title3.weight(.semibold))
                     }
-                )
-                
-                VStack(spacing: 8) {
-                    DatePicker(
-                        SettingsTextsEnum.habitReminderHourLabel,
-                        selection: reminderTimeBinding,
-                        displayedComponents: .hourAndMinute
-                    )
-                    
-                    Toggle(
-                        isOn: isMutedOnWeekendsBinding,
-                        label: {
-                            VStack(alignment: .leading) {
-                                Text(SettingsTextsEnum.habitReminderMuteWeekendsTitle)
-                                    .font(
-                                        .body
-                                            .weight(
-                                                habitReminderSheetViewModel.isReminderEnabled ? .bold : .regular
-                                            )
-                                    )
-                                
+                }
+
+                Section {
+                    Toggle(SettingsTextsEnum.habitReminderReceiveTitle, isOn: isReminderEnabledBinding)
+
+                    Group {
+                        DatePicker(
+                            SettingsTextsEnum.habitReminderHourLabel,
+                            selection: reminderTimeBinding,
+                            displayedComponents: .hourAndMinute
+                        )
+
+                        Toggle(
+                            SettingsTextsEnum.habitReminderMuteWeekendsTitle,
+                            isOn: isMutedOnWeekendsBinding
+                        )
+                    }
+                    .disabled(!habitReminderSheetViewModel.isReminderEnabled)
+                } footer: {
+                    VStack(alignment: .leading) {
+                        if habitReminderSheetViewModel.isReminderEnabled {
+                            Text(SettingsTextsEnum.habitReminderAtTime(habitReminderSheetViewModel.reminderTime))
+
+                            if habitReminderSheetViewModel.isMutedOnWeekends {
                                 Text(SettingsTextsEnum.habitReminderMuteWeekendsSubtitle)
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
                             }
+                        } else {
+                            Text(SettingsTextsEnum.habitReminderDisabled)
                         }
-                    )
-                }
-                .disabled(!habitReminderSheetViewModel.isReminderEnabled)
-            }
-            .padding(16)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .navigationTitle(SettingsTextsEnum.habitReminderSheetTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button(String(localized: SettingsTextsEnum.done)) {
-                    Task {
-                        await habitReminderSheetViewModel.save()
-                        dismiss()
                     }
                 }
-                .buttonStyle(.plain)
+            }
+            .navigationTitle(SettingsTextsEnum.habitReminderSheetTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .accessibilityLabel(CoreTextsEnum.cancel)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        Task {
+                            await habitReminderSheetViewModel.save()
+                            dismiss()
+                        }
+                    } label: {
+                        Image(systemName: "checkmark")
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.accentColor)
+                    .accessibilityLabel(SettingsTextsEnum.done)
+                }
             }
         }
     }

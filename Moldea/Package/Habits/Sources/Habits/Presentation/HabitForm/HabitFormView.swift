@@ -34,55 +34,46 @@ struct HabitFormContentView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 12) {
-                HabitSummaryView(
-                    color: habitFormViewModel.selectedColor,
-                    icon: habitFormViewModel.selectedIcon,
-                    name: habitFormViewModel.name,
-                    onHabitNameChanged: {
-                        habitFormViewModel.onHabitNameChanged($0)
-                    }
-                )
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(HabitsTextsEnum.iconTitle)
-                        .textCase(.uppercase)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+            Form {
+                Section {
+                    HabitSummaryView(
+                        color: habitFormViewModel.selectedColor,
+                        icon: habitFormViewModel.selectedIcon,
+                        name: habitFormViewModel.name,
+                        onHabitNameChanged: {
+                            habitFormViewModel.onHabitNameChanged($0)
+                        }
+                    )
+                }
 
+                Section {
                     HabitIconPicker(
                         selectedIcon: habitFormViewModel.selectedIcon,
                         tint: habitFormViewModel.selectedColor,
                         onIconSelected: { habitFormViewModel.selectIcon($0) },
                         onMoreTapped: { isShowingIconChooser = true }
                     )
+                } header: {
+                    Text(HabitsTextsEnum.iconTitle)
                 }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(HabitsTextsEnum.colorTitle)
-                        .textCase(.uppercase)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
 
+                Section {
                     HabitColorPicker(
                         selectedHex: habitFormViewModel.selectedColorHex,
                         onColorSelected: { habitFormViewModel.selectColor(hex: $0) }
                     )
+                } header: {
+                    Text(HabitsTextsEnum.colorTitle)
                 }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(HabitsTextsEnum.frequency)
-                        .textCase(.uppercase)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                    
+
+                Section {
                     HabitFrequencyPicker(
                         selectedHabitFrequency: habitFormViewModel.selectedFrequency,
                         onFrequencyChanged: {
                             habitFormViewModel.onFrequencyChanged($0)
                         }
                     )
-                    
+
                     TimesADayPicker(
                         range: habitFormViewModel.timesADayRange,
                         selectedTimesADay: habitFormViewModel.selectedTimesADay,
@@ -93,46 +84,36 @@ struct HabitFormContentView: View {
                             habitFormViewModel.onDecrementTimeADayClicked()
                         }
                     )
-                    
+
                     frequencyDetail
+                } header: {
+                    Text(HabitsTextsEnum.frequency)
                 }
-                .animation(
-                    .snappy,
-                    value: habitFormViewModel.selectedFrequency
+                .animation(.snappy, value: habitFormViewModel.selectedFrequency)
+
+                NotificationsPicker(
+                    isRemindHabitEnabled: habitFormViewModel.isRemindHabitEnabled,
+                    isMutedOnWeekends: habitFormViewModel.isMutedOnWeekends,
+                    reminderTime: habitFormViewModel.reminderTime,
+                    onRemindHabitToggled: {
+                        habitFormViewModel.onRemidHabitToggled($0)
+                    },
+                    onMuteOnWeekendToggled: {
+                        habitFormViewModel.onMuteOnWeekendToggled($0)
+                    },
+                    onReminderTimeChanged: {
+                        habitFormViewModel.onReminderTimeChanged($0)
+                    }
                 )
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(CoreTextsEnum.announcements)
-                        .textCase(.uppercase)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                    
-                    NotificationsPicker(
-                        isRemindHabitEnabled: habitFormViewModel
-                            .isRemindHabitEnabled,
-                        isMutedOnWeekends: habitFormViewModel
-                            .isMutedOnWeekends,
-                        reminderTime: habitFormViewModel.reminderTime,
-                        onRemindHabitToggled: {
-                            habitFormViewModel.onRemidHabitToggled($0)
-                        },
-                        onMuteOnWeekendToggled: {
-                            habitFormViewModel.onMuteOnWeekendToggled($0)
-                        },
-                        onReminderTimeChanged: {
-                            habitFormViewModel.onReminderTimeChanged($0)
-                        }
-                    )
-                }
-                
+
                 if let errorMessage = habitFormViewModel.errorMessage {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
+                    Section {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
                 }
             }
-            .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .navigationTitle(
                 habitFormViewModel.isEditing ? HabitsTextsEnum.editHabit : HabitsTextsEnum.newHabit
             )
@@ -155,9 +136,12 @@ struct HabitFormContentView: View {
                         Button {
                             Task { await habitFormViewModel.save() }
                         } label: {
-                            Text(CoreTextsEnum.save)
+                            Image(systemName: "checkmark")
                         }
                         .disabled(!habitFormViewModel.canSave)
+                        .buttonStyle(.glassProminent)
+                        .tint(.accentColor)
+                        .accessibilityLabel(HabitsTextsEnum.save)
                     }
                 )
                 ToolbarItem(
@@ -166,8 +150,9 @@ struct HabitFormContentView: View {
                         Button {
                             dismiss()
                         } label: {
-                            Text(CoreTextsEnum.cancel)
+                            Image(systemName: "xmark")
                         }
+                        .accessibilityLabel(CoreTextsEnum.cancel)
                     }
                 )
             }

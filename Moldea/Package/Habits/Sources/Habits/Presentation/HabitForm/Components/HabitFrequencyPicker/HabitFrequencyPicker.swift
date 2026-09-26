@@ -10,30 +10,30 @@ import SwiftUI
 struct HabitFrequencyPicker: View {
     let selectedHabitFrequency: HabitFrequencyEnum
     let onFrequencyChanged: (HabitFrequencyEnum) -> Void
-    
+
+    private var selection: Binding<HabitFrequencyEnum> {
+        Binding(get: { selectedHabitFrequency }, set: { onFrequencyChanged($0) })
+    }
+
     var body: some View {
-        HStack(spacing: 12) {
+        Picker(HabitsTextsEnum.frequency, selection: selection) {
             ForEach(HabitFrequencyEnum.allCases) { frequency in
-                HabitFrequencyPickerItem(
-                    frequency: frequency,
-                    isSelected: selectedHabitFrequency == frequency,
-                    action: {
-                        onFrequencyChanged(frequency)
-                    }
-                )
+                Text(frequency.name).tag(frequency)
             }
         }
-        .animation(.snappy, value: selectedHabitFrequency)
+        .pickerStyle(.segmented)
+        .labelsHidden()
     }
 }
 
 
 #Preview {
     @Previewable @State var selectedHabitFrequency: HabitFrequencyEnum = .everyDay
-    
-    HabitFrequencyPicker(
-        selectedHabitFrequency: .everyDay, onFrequencyChanged: {
-            selectedHabitFrequency = $0
-        }
-    )
+
+    Form {
+        HabitFrequencyPicker(
+            selectedHabitFrequency: selectedHabitFrequency,
+            onFrequencyChanged: { selectedHabitFrequency = $0 }
+        )
+    }
 }

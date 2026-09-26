@@ -12,44 +12,39 @@ struct TimesAWeekPicker: View {
     let selectedTimesAWeek: Int
     let onIncrementTimesAWeek: () -> Void
     let onDecrementTimesAWeek: () -> Void
-    
+
+    private var value: Binding<Int> {
+        Binding(
+            get: { selectedTimesAWeek },
+            set: { newValue in
+                if newValue > selectedTimesAWeek {
+                    onIncrementTimesAWeek()
+                } else if newValue < selectedTimesAWeek {
+                    onDecrementTimesAWeek()
+                }
+            }
+        )
+    }
+
     var body: some View {
-        HStack {
-            Text(HabitsTextsEnum.timesAWeek)
-                .font(.body)
-            
-            Spacer()
-            
-            Button(action: { onDecrementTimesAWeek() }) {
-                Image(systemName: "minus")
-                    .font(.body.weight(.semibold))
-                    .frame(width: 32, height: 32)
+        Stepper(value: value, in: range) {
+            LabeledContent(HabitsTextsEnum.timesAWeek) {
+                Text(selectedTimesAWeek, format: .number)
+                    .monospacedDigit()
             }
-            .disabled(selectedTimesAWeek <= range.lowerBound)
-            .buttonBorderShape(.circle)
-            .buttonStyle(.glass)
-            
-            Text("\(selectedTimesAWeek)")
-                .monospacedDigit()
-                .padding(.horizontal, 16)
-            
-            Button(action: { onIncrementTimesAWeek() }) {
-                Image(systemName: "plus")
-                    .font(.body.weight(.semibold))
-                    .frame(width: 32, height: 32)
-            }
-            .disabled(selectedTimesAWeek >= range.upperBound)
-            .buttonBorderShape(.circle)
-            .buttonStyle(.glass)
         }
     }
 }
 
 #Preview() {
-    TimesAWeekPicker(
-        range: 1...7,
-        selectedTimesAWeek: 0,
-        onIncrementTimesAWeek: {},
-        onDecrementTimesAWeek: {}
-    )
+    @Previewable @State var timesAWeek = 1
+
+    Form {
+        TimesAWeekPicker(
+            range: 1...7,
+            selectedTimesAWeek: timesAWeek,
+            onIncrementTimesAWeek: { timesAWeek += 1 },
+            onDecrementTimesAWeek: { timesAWeek -= 1 }
+        )
+    }
 }

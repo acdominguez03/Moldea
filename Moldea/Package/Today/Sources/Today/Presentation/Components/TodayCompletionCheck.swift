@@ -10,6 +10,9 @@ import Core
 
 struct TodayCompletionCheck: View {
     private static let size: CGFloat = 34
+    private static let touchTarget: CGFloat = 44
+
+    @Environment(\.self) private var environment
 
     let completed: Int
     let total: Int
@@ -27,7 +30,7 @@ struct TodayCompletionCheck: View {
 
                     Image(systemName: "checkmark")
                         .font(.footnote.weight(.bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(ContrastingColor.foreground(on: color, in: environment))
                 } else {
                     Circle()
                         .strokeBorder(.tertiary, lineWidth: 1.5)
@@ -35,12 +38,14 @@ struct TodayCompletionCheck: View {
                     if total > 1 {
                         Text(verbatim: "\(completed.formatted())/\(total.formatted())")
                             .font(.caption2.weight(.semibold))
-                            .foregroundStyle(color)
+                            .foregroundStyle(.secondary)
                             .monospacedDigit()
                     }
                 }
             }
             .frame(width: Self.size, height: Self.size)
+            .frame(width: Self.touchTarget, height: Self.touchTarget)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text(TodayTextsEnum.completionLabel))
