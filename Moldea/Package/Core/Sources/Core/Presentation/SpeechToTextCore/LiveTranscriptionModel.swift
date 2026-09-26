@@ -131,11 +131,10 @@ final class LiveTranscriptionModel {
 #if compiler(>=6.3)
         if #available(iOS 27, *) {
             try await analyzeCaptureSession(transcriber: transcriber)
+            return
         }
-#else
-        try await analyzeAudioEngine(transcriber: transcriber)
 #endif
-        
+
         try await analyzeAudioEngine(transcriber: transcriber)
     }
     
