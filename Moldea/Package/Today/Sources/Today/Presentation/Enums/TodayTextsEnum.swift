@@ -24,8 +24,14 @@ public enum TodayTextsEnum {
     public static let tabWeekly = resource("today_tab_weekly")
 
     // MARK: Completion Texts
-    public static let completionLabel = resource("today_completion_label")
     public static let completionHint = resource("today_completion_hint")
+
+    public static func completionLabel(_ name: String) -> LocalizedStringResource {
+        LocalizedStringResource(
+            "today_completion_label_named \(name)",
+            bundle: .atURL(Bundle.module.bundleURL)
+        )
+    }
 
     // MARK: Progress Texts
     public static func habitsProgress(_ completed: Int, _ total: Int) -> LocalizedStringResource {

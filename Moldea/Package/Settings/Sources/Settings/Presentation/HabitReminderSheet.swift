@@ -12,6 +12,13 @@ struct HabitReminderSheet: View {
     let habit: Habit
     @State var habitReminderSheetViewModel: HabitReminderSheetViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var headerLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout(spacing: 12))
+    }
     
     private var color: Color {
         HexColorConverter.color(fromHex: habit.color) ?? .gray
@@ -27,7 +34,8 @@ struct HabitReminderSheet: View {
     private var isMutedOnWeekendsBinding: Binding<Bool> {
         Binding(
             get: { habitReminderSheetViewModel.isMutedOnWeekends },
-            set: { habitReminderSheetViewModel.onMuteOnWeekendToggled($0) }
+            set: { habitReminderSheetViewModel.onMuteOnWeekendToggled($0)
+            }
         )
     }
     
@@ -42,10 +50,11 @@ struct HabitReminderSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    HStack(spacing: 12) {
+                    headerLayout {
                         HabitIconBadge(color: color, icon: habit.icon, style: .solid)
                         Text(habit.name)
                             .font(.title3.weight(.semibold))
+                            .accessibilityAddTraits(.isHeader)
                     }
                 }
 

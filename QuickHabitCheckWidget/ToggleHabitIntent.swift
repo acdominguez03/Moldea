@@ -10,9 +10,9 @@ import WidgetKit
 import Core
 
 struct ToggleHabitIntent: AppIntent {
-    static let title: LocalizedStringResource = "Marcar hábito"
+    static let title: LocalizedStringResource = "Toggle habit"
 
-    @Parameter(title: "Hábito")
+    @Parameter(title: "Habit")
     var habitID: String
 
     init() {}

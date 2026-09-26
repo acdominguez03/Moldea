@@ -30,8 +30,14 @@ public struct HabitCardView: View {
         )
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     public var body: some View {
-        HStack(spacing: 8) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 8))
+
+        layout {
             HabitIconBadge(color: color, icon: icon)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -43,9 +49,8 @@ public struct HabitCardView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-
-            Spacer()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
     }
 
@@ -57,6 +62,9 @@ public struct HabitCardView: View {
             Text(CoreTextsEnum.summaryTimesPerDay(count))
         case .weekdays(let symbols):
             Text(CoreTextsEnum.summaryWeekdays(symbols.formatted()))
+                .accessibilityLabel(
+                    Text(CoreTextsEnum.summaryWeekdays(HabitScheduleSummaryEnum.weekdayNames(of: schedule).formatted()))
+                )
         case .timesPerWeek(let count):
             Text(CoreTextsEnum.summaryTimesPerWeek(count))
         }

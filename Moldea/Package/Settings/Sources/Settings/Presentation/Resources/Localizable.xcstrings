@@ -103,6 +103,24 @@
         }
       }
     },
+    "settings_edit_reminder" : {
+      "comment" : "Acción de VoiceOver en la fila de un hábito para abrir la edición de su recordatorio.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar recordatorio"
+          }
+        }
+      }
+    },
     "settings_general_section" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -303,6 +321,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notificaciones deshabilitadas"
+          }
+        }
+      }
+    },
+    "settings_opens_system_settings" : {
+      "comment" : "Pista de VoiceOver de la fila que avisa de que los permisos de notificación están desactivados.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the Settings app."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre la app Ajustes."
           }
         }
       }

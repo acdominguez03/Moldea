@@ -849,8 +849,8 @@ transición al cambiar el ajuste. El `id:` del `.task` es el propio `reduceMotio
 activar o desactivar el ajuste con la pantalla abierta reinicia el bucle en vez de dejarlo en
 el estado anterior.
 
-Es una animación decorativa y sintética —marcada con `.accessibilityHidden(true)` en la
-pantalla, porque el estado de escucha ya lo comunica el título—. Cuando entre el audio real,
+Es una animación decorativa y sintética —`WaveAnimation` se marca a sí misma con
+`.accessibilityHidden(true)`, porque el estado de escucha ya lo comunica el título—. Cuando entre el audio real,
 la altura debe venir del nivel de la señal en vez de `CGFloat.random(in:)`.
 
 ## Textos y localización
@@ -1051,3 +1051,12 @@ Es la que hay que volver a pasar cada vez que se toque una palabra de
 cuando es del runtime. Los tests unitarios sí pasan en los dos.
 
 `CoreTests.swift` es todavía la plantilla generada.
+
+## Accesibilidad
+
+`ContrastingColor.contrastRatio(...)`, el fallback `.tinted` → `.solid` de `HabitIconBadge`
+(con su círculo en `@ScaledMetric`), `HabitScheduleSummaryEnum.weekdayNames(of:)` y los textos
+compartidos de VoiceOver (`accessibilityCompleted`, `accessibilityProgress(_:of:)`…) viven aquí.
+`HabitCommandView` anuncia cada fase y no se cierra sola con VoiceOver activo.
+
+Las reglas comunes están en el `CLAUDE.md` raíz, en _Accesibilidad_.

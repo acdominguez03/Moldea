@@ -75,10 +75,9 @@ struct QuickHabitCheckWidgetEntryView: View {
         if habits.isEmpty {
             VStack (spacing: 8) {
                 Image(systemName: "calendar")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
+                    .font(.title2)
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
                 
                 Text(CoreTextsEnum.noHabitsForToday)
                     .font(.caption)
@@ -102,10 +101,15 @@ struct QuickHabitCheckWidgetEntryView: View {
             
             Spacer()
             
-            Text("\(completedHabits)/\(entry.habits.count)")
+            Text(verbatim: "\(completedHabits.formatted())/\(entry.habits.count.formatted())")
                 .font(.caption2)
+                .accessibilityLabel(
+                    Text(CoreTextsEnum.accessibilityHabitsCompletedCount(completedHabits, of: entry.habits.count))
+                )
         }
         .padding(.bottom, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
     }
     
     private func content(showing count: Int) -> some View {
@@ -118,19 +122,39 @@ struct QuickHabitCheckWidgetEntryView: View {
             }
             
             if count < habits.count {
-                Text("+\(habits.count - count)")
+                Text(verbatim: "+\((habits.count - count).formatted())")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel(Text(CoreTextsEnum.accessibilityMoreHabits(habits.count - count)))
             }
         }
     }
 }
 
 private struct HabitRow: View {
+    private static let minimumIconContrast = 3.0
+
+    @Environment(\.self) private var environment
+
     let todayHabit: TodayHabit
-    
+
     private var color: Color {
         HexColorConverter.color(fromHex: todayHabit.habit.color) ?? .gray
+    }
+
+    private var iconColor: Color {
+        let ratio = ContrastingColor.contrastRatio(
+            of: color,
+            on: Color(.secondarySystemBackground),
+            in: environment
+        )
+        return ratio >= Self.minimumIconContrast ? color : .primary
+    }
+
+    private var accessibilityValue: LocalizedStringResource {
+        todayHabit.isCompletedToday
+            ? CoreTextsEnum.accessibilityCompleted
+            : CoreTextsEnum.accessibilityProgress(todayHabit.completedToday, of: total)
     }
     
     private var total: Int {
@@ -142,7 +166,8 @@ private struct HabitRow: View {
             VStack(spacing: 0) {
                 HStack(spacing: 8) {
                     Image(systemName: todayHabit.isCompletedToday ? "checkmark.circle.fill" : "circle")
-                        .foregroundStyle(color)
+                        .foregroundStyle(iconColor)
+                        .accessibilityHidden(true)
                     
                     Text(todayHabit.habit.name)
                         .font(.subheadline)
@@ -153,7 +178,7 @@ private struct HabitRow: View {
                     Spacer()
                     
                     if total > 1 {
-                        Text("\(todayHabit.completedToday)/\(total)")
+                        Text(verbatim: "\(todayHabit.completedToday.formatted())/\(total.formatted())")
                             .font(.caption)
                             .monospacedDigit()
                             .foregroundStyle(.secondary)
@@ -167,6 +192,10 @@ private struct HabitRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(todayHabit.habit.name)
+        .accessibilityValue(Text(accessibilityValue))
+        .accessibilityAddTraits(todayHabit.isCompletedToday ? [.isButton, .isSelected] : .isButton)
     }
 }
 

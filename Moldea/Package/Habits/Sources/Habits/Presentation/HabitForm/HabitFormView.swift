@@ -108,9 +108,13 @@ struct HabitFormContentView: View {
 
                 if let errorMessage = habitFormViewModel.errorMessage {
                     Section {
-                        Text(errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.red)
+                        Label {
+                            Text(errorMessage)
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.red)
+                        }
+                        .font(.footnote)
                     }
                 }
             }
@@ -128,6 +132,10 @@ struct HabitFormContentView: View {
             }
             .onChange(of: habitFormViewModel.didSave) { _, didSave in
                 if didSave { dismiss() }
+            }
+            .onChange(of: habitFormViewModel.errorMessage) { _, errorMessage in
+                guard let errorMessage else { return }
+                AccessibilityNotification.Announcement(String(localized: errorMessage)).post()
             }
             .toolbar {
                 ToolbarItem(

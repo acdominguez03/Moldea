@@ -1,6 +1,96 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "statistics_chart_axis_percentage" : {
+      "comment" : "Nombre del eje vertical de las gráficas para VoiceOver.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Percentage completed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Porcentaje completado"
+          }
+        }
+      }
+    },
+    "statistics_chart_axis_period" : {
+      "comment" : "Nombre del eje horizontal de las gráficas para VoiceOver.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Period"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Periodo"
+          }
+        }
+      }
+    },
+    "statistics_chart_title_month" : {
+      "comment" : "Título de la gráfica mensual para VoiceOver y Audio Graphs.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progress this month"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progreso del mes"
+          }
+        }
+      }
+    },
+    "statistics_chart_title_week" : {
+      "comment" : "Título de la gráfica semanal para VoiceOver y Audio Graphs.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progress this week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progreso de la semana"
+          }
+        }
+      }
+    },
+    "statistics_chart_title_year" : {
+      "comment" : "Título de la gráfica anual para VoiceOver y Audio Graphs.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progress this year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progreso del año"
+          }
+        }
+      }
+    },
     "statistics_day_chart_summary" : {
       "comment" : "Follows the overall percentage of the selected day, as in \"45 % completed this day\".",
       "extractionState" : "manual",
@@ -144,6 +234,24 @@
         }
       }
     },
+    "statistics_month_chart_week_accessibility %lld" : {
+      "comment" : "Nombre completo de una semana de la gráfica mensual para VoiceOver.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semana %lld"
+          }
+        }
+      }
+    },
     "statistics_month_chart_week_mark %lld" : {
       "comment" : "Short label for each of the four week bars of the month chart, as in \"W1\".",
       "extractionState" : "manual",
@@ -193,6 +301,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "cumplido esta semana"
+          }
+        }
+      }
+    },
+    "statistics_week_chart_weekly_accessibility" : {
+      "comment" : "Nombre completo de la barra semanal de la gráfica, que se lee con VoiceOver en lugar de la abreviatura.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekly goal habits"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hábitos con objetivo semanal"
           }
         }
       }

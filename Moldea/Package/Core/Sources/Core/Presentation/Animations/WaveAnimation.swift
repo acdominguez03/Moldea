@@ -18,6 +18,7 @@ struct WaveAnimation: View {
                 WaveItemAnimation(isActive: isActive)
             }
         }
+        .accessibilityHidden(true)
     }
 }
 

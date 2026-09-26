@@ -145,3 +145,10 @@ métodos síncronos.
   `RequestNotificationAuthorizationUseCase` inyectado, en ambos sentidos (concede y deniega).
 
 `Tests/SettingsTests/SettingsTests.swift` es todavía la plantilla generada.
+
+## Accesibilidad
+
+`HabitReminderRow` añade la acción «Editar recordatorio» al `Toggle` (el botón de su label no
+se alcanza con VoiceOver). La hoja de recordatorio admite `[.medium, .large]`.
+
+Las reglas comunes están en el `CLAUDE.md` raíz, en _Accesibilidad_.

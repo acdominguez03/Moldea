@@ -19,6 +19,7 @@ public struct SpeechToTextView: View {
 
 struct SpeechToTextContentView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @State private var viewModel: SpeechToTextViewModel
     
@@ -37,60 +38,13 @@ struct SpeechToTextContentView: View {
     }
 
     var body: some View {
-        VStack(spacing: 20) {
-            Group {
-                if viewModel.hasTranscript {
-                    Text(viewModel.styledTranscript)
-                        .lineLimit(10)
-                } else {
-                    Text(CoreTextsEnum.speechToTextPlaceholder)
-                        .foregroundStyle(.secondary)
-                }
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                ScrollView { content }
+            } else {
+                content
             }
-            .font(.body)
-            .textSelection(.enabled)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            
-            switch viewModel.phase {
-            case .preparing:
-                if let progress = viewModel.downloadProgress {
-                    ProgressView(progress)
-                        .font(.footnote)
-                } else {
-                    ProgressView {
-                        Text(CoreTextsEnum.speechToTextPreparing)
-                    }
-                    .font(.footnote)
-                }
-            case .failed(let message):
-                Text(message)
-                    .font(.footnote)
-                    .foregroundStyle(.red)
-                    .multilineTextAlignment(.center)
-            case .idle, .transcribing:
-                EmptyView()
-            }
-            
-            WaveAnimation(isActive: viewModel.isTranscribing)
-                .accessibilityHidden(true)
-            
-            Button {
-                Task { await viewModel.finishAndRecognize() }
-            } label: {
-                Text(CoreTextsEnum.finish)
-            }
-            .buttonStyle(.glass)
-            .buttonSizing(.flexible)
-            .disabled(!viewModel.canFinish)
-            
-            Text(CoreTextsEnum.speechToTextDescription)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                .font(.body)
-                .multilineTextAlignment(.leading)
-                .lineLimit(3)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 40)
         .navigationTitle(CoreTextsEnum.listening)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: isPresentingCommand) {
@@ -121,8 +75,70 @@ struct SpeechToTextContentView: View {
         .task {
             await viewModel.start()
         }
+        .onChange(of: viewModel.phase) {
+            guard case .failed(let message) = viewModel.phase else { return }
+            AccessibilityNotification.Announcement(String(localized: message)).post()
+        }
         .onDisappear {
             viewModel.stop()
         }
+    }
+
+    private var content: some View {
+        VStack(spacing: 20) {
+            Group {
+                if viewModel.hasTranscript {
+                    Text(viewModel.styledTranscript)
+                } else {
+                    Text(CoreTextsEnum.speechToTextPlaceholder)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .font(.body)
+            .textSelection(.enabled)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            
+            switch viewModel.phase {
+            case .preparing:
+                if let progress = viewModel.downloadProgress {
+                    ProgressView(progress)
+                        .font(.footnote)
+                } else {
+                    ProgressView {
+                        Text(CoreTextsEnum.speechToTextPreparing)
+                    }
+                    .font(.footnote)
+                }
+            case .failed(let message):
+                Label {
+                    Text(message)
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                }
+                .font(.footnote)
+                .multilineTextAlignment(.center)
+            case .idle, .transcribing:
+                EmptyView()
+            }
+
+            WaveAnimation(isActive: viewModel.isTranscribing)
+
+            Button {
+                Task { await viewModel.finishAndRecognize() }
+            } label: {
+                Text(CoreTextsEnum.finish)
+            }
+            .buttonStyle(.glass)
+            .buttonSizing(.flexible)
+            .disabled(!viewModel.canFinish)
+            
+            Text(CoreTextsEnum.speechToTextDescription)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                .font(.body)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 40)
     }
 }

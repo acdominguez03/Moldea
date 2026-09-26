@@ -13,7 +13,12 @@ struct HabitIconPicker: View {
     let onIconSelected: (String) -> Void
     let onMoreTapped: () -> Void
 
-    private let columns = [GridItem(.adaptive(minimum: 44, maximum: 52), spacing: 10)]
+    @ScaledMetric(relativeTo: .title2) private var minimumItemSize: CGFloat = 44
+    @ScaledMetric(relativeTo: .title2) private var maximumItemSize: CGFloat = 52
+
+    private var columns: [GridItem] {
+        [GridItem(.adaptive(minimum: minimumItemSize, maximum: maximumItemSize), spacing: 10)]
+    }
 
     private var customIcon: String? {
         HabitPaletteIcon.allCases.contains { $0.systemName == selectedIcon } ? nil : selectedIcon

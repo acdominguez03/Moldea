@@ -190,3 +190,11 @@ Swift Testing. Los repositorios y casos de uso falsos son `actor` (los protocolo
 
 No hay tests de vista ni de la cadena completa por la interfaz. `HabitsTests.swift` es todavía
 la plantilla generada.
+
+## Accesibilidad
+
+`HabitView` expone pausar/eliminar como acciones de VoiceOver y lee los días completos. El
+selector de días, la paleta y el de frecuencia cambian de disposición en tamaños de
+accesibilidad; los errores del formulario se anuncian.
+
+Las reglas comunes están en el `CLAUDE.md` raíz, en _Accesibilidad_.

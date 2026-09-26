@@ -59,4 +59,8 @@ public enum SettingsTextsEnum {
     // MARK: Notification Permission Denied
     public static let notificationsPermissionDisabledTitle = resource("settings_notifications_permission_disabled_title")
     public static let notificationsPermissionDisabledDescription = resource("settings_notifications_permission_disabled_description")
+
+    // MARK: Accessibility
+    public static let editReminder = resource("settings_edit_reminder")
+    public static let opensSystemSettings = resource("settings_opens_system_settings")
 }

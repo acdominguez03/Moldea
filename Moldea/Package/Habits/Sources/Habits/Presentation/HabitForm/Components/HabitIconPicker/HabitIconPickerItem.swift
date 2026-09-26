@@ -76,7 +76,7 @@ struct HabitIconPickerMoreItem: View {
                 .overlay {
                     if customIcon == nil {
                         shape.strokeBorder(
-                            Color.primary.opacity(0.4),
+                            .secondary,
                             style: StrokeStyle(lineWidth: 1, dash: [4])
                         )
                     }

@@ -15,14 +15,25 @@ struct HabitFrequencyPicker: View {
         Binding(get: { selectedHabitFrequency }, set: { onFrequencyChanged($0) })
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            picker
+                .pickerStyle(.menu)
+        } else {
+            picker
+                .pickerStyle(.segmented)
+                .labelsHidden()
+        }
+    }
+
+    private var picker: some View {
         Picker(HabitsTextsEnum.frequency, selection: selection) {
             ForEach(HabitFrequencyEnum.allCases) { frequency in
                 Text(frequency.name).tag(frequency)
             }
         }
-        .pickerStyle(.segmented)
-        .labelsHidden()
     }
 }
 

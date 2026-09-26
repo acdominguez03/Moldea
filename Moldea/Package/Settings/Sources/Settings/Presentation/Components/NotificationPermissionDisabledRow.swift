@@ -11,9 +11,17 @@ import Core
 struct NotificationPermissionDisabledRow: View {
     let onRowTapped: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var layout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout(spacing: 12))
+    }
+
     var body: some View {
         Button(action: onRowTapped) {
-            HStack(spacing: 12) {
+            layout {
                 HabitIconBadge(color: .red, icon: "bell.slash.fill")
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -27,6 +35,7 @@ struct NotificationPermissionDisabledRow: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityHint(Text(SettingsTextsEnum.opensSystemSettings))
     }
 }
 

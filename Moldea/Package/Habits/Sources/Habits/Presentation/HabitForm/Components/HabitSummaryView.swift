@@ -18,8 +18,14 @@ struct HabitSummaryView: View {
         Binding(get: { name }, set: { onHabitNameChanged($0) })
       }
     
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
-        HStack(spacing: 16) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
+            : AnyLayout(HStackLayout(spacing: 16))
+
+        layout {
             HabitIconBadge(color: color, icon: icon, style: .solid, size: .large)
 
             VStack {

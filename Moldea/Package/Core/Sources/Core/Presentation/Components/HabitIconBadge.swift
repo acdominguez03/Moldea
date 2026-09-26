@@ -19,13 +19,6 @@ public struct HabitIconBadge: View {
         case regular
         case large
 
-        var dimension: CGFloat {
-            switch self {
-            case .regular: 52
-            case .large: 72
-            }
-        }
-
         var font: Font {
             switch self {
             case .regular: .title2
@@ -34,7 +27,12 @@ public struct HabitIconBadge: View {
         }
     }
 
+    static let tintOpacity = 0.2
+    static let minimumGlyphContrast = 3.0
+
     @Environment(\.self) private var environment
+    @ScaledMetric(relativeTo: .title2) private var regularDimension: CGFloat = 52
+    @ScaledMetric(relativeTo: .largeTitle) private var largeDimension: CGFloat = 72
 
     private let color: Color
     private let icon: String
@@ -48,27 +46,47 @@ public struct HabitIconBadge: View {
         self.size = size
     }
 
-    private var glyphColor: Color {
+    private var dimension: CGFloat {
+        switch size {
+        case .regular: regularDimension
+        case .large: largeDimension
+        }
+    }
+
+    private var effectiveStyle: Style {
+        guard style == .tinted else { return style }
+        let ratio = ContrastingColor.contrastRatio(
+            of: color,
+            onTintOf: color,
+            opacity: Self.tintOpacity,
+            over: Color(.secondarySystemGroupedBackground),
+            in: environment
+        )
+        return ratio >= Self.minimumGlyphContrast ? .tinted : .solid
+    }
+
+    public var body: some View {
+        let style = effectiveStyle
+        Image(systemName: icon)
+            .font(size.font)
+            .foregroundStyle(glyphColor(for: style))
+            .frame(width: dimension, height: dimension)
+            .background(backgroundColor(for: style), in: Circle())
+            .accessibilityHidden(true)
+    }
+
+    private func glyphColor(for style: Style) -> Color {
         switch style {
         case .tinted: color
         case .solid: ContrastingColor.foreground(on: color, in: environment)
         }
     }
 
-    private var backgroundColor: Color {
+    private func backgroundColor(for style: Style) -> Color {
         switch style {
-        case .tinted: color.opacity(0.2)
+        case .tinted: color.opacity(Self.tintOpacity)
         case .solid: color
         }
-    }
-
-    public var body: some View {
-        Image(systemName: icon)
-            .font(size.font)
-            .foregroundStyle(glyphColor)
-            .frame(width: size.dimension, height: size.dimension)
-            .background(backgroundColor, in: Circle())
-            .accessibilityHidden(true)
     }
 }
 

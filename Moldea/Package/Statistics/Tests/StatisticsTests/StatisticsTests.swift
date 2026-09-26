@@ -159,3 +159,61 @@ struct DayChartViewModelTests {
         #expect(viewModel.dayHabits.map { viewModel.percentage(for: $0) } == [100, 0])
     }
 }
+
+struct ChartAccessibilityTitleTests {
+    private var spanishCalendar: Calendar {
+        var calendar = calendar
+        calendar.locale = Locale(identifier: "es_ES")
+        calendar.firstWeekday = 2
+        return calendar
+    }
+
+    @Test func weekBarsUseFullWeekdayNamesStartingOnFirstWeekday() {
+        let viewModel = WeekChartViewModel(
+            calculateHabitProgressUseCase: CalculateHabitsProgressUseCase(),
+            calendar: spanishCalendar
+        )
+
+        #expect(viewModel.data.map(\.accessibilityTitle) == spanishCalendar.standaloneWeekdaySymbols.rotated(by: 1))
+        #expect(viewModel.data.allSatisfy { $0.title != $0.accessibilityTitle })
+    }
+
+    @Test func yearBarsUseFullMonthNames() {
+        let viewModel = YearChartViewModel(
+            calculateHabitProgressUseCase: CalculateHabitsProgressUseCase(),
+            calendar: spanishCalendar
+        )
+
+        #expect(viewModel.data.map(\.accessibilityTitle) == spanishCalendar.standaloneMonthSymbols)
+    }
+
+    @Test func monthBarsHaveOneDistinctNamePerWeek() {
+        let viewModel = MonthChartViewModel(
+            calculateHabitProgressUseCase: CalculateHabitsProgressUseCase(),
+            calendar: spanishCalendar
+        )
+        let titles = viewModel.data.map(\.accessibilityTitle)
+
+        #expect(titles.count == 4)
+        #expect(Set(titles).count == 4)
+        #expect(titles.allSatisfy { !$0.isEmpty })
+    }
+
+    @Test func tierFollowsPercentageThresholds() {
+        func tier(_ percentage: Int) -> HabitStatistic.Tier {
+            HabitStatistic(id: "x", title: "x", accessibilityTitle: "x", percentage: percentage).tier
+        }
+
+        #expect(tier(59) == .low)
+        #expect(tier(60) == .medium)
+        #expect(tier(79) == .medium)
+        #expect(tier(80) == .high)
+        #expect(HabitStatistic(id: "w", title: "w", accessibilityTitle: "w", percentage: 10, kind: .weekly).tier == .weekly)
+    }
+}
+
+private extension Array {
+    func rotated(by offset: Int) -> [Element] {
+        Array(self[offset...] + self[..<offset])
+    }
+}

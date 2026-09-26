@@ -9,15 +9,20 @@ import SwiftUI
 import Core
 
 struct HabitColorPicker: View {
+    private static let columnCount = 7
+    private static let accessibilityColumnCount = 4
+
     @Environment(\.self) private var environment
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let selectedHex: String
     let onColorSelected: (String) -> Void
 
-    private let columns = Array(
-        repeating: GridItem(.flexible(minimum: 28, maximum: 48), spacing: 8),
-        count: 7
-    )
+    private var columns: [GridItem] {
+        dynamicTypeSize.isAccessibilitySize
+            ? Array(repeating: GridItem(.flexible(minimum: 44), spacing: 8), count: Self.accessibilityColumnCount)
+            : Array(repeating: GridItem(.flexible(minimum: 28, maximum: 48), spacing: 8), count: Self.columnCount)
+    }
 
     private var customColor: Color? {
         guard !HabitPaletteColor.allCases.contains(where: { $0.hex == selectedHex }) else {

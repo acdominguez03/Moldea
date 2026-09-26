@@ -23,7 +23,12 @@ struct ChooseHabitIconView: View {
     let tint: Color
     let onIconSelected: (String) -> Void
 
-    private let columns = [GridItem(.adaptive(minimum: 44, maximum: 52), spacing: 10)]
+    @ScaledMetric(relativeTo: .title2) private var minimumItemSize: CGFloat = 44
+    @ScaledMetric(relativeTo: .title2) private var maximumItemSize: CGFloat = 52
+
+    private var columns: [GridItem] {
+        [GridItem(.adaptive(minimum: minimumItemSize, maximum: maximumItemSize), spacing: 10)]
+    }
 
     init(
         catalog: any HabitIconCatalog,

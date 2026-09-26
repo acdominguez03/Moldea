@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ProgressSummaryHeader: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let percentage: Int
     let summary: LocalizedStringResource
 
@@ -17,7 +19,11 @@ struct ProgressSummaryHeader: View {
     }
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 10) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout(alignment: .bottom, spacing: 10))
+
+        layout {
             Text(percentage, format: .percent)
                 .font(.title)
                 .fontWeight(.bold)
@@ -25,11 +31,10 @@ struct ProgressSummaryHeader: View {
 
             Text(summary)
                 .font(.footnote)
-                .fontWeight(.light)
                 .foregroundStyle(.secondary)
         }
         .accessibilityElement(children: .combine)
-        .lineLimit(1)
+        .accessibilityAddTraits(.isHeader)
     }
 }
 

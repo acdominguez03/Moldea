@@ -10,6 +10,7 @@ import SwiftUI
 private struct FittingSheetModifier: ViewModifier {
     let extraDetents: Set<PresentationDetent>
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var measuredHeight: CGFloat = 1
 
     func body(content: Content) -> some View {
@@ -20,9 +21,15 @@ private struct FittingSheetModifier: ViewModifier {
             } action: { newHeight in
                 measuredHeight = max(1, newHeight)
             }
-            .presentationDetents(
-                Set([.height(measuredHeight)]).union(extraDetents)
-            )
+            .presentationDetents(detents)
+    }
+
+    private var detents: Set<PresentationDetent> {
+        var detents = Set([PresentationDetent.height(measuredHeight)]).union(extraDetents)
+        if dynamicTypeSize.isAccessibilitySize {
+            detents.insert(.large)
+        }
+        return detents
     }
 }
 

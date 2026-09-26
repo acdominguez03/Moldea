@@ -371,9 +371,10 @@ Contrapartidas conocidas:
 
 - Con un hex fijo se pierde la adaptación automática de los colores del sistema a modo
   claro/oscuro y a contraste aumentado. Hay que revisar la legibilidad en modo oscuro.
-- `stone` (`#DAD7D0`) tiene poco contraste en modo claro (≈1,3:1 calculado a mano sobre
-  blanco, cuando lo habitual para gráficos es 3:1): el icono se ve muy poco. Se aceptó de
-  momento y queda por revisar.
+- `stone` (`#DAD7D0`) tiene poco contraste en modo claro (≈1,3:1 sobre blanco). Ya no es un
+  problema en el badge: `HabitIconBadge` cambia a `.solid` cuando el `.tinted` no llega a 3:1
+  (ver _Accesibilidad_). Sí sigue viéndose poco como punto de color en `HabitReminderRow` y en
+  `HabitProgressCard`, donde es decorativo (el nombre va al lado).
 - El paso por 8 bits al convertir un `Color` puede acabar en el hex exacto de un color de la
   paleta; entonces se marca ese círculo. No se ha comprobado en pantalla.
 
@@ -469,6 +470,83 @@ que por eso reciben sus dependencias por protocolo.
 - **Vistas sin queries**: `#Preview { HabitFormView() }`, que usa el default del `@Entry`.
 - **Una `XContentView` o un componente** que pida un view model:
   `XDependencies.preview.makeXViewModel()`.
+
+### Accesibilidad
+
+Objetivo: poder marcar en App Store Connect las etiquetas de **VoiceOver**, **Dynamic Type** y
+**Sufficient Contrast**. Reglas que sigue todo el proyecto:
+
+**VoiceOver**
+
+- Todo botón de solo icono lleva `.accessibilityLabel`. Si la acción es sobre un hábito, **la
+  etiqueta nombra el hábito** («Marcar «Leer» como hecho»): en una lista, un «Marcar como hecho»
+  genérico repetido en cada fila no distingue nada.
+- El estado va en el valor y en los traits, no solo en el aspecto: completado →
+  `CoreTextsEnum.accessibilityCompleted` + `.isSelected`; progreso → «2 de 4».
+- Las abreviaturas visibles (L/M/X, «Sem», «W3») tienen una versión completa para VoiceOver:
+  `HabitScheduleSummaryEnum.weekdayNames(of:)` para los días de un hábito,
+  `HabitStatistic.accessibilityTitle` para las barras. «M» en español es martes o miércoles.
+- Filas con `.swipeActions` y `.accessibilityElement(children: .combine)`: las acciones también
+  se exponen con `.accessibilityAction(named:)` (`HabitView`). Un `Button` dentro del label de un
+  `Toggle` es inalcanzable con VoiceOver: su acción se añade con `.accessibilityAction(named:)`
+  al `Toggle` (`HabitReminderRow`).
+- Los títulos que no son de sistema llevan `.isHeader`.
+- Cambios de contenido en la misma pantalla se anuncian con
+  `AccessibilityNotification.Announcement` (fases de `HabitCommandView`, errores de
+  `SpeechToTextView` y `HabitFormView`). Se lanzan desde la vista, en `.onChange`, porque es UI.
+- Con VoiceOver activo `HabitCommandView` **no se cierra sola** a los 2 s (no da tiempo a oír el
+  resultado): aparece un botón _Cerrar_.
+- Gráficas (`ProgressBarChart`): etiqueta y valor en cada `BarMark`, anotaciones de texto
+  ocultas (la HIG pide ocultar las etiquetas visibles de ejes) y
+  `.accessibilityChartDescriptor(ProgressChartDescriptor)` para Audio Graphs.
+- Decorativo → `.accessibilityHidden(true)`: `HabitIconBadge`, `WaveAnimation` (dentro del propio
+  componente) y los iconos de estado del widget, cuyo estado ya va en el valor.
+
+**Dynamic Type**
+
+- Solo estilos de texto, nunca `.system(size:)`.
+- Dimensiones que acompañan a texto con `@ScaledMetric(relativeTo:)`: el círculo de
+  `HabitIconBadge`, el botón de completar, las celdas del selector de iconos, los puntos de color.
+- **Patrón de fila:** `AnyLayout` que es `HStackLayout` normalmente y
+  `VStackLayout(alignment: .leading)` si `dynamicTypeSize.isAccessibilitySize`. Así la identidad
+  de los hijos se conserva al cambiar de tamaño. Lo usan `HabitCardView`, `TodayCardView`,
+  `HabitView`, `HabitSummaryView`, `HabitReminderSheet`, `ProgressSummaryHeader`…
+- En tamaños de accesibilidad: los `Picker` segmentados pasan a `.menu`, el selector de días
+  pasa a cuadrícula de 4, la paleta de colores a 4 columnas, y `StatisticsView` y
+  `SpeechToTextView` pasan a un `ScrollView` (la lista de `Statistics` se pinta como
+  `LazyVStack` para no anidar una `List` dentro).
+- Nada de `.lineLimit` en contenido. La excepción son las anotaciones de la gráfica, topadas a
+  `.xxxLarge` con `.dynamicTypeSize(...)` porque 12 meses no caben; VoiceOver y el descriptor
+  tienen la información completa.
+- Las hojas con altura medida (`fittingSheetDetents`) añaden `.large` en tamaños de
+  accesibilidad; la de recordatorios usa `[.medium, .large]`.
+
+**Contraste**
+
+- Texto ≥ 4,5:1; iconos, bordes de controles y marcas de gráfica ≥ 3:1 (WCAG 2.1).
+- `ContrastingColor.contrastRatio(of:on:in:)` y `contrastRatio(of:onTintOf:opacity:over:in:)`
+  calculan el ratio real; el segundo compone el tinte en sRGB (como lo pinta el sistema, no en
+  lineal, que da fondos más claros de lo real).
+- **`HabitIconBadge` `.tinted` → `.solid` automático** si el glifo no llega a 3:1 sobre su
+  círculo al 20 % compuesto sobre `secondarySystemGroupedBackground`. Con la paleta actual caen
+  a sólido `stone`, `yellow`, `orange` y `green` en claro, y los oscuros en modo oscuro. Se
+  resuelve con el entorno, así que cubre modo oscuro y _Aumentar contraste_.
+- El icono de estado del widget usa el color del hábito solo si llega a 3:1; si no, `.primary`.
+- Tramos de la gráfica: tres grises sólidos por modo (claro `#8A8A8E`/`#5E5E63`/`#1C1C1E`,
+  oscuro `#7C7C80`/`#AEAEB2`/`#F2F2F7`), todos ≥ 3:1 contra el fondo. Antes eran opacidades
+  del gris y el tramo bajo daba ≈1,6:1.
+- Los errores no dependen solo del rojo: `Label` con `exclamationmark.triangle.fill` y el texto
+  en el color primario (rojo de sistema sobre blanco en `footnote` ≈ 3,6:1).
+- Bordes: `.secondary`, no `.tertiary` ni `primary.opacity(<0.5)`.
+
+**Pendiente / conocido**
+
+- Las etiquetas de `ChooseHabitIconView` son el nombre del SF Symbol sin puntos (en inglés): el
+  SDK no ofrece nombres localizados de símbolos.
+- El texto blanco del día seleccionado en `WeekDayPickerItem` va sobre cristal tintado; su
+  contraste depende del fondo y no se ha medido.
+- Las celdas de `WeekDayPicker` miden ≈ 41 pt en un iPhone estándar (menos de los 44 pt de la
+  HIG); forzar 44 pt desborda las 7 en una fila.
 
 ## Notas de trabajo
 

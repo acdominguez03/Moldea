@@ -1,6 +1,78 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "accessibility_completed" : {
+      "comment" : "Valor de VoiceOver de un hábito que ya tiene todas sus repeticiones de hoy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Completado"
+          }
+        }
+      }
+    },
+    "accessibility_habits_completed_count %lld %lld" : {
+      "comment" : "Etiqueta de VoiceOver de la cabecera del widget de hábitos.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld of %2$lld habits completed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld hábitos completados"
+          }
+        }
+      }
+    },
+    "accessibility_more_habits %lld" : {
+      "comment" : "Etiqueta de VoiceOver del contador +N del widget de hábitos.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld more habits"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld hábitos más"
+          }
+        }
+      }
+    },
+    "accessibility_progress_of %lld %lld" : {
+      "comment" : "Valor de VoiceOver del progreso de un hábito: repeticiones hechas de las totales.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld of %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld"
+          }
+        }
+      }
+    },
     "ai_command_already_completed %@" : {
       "comment" : "Aviso al completar por voz un hábito que ya estaba completado hoy. La variable es el nombre del hábito.",
       "extractionState" : "manual",
@@ -415,6 +487,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toca un hábito para cambiar su icono, su color, su frecuencia o sus avisos. Arrastra hacia la derecha para borrarlo y hacia la izquierda para pausarlo."
+          }
+        }
+      }
+    },
+    "habits_completed" : {
+      "comment" : "Etiqueta del indicador circular del widget de progreso.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habits completed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hábitos completados"
           }
         }
       }
@@ -1059,6 +1149,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entrada de voz"
+          }
+        }
+      }
+    },
+    "voice_input_hint" : {
+      "comment" : "Pista de VoiceOver del botón de entrada de voz de la tab bar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens dictation to create, delete or complete habits."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre el dictado para crear, borrar o completar hábitos."
           }
         }
       }

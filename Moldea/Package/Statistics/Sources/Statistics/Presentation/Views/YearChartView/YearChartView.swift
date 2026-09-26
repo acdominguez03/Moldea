@@ -25,7 +25,7 @@ struct YearChartView: View {
                 summary: StatisticsTextsEnum.yearChartSummary
             )
 
-            ProgressBarChart(statistics: yearChartViewModel.data)
+            ProgressBarChart(title: StatisticsTextsEnum.chartTitleYear, statistics: yearChartViewModel.data)
 
             HabitProgressList(habits: yearlyHabits) {
                 yearChartViewModel.percentage(for: $0)

@@ -47,6 +47,7 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
                 } label: {
                     Label(MainTab.microphone.description, systemImage: MainTab.microphone.icon)
                         .environment(\.symbolVariants, .none)
+                        .accessibilityHint(CoreTextsEnum.voiceInputHint)
                 }
             }
         }

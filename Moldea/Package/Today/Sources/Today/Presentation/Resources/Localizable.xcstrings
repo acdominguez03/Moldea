@@ -1,23 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "today_empty_state" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing planned for today yet"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aún no hay nada planificado para hoy"
-          }
-        }
-      }
-    },
     "today_completion_hint" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -35,19 +18,54 @@
         }
       }
     },
-    "today_completion_label" : {
+    "today_completion_label_named %@" : {
+      "comment" : "Etiqueta de VoiceOver del botón de completar. La variable es el nombre del hábito.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mark as done"
+            "value" : "Mark “%@” as done"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marcar como hecho"
+            "value" : "Marcar «%@» como hecho"
+          }
+        }
+      }
+    },
+    "today_empty_state" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing planned for today yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay nada planificado para hoy"
+          }
+        }
+      }
+    },
+    "today_error_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't update the habit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo actualizar el hábito"
           }
         }
       }
@@ -120,19 +138,19 @@
         }
       }
     },
-    "today_error_title" : {
+    "today_tab_daily" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Couldn't update the habit"
+            "value" : "Daily"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo actualizar el hábito"
+            "value" : "Diarios"
           }
         }
       }
@@ -150,23 +168,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Periodo"
-          }
-        }
-      }
-    },
-    "today_tab_daily" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daily"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diarios"
           }
         }
       }

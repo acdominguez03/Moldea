@@ -9,6 +9,8 @@ import SwiftUI
 import Core
 
 struct HabitProgressList: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let habits: [TodayHabit]
     let percentage: (TodayHabit) -> Int
 
@@ -18,25 +20,46 @@ struct HabitProgressList: View {
     }
 
     var body: some View {
-        List {
-            Section {
+        if dynamicTypeSize.isAccessibilitySize {
+            LazyVStack(alignment: .leading, spacing: 16) {
+                header
+                    .accessibilityAddTraits(.isHeader)
+
                 ForEach(habits) { habitModel in
-                    HabitProgressCard(
-                        color: HexColorConverter.color(fromHex: habitModel.habit.color) ?? .gray,
-                        name: habitModel.habit.name,
-                        percentage: percentage(habitModel)
-                    )
-                    .listRowBackground(Color.clear)
+                    card(for: habitModel)
+                    Divider()
                 }
-            } header: {
-                Text(StatisticsTextsEnum.habitsHeader)
-                    .font(.headline)
-                    .fontWeight(.light)
-                    .textCase(.uppercase)
             }
+            .padding(.top)
+        } else {
+            List {
+                Section {
+                    ForEach(habits) { habitModel in
+                        card(for: habitModel)
+                            .listRowBackground(Color.clear)
+                    }
+                } header: {
+                    header
+                }
+            }
+            .listStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .scrollIndicators(.hidden)
         }
-        .listStyle(.grouped)
-        .scrollContentBackground(.hidden)
-        .scrollIndicators(.hidden)
+    }
+
+    private var header: some View {
+        Text(StatisticsTextsEnum.habitsHeader)
+            .font(.headline)
+            .fontWeight(.light)
+            .textCase(.uppercase)
+    }
+
+    private func card(for habitModel: TodayHabit) -> some View {
+        HabitProgressCard(
+            color: HexColorConverter.color(fromHex: habitModel.habit.color) ?? .gray,
+            name: habitModel.habit.name,
+            percentage: percentage(habitModel)
+        )
     }
 }

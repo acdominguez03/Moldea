@@ -117,3 +117,11 @@ porque su método es `async`.
 Los tests de los paquetes **no están en el test plan de Xcode** (`Moldea` solo trae
 `MoldeaTests` y `MoldeaUITests`), así que se pasan con `xcodebuild test -scheme Today
 -destination 'id=<simulador iOS 26/27>'`.
+
+## Accesibilidad
+
+`TodayCompletionCheck` nombra el hábito en su etiqueta (`completionLabel(_:)`), expone
+«Completado» + `.isSelected` y escala con `@ScaledMetric`. `TodayCardView` usa el patrón
+`AnyLayout` en tamaños de accesibilidad.
+
+Las reglas comunes están en el `CLAUDE.md` raíz, en _Accesibilidad_.

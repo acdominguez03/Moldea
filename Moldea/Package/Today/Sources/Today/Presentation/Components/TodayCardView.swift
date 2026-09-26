@@ -8,7 +8,8 @@ import SwiftUI
 import Core
 
 public struct TodayCardView: View {
-    private static let barsWidth: CGFloat = 140
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .subheadline) private var barsWidth: CGFloat = 140
 
     private let name: String
     private let color: Color
@@ -32,7 +33,7 @@ public struct TodayCardView: View {
 
     public var body: some View {
         HStack(spacing: 8) {
-            HStack(spacing: 8) {
+            infoLayout {
                 HabitIconBadge(color: color, icon: icon)
 
                 VStack(alignment: .leading, spacing: 5) {
@@ -46,16 +47,24 @@ public struct TodayCardView: View {
                 }
             }
             .accessibilityElement(children: .combine)
+            .accessibilityValue(isCompletedToday ? Text(CoreTextsEnum.accessibilityCompleted) : Text(verbatim: ""))
 
-            Spacer()
+            Spacer(minLength: 0)
 
             TodayCompletionCheck(
+                name: name,
                 completed: completedToday,
                 total: repetitionsPerDay,
                 color: color,
                 action: onToggleCompletion
             )
         }
+    }
+
+    private var infoLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 8))
     }
 
     @ViewBuilder
@@ -88,6 +97,9 @@ public struct TodayCardView: View {
             return Text(CoreTextsEnum.summaryTimesPerDay(count))
         case .weekdays(let symbols):
             return Text(CoreTextsEnum.summaryWeekdays(symbols.formatted()))
+                .accessibilityLabel(
+                    Text(CoreTextsEnum.summaryWeekdays(HabitScheduleSummaryEnum.weekdayNames(of: schedule).formatted()))
+                )
         case .timesPerWeek(let count):
             return Text(CoreTextsEnum.summaryTimesPerWeek(count))
         }
@@ -111,7 +123,7 @@ public struct TodayCardView: View {
                     .tint(color)
             }
         }
-        .frame(maxWidth: Self.barsWidth, alignment: .leading)
+        .frame(maxWidth: barsWidth, alignment: .leading)
         .accessibilityHidden(true)
     }
 

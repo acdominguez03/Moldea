@@ -33,6 +33,10 @@ struct DayChartView: View {
                             )
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(
+                            Text(day.date, format: .dateTime.weekday(.wide).day().month(.wide))
+                        )
+                        .accessibilityAddTraits(day.date == dayChartViewModel.selectedDay ? .isSelected : [])
                     }
                 }
             }

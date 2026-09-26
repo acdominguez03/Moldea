@@ -62,11 +62,13 @@ final class WeekChartViewModel {
 
     private static func emptyWeek(calendar: Calendar) -> [HabitStatistic] {
         let symbols = calendar.veryShortWeekdaySymbols
+        let names = calendar.standaloneWeekdaySymbols
         return (0..<symbols.count).map { offset in
             let weekday = (calendar.firstWeekday - 1 + offset) % symbols.count
             return HabitStatistic(
                 id: "day_\(weekday)",
                 title: symbols[weekday],
+                accessibilityTitle: names[weekday],
                 percentage: 0
             )
         }
@@ -107,6 +109,7 @@ final class WeekChartViewModel {
         return HabitStatistic(
             id: "weekly",
             title: String(localized: StatisticsTextsEnum.weekChartWeeklyMark),
+            accessibilityTitle: String(localized: StatisticsTextsEnum.weekChartWeeklyAccessibility),
             percentage: progress.percentage,
             kind: .weekly
         )

@@ -13,7 +13,9 @@ struct HabitView: View {
     let onHabitClicked: () -> Void
     let onSetHabitActiveClicked: () -> Void
     let onDelete: () -> Void
-    
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     private var color: Color {
         HexColorConverter.color(fromHex: habit.color) ?? HabitPaletteColor.gray.color
     }
@@ -24,29 +26,35 @@ struct HabitView: View {
     
     var body: some View {
         Button(action: onHabitClicked) {
-            HStack(spacing: 8) {
+            layout {
                 HabitIconBadge(color: color, icon: habit.icon)
-                
+
                 VStack(alignment: .leading, spacing: 2) {
                     Text(habit.name)
                         .foregroundStyle(habit.isActive ? .primary : .secondary)
-                    
+
                     subtitle
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
-                
-                Spacer()
-                
+
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Spacer()
+                }
+
                 if !habit.isActive {
                     Text(HabitsTextsEnum.onPause)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
+        .accessibilityAction(named: Text(activeToggleTitle), onSetHabitActiveClicked)
+        .accessibilityAction(named: Text(HabitsTextsEnum.delete), onDelete)
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
             Button(action: onSetHabitActiveClicked) {
                 activeToggleLabel
@@ -71,11 +79,18 @@ struct HabitView: View {
         }
     }
 
+    private var layout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 8))
+    }
+
+    private var activeToggleTitle: LocalizedStringResource {
+        habit.isActive ? HabitsTextsEnum.deactivate : HabitsTextsEnum.activate
+    }
+
     private var activeToggleLabel: some View {
-        Label(
-            habit.isActive ? HabitsTextsEnum.deactivate : HabitsTextsEnum.activate,
-            systemImage: habit.isActive ? "pause" : "play"
-        )
+        Label(activeToggleTitle, systemImage: habit.isActive ? "pause" : "play")
     }
 
     private var subtitle: Text {
@@ -85,7 +100,10 @@ struct HabitView: View {
         case .timesPerDay(let count):
             Text(HabitsTextsEnum.summaryTimesPerDay(count))
         case .weekdays(let symbols):
-            Text("\(HabitsTextsEnum.days): \(symbols.joined(separator: ", "))")
+            Text(CoreTextsEnum.summaryWeekdays(symbols.formatted()))
+                .accessibilityLabel(
+                    Text(CoreTextsEnum.summaryWeekdays(HabitScheduleSummaryEnum.weekdayNames(of: habit.schedule).formatted()))
+                )
         case .timesPerWeek(let count):
             Text(HabitsTextsEnum.summaryTimesPerWeek(count))
         }

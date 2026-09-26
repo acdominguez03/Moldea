@@ -164,3 +164,13 @@ Swift Testing (`import Testing`, `@Test`). `StatisticsTests.swift` cubre `HabitO
 (tramos de febrero y de un mes de 31 días, días futuros, objetivo de los semanales, los 10 últimos
 días cruzando de mes y los hábitos programados en un día) y los view models diario, mensual y
 anual, con un `Calendar` gregoriano en UTC.
+
+## Accesibilidad
+
+`ProgressBarChart` recibe un título y publica un `ProgressChartDescriptor`
+(`AXChartDescriptorRepresentable`) para Audio Graphs; cada barra lee
+`HabitStatistic.accessibilityTitle` (nombre completo del día, semana o mes). Los tramos de color
+son `HabitStatistic.Tier`. En tamaños de accesibilidad `StatisticsView` pasa a `ScrollView` y
+`HabitProgressList` a `LazyVStack`.
+
+Las reglas comunes están en el `CLAUDE.md` raíz, en _Accesibilidad_.

@@ -25,7 +25,7 @@ struct WeekChartView: View {
                 summary: StatisticsTextsEnum.weekChartSummary
             )
 
-            ProgressBarChart(statistics: weekChartViewModel.chartData)
+            ProgressBarChart(title: StatisticsTextsEnum.chartTitleWeek, statistics: weekChartViewModel.chartData)
             
             HabitProgressList(habits: weeklyHabits) {
                 weekChartViewModel.percentage(for: $0)

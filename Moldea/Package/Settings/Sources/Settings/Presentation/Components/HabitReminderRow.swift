@@ -12,7 +12,9 @@ struct HabitReminderRow: View {
     let habit: Habit
     let onReminderToggled: () -> Void
     let onRowTapped: () -> Void
-    
+
+    @ScaledMetric(relativeTo: .body) private var dotSize: CGFloat = 12
+
     private var color: Color {
         HexColorConverter.color(fromHex: habit.color) ?? .gray
     }
@@ -34,7 +36,7 @@ struct HabitReminderRow: View {
                         HStack(spacing: 12) {
                             Circle()
                                 .fill(color)
-                                .frame(width: 12, height: 12)
+                                .frame(width: dotSize, height: dotSize)
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(habit.name)
@@ -50,6 +52,7 @@ struct HabitReminderRow: View {
                     .buttonStyle(.plain)
                 }
             )
+            .accessibilityAction(named: Text(SettingsTextsEnum.editReminder), onRowTapped)
         }
     }
     

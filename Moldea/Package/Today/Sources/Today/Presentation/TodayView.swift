@@ -92,6 +92,11 @@ struct TodayContentView: View {
                 }
 
                 Section {
+                    if habits.isEmpty {
+                        Text(TodayTextsEnum.emptyState)
+                            .foregroundStyle(.secondary)
+                    }
+
                     ForEach(habits, id: \.id) { todayHabit in
                         TodayCardView(todayHabit: todayHabit) {
                             Task { await todayViewModel.onToggleCompletion(todayHabit) }

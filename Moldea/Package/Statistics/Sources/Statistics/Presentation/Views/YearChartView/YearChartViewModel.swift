@@ -51,10 +51,12 @@ final class YearChartViewModel {
     }
 
     private static func emptyYear(calendar: Calendar) -> [HabitStatistic] {
-        calendar.veryShortStandaloneMonthSymbols.enumerated().map { index, symbol in
+        let names = calendar.standaloneMonthSymbols
+        return calendar.veryShortStandaloneMonthSymbols.enumerated().map { index, symbol in
             HabitStatistic(
                 id: "month_\(index + 1)",
                 title: symbol,
+                accessibilityTitle: names[index],
                 percentage: 0
             )
         }

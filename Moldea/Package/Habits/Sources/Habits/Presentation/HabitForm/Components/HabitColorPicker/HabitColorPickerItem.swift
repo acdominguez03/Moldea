@@ -17,7 +17,7 @@ struct HabitColorPickerItem: View {
         Button(action: action) {
             Circle()
                 .fill(color)
-                .overlay(Circle().strokeBorder(Color.primary.opacity(0.15), lineWidth: 1))
+                .overlay(Circle().strokeBorder(.secondary, lineWidth: 1))
                 .padding(4)
                 .overlay {
                     if isSelected {

@@ -116,11 +116,13 @@ struct SettingsContentView: View {
                     habit: habit,
                     habitReminderSheetViewModel: dependencies.makeHabitReminderSheetViewModel(habit: habit)
                 )
-                .fittingScrollSheetDetents()
+                .presentationDetents([.medium, .large])
             }
             .onChange(of: scenePhase) { _, newPhase in
                 if newPhase == .active {
-                    Task { await settingsViewModel.refreshNotificationPermissionStatus() }
+                    Task {
+                        await settingsViewModel.refreshNotificationPermissionStatus()
+                    }
                 }
             }
         }

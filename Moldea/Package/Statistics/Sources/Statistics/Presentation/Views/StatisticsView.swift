@@ -10,6 +10,7 @@ import Core
 
 public struct StatisticsView: View {
     @Environment(\.statisticsDependencies) private var dependencies
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @HabitsQuery private var habits: [Habit]
 
@@ -24,22 +25,20 @@ public struct StatisticsView: View {
                     ContentUnavailableView {
                         Label(StatisticsTextsEnum.emptyState, systemImage: "chart.bar")
                     }
+                } else if dynamicTypeSize.isAccessibilitySize {
+                    ScrollView {
+                        VStack(alignment: .leading) {
+                            filterPicker
+                                .pickerStyle(.menu)
+
+                            filterContent
+                        }
+                        .padding(20)
+                    }
                 } else {
                     VStack {
-                        Picker(StatisticsTextsEnum.screenTitle, selection: $filterSelected) {
-                            Text(StatisticsTextsEnum.statisticsFilterDay)
-                                .tag(StatisticsFilterEnum.day)
-
-                            Text(StatisticsTextsEnum.statisticsFilterWeek)
-                                .tag(StatisticsFilterEnum.week)
-
-                            Text(StatisticsTextsEnum.statisticsFilterMonth)
-                                .tag(StatisticsFilterEnum.month)
-
-                            Text(StatisticsTextsEnum.statisticsFilterYear)
-                                .tag(StatisticsFilterEnum.year)
-                        }
-                        .pickerStyle(.segmented)
+                        filterPicker
+                            .pickerStyle(.segmented)
 
                         filterContent
                     }
@@ -49,6 +48,22 @@ public struct StatisticsView: View {
             }
             .navigationTitle(StatisticsTextsEnum.screenTitle)
             .navigationBarTitleDisplayMode(.large)
+        }
+    }
+
+    private var filterPicker: some View {
+        Picker(StatisticsTextsEnum.screenTitle, selection: $filterSelected) {
+            Text(StatisticsTextsEnum.statisticsFilterDay)
+                .tag(StatisticsFilterEnum.day)
+
+            Text(StatisticsTextsEnum.statisticsFilterWeek)
+                .tag(StatisticsFilterEnum.week)
+
+            Text(StatisticsTextsEnum.statisticsFilterMonth)
+                .tag(StatisticsFilterEnum.month)
+
+            Text(StatisticsTextsEnum.statisticsFilterYear)
+                .tag(StatisticsFilterEnum.year)
         }
     }
 

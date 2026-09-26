@@ -12,24 +12,32 @@ struct HabitStatistic: Identifiable {
         case day
         case weekly
     }
-    
+
+    enum Tier: String {
+        case low
+        case medium
+        case high
+        case weekly
+    }
+
     let id: String
     let title: String
+    let accessibilityTitle: String
     var percentage: Int
     var kind: Kind = .day
-    
-    var color: String {
+
+    var tier: Tier {
         switch kind {
         case .weekly:
-            return "weekly"
+            return .weekly
         case .day:
             switch percentage {
             case ..<60:
-                return "gray_500"
+                return .low
             case ..<80:
-                return "gray_800"
+                return .medium
             default:
-                return "gray"
+                return .high
             }
         }
     }

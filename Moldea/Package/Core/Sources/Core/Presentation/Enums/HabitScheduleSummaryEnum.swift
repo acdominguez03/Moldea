@@ -29,8 +29,17 @@ public enum HabitScheduleSummaryEnum: Equatable {
         }
     }
 
-    private static func symbols(for weekdays: Set<Int>, calendar: Calendar) -> [String] {
-        let symbols = calendar.veryShortStandaloneWeekdaySymbols
+    public static func weekdayNames(of schedule: HabitSchedule, calendar: Calendar = .current) -> [String] {
+        guard case .fixedDays(let weekdays) = schedule.frequency else { return [] }
+        return symbols(for: weekdays, calendar: calendar, from: calendar.standaloneWeekdaySymbols)
+    }
+
+    private static func symbols(
+        for weekdays: Set<Int>,
+        calendar: Calendar,
+        from symbols: [String]? = nil
+    ) -> [String] {
+        let symbols = symbols ?? calendar.veryShortStandaloneWeekdaySymbols
         let offset = { (weekday: Int) in (weekday - calendar.firstWeekday + 7) % 7 }
 
         return weekdays

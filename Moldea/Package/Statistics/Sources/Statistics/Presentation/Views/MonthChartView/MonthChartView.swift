@@ -25,7 +25,7 @@ struct MonthChartView: View {
                 summary: StatisticsTextsEnum.monthChartSummary
             )
 
-            ProgressBarChart(statistics: monthChartViewModel.data)
+            ProgressBarChart(title: StatisticsTextsEnum.chartTitleMonth, statistics: monthChartViewModel.data)
 
             HabitProgressList(habits: monthlyHabits) {
                 monthChartViewModel.percentage(for: $0)

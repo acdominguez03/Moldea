@@ -65,6 +65,19 @@ struct HabitScheduleSummaryTests {
         #expect(summary(.fixedDays(weekdays: [2, 9])) == .weekdays(["L"]))
     }
 
+    @Test func weekdayNamesAreFullAndFollowTheCalendarWeekOrder() {
+        let schedule = HabitSchedule(frequency: .fixedDays(weekdays: [1, 2, 4]), repetitionsPerDay: 1)
+        let calendar = makeCalendar(locale: "es_ES", firstWeekday: 2)
+
+        #expect(HabitScheduleSummaryEnum.weekdayNames(of: schedule, calendar: calendar) == ["lunes", "miércoles", "domingo"])
+    }
+
+    @Test func weekdayNamesAreEmptyWithoutFixedDays() {
+        let schedule = HabitSchedule(frequency: .daily, repetitionsPerDay: 1)
+
+        #expect(HabitScheduleSummaryEnum.weekdayNames(of: schedule).isEmpty)
+    }
+
     // MARK: Textos
 
     @Test(arguments: [

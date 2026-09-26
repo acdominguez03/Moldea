@@ -200,4 +200,30 @@ public enum CoreTextsEnum {
     public static let quickCheck = resource("quick_check")
     public static let habitsPlannedForToday = resource("habits_planned_for_today")
     public static let noHabitsForToday = resource("no_habits_for_today")
+    public static let habitsCompleted = resource("habits_completed")
+
+    // MARK: Accessibility
+    public static let voiceInputHint = resource("voice_input_hint")
+    public static let accessibilityCompleted = resource("accessibility_completed")
+
+    public static func accessibilityProgress(_ completed: Int, of total: Int) -> LocalizedStringResource {
+        LocalizedStringResource(
+            "accessibility_progress_of \(completed) \(total)",
+            bundle: .atURL(Bundle.module.bundleURL)
+        )
+    }
+
+    public static func accessibilityMoreHabits(_ count: Int) -> LocalizedStringResource {
+        LocalizedStringResource(
+            "accessibility_more_habits \(count)",
+            bundle: .atURL(Bundle.module.bundleURL)
+        )
+    }
+
+    public static func accessibilityHabitsCompletedCount(_ completed: Int, of total: Int) -> LocalizedStringResource {
+        LocalizedStringResource(
+            "accessibility_habits_completed_count \(completed) \(total)",
+            bundle: .atURL(Bundle.module.bundleURL)
+        )
+    }
 }

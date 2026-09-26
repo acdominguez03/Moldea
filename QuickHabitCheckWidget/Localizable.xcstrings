@@ -1,0 +1,40 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Habit" : {
+      "comment" : "Título del parámetro del intent que marca un hábito desde el widget.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hábito"
+          }
+        }
+      }
+    },
+    "Toggle habit" : {
+      "comment" : "Título del intent que marca o desmarca un hábito desde el widget.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toggle habit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar hábito"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -58,7 +58,7 @@ struct TodayProgressWidgetEntryView : View {
             Gauge(
                 value: entry.percentage
             ) {
-                Text("Hábitos completados")
+                Text(CoreTextsEnum.habitsCompleted)
             } currentValueLabel: {
                 Text(entry.percentage, format: .percent.precision(.fractionLength(0)))
             }
@@ -83,7 +83,7 @@ struct TodayProgressWidget: Widget {
     }
 }
 
-#Preview(as: .systemSmall) {
+#Preview(as: .accessoryCircular) {
     TodayProgressWidget()
 } timeline: {
     TodayProgressEntry(date: .now, percentage: 1 )

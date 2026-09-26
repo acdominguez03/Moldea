@@ -48,4 +48,16 @@ public enum StatisticsTextsEnum {
 
     // MARK: Year Chart
     public static let yearChartSummary = resource("statistics_year_chart_summary")
+
+    // MARK: Chart Accessibility
+    public static let chartTitleWeek = resource("statistics_chart_title_week")
+    public static let chartTitleMonth = resource("statistics_chart_title_month")
+    public static let chartTitleYear = resource("statistics_chart_title_year")
+    public static let chartAxisPeriod = resource("statistics_chart_axis_period")
+    public static let chartAxisPercentage = resource("statistics_chart_axis_percentage")
+    public static let weekChartWeeklyAccessibility = resource("statistics_week_chart_weekly_accessibility")
+
+    public static func monthChartWeekAccessibility(_ number: Int) -> LocalizedStringResource {
+        localized("statistics_month_chart_week_accessibility \(number)")
+    }
 }

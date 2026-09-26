@@ -52,6 +52,7 @@ final class MonthChartViewModel {
             HabitStatistic(
                 id: "week_\(number)",
                 title: String(localized: StatisticsTextsEnum.monthChartWeekMark(number)),
+                accessibilityTitle: String(localized: StatisticsTextsEnum.monthChartWeekAccessibility(number)),
                 percentage: 0
             )
         }
