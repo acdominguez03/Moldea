@@ -138,6 +138,57 @@
         }
       }
     },
+    "day_summary" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day summary"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen del día"
+          }
+        }
+      }
+    },
+    "only_one_reminder_with_habits_left %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just one reminder at %@ if you still have habits left"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un solo aviso a las %@ si aún te quedan hábitos"
+          }
+        }
+      }
+    },
+    "settings_daily_summary_toggle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remind me about pending habits"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avisarme de los hábitos pendientes"
+          }
+        }
+      }
+    },
     "settings_habit_reminder_at_time %@" : {
       "extractionState" : "manual",
       "localizations" : {

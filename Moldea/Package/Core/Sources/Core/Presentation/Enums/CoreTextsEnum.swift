@@ -178,6 +178,10 @@ public enum CoreTextsEnum {
     // MARK: Announcements
     public static let announcements = resource("announcements")
 
+    // MARK: Daily Summary Notification
+    public static let dailySummaryTitle = resource("notification_daily_summary_title")
+    public static let dailySummaryBody = resource("notification_daily_summary_body")
+
     // MARK: Habit Reminder Notification
     public static let habitReminderDailySingleBody = resource("notification_habit_daily_single_body")
     public static let habitReminderFixedDaysBody = resource("notification_habit_fixed_days_body")

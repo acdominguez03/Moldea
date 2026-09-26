@@ -8,7 +8,7 @@
 import Core
 
 protocol SetIsNotificationsEnabledUseCaseProtocol: Sendable {
-    func execute(isEnabled: Bool, habits: [Habit]) async throws
+    func execute(isEnabled: Bool) async throws
 }
 
 struct SetIsNotificationsEnabledUseCase: SetIsNotificationsEnabledUseCaseProtocol {
@@ -20,18 +20,10 @@ struct SetIsNotificationsEnabledUseCase: SetIsNotificationsEnabledUseCaseProtoco
         self.notificationScheduler = notificationScheduler
     }
 
-    func execute(isEnabled: Bool, habits: [Habit]) async throws {
+    func execute(isEnabled: Bool) async throws {
         repository.saveBool(PreferenceKey.isNotificationsEnabled, isEnabled)
-
-        // Limpieza total en los dos sentidos: no depende de que la base de datos sepa qué hay
-        // programado, así que también quita restos de hábitos pausados, borrados o con el aviso
-        // ya apagado.
         await notificationScheduler.cancelAllReminders()
-
         guard isEnabled else { return }
-
-        for habit in habits where habit.isActive && habit.hasActiveReminder {
-            await notificationScheduler.scheduleReminder(for: habit)
-        }
+        await notificationScheduler.syncReminders()
     }
 }

@@ -694,6 +694,40 @@
         }
       }
     },
+    "notification_daily_summary_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Moldea and review them to get them done."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entra en Moldea y revísalos para completarlos."
+          }
+        }
+      }
+    },
+    "notification_daily_summary_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡You have habits left to complete!"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡Tienes hábitos pendientes por completar!"
+          }
+        }
+      }
+    },
     "notification_habit_daily_multiple_body %lld" : {
       "extractionState" : "manual",
       "localizations" : {

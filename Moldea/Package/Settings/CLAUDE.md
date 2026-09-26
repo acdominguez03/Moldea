@@ -28,6 +28,8 @@ Sources/Settings/
 │   └── UseCases/
 │       ├── GetIsNotificationsEnabledUseCase.swift
 │       ├── SetIsNotificationsEnabledUseCase.swift
+│       ├── GetIsDailySummaryEnabledUseCase.swift
+│       ├── SetIsDailySummaryEnabledUseCase.swift
 │       ├── GetIsNotificationPermissionAllowedUseCase.swift
 │       ├── SetHabitReminderEnabledUseCase.swift
 │       └── UpdateHabitReminderUseCase.swift
@@ -77,6 +79,14 @@ La sección de notificaciones se pinta de una forma u otra según
   con el icono `bell.slash.fill` dentro de `HabitIconBadge` (de `Core`, en rojo), el título
   "Notificaciones deshabilitadas" y una descripción que invita a tocarla. Al tocarla, abre
   `UIApplication.openNotificationSettingsURLString` con `@Environment(\.openURL)`.
+
+- **Resumen del día**: una segunda sección, solo visible con "Permitir avisos" activo y hábitos
+  con recordatorio, con un `Toggle` (`isDailySummaryEnabled`, `UserDefaults` como
+  `isNotificationsEnabled`) y un pie que dice la hora (21:30, fija). Al cambiarlo,
+  `SetIsDailySummaryEnabledUseCase` guarda y llama a `syncReminders()`; qué hábitos cuentan y
+  cuándo se quita lo decide `ReminderPlanner` en `Core`. Apagado por defecto.
+- `SetIsNotificationsEnabledUseCase` ya no recibe la lista de hábitos: al encender hace una sola
+  sincronización, que programa los avisos de los hábitos y el de la noche.
 
 Estas dos preferencias son independientes por diseño (razonamiento completo en el `CLAUDE.md`
 de `Core`, en `PreferenceKey`): el permiso del sistema (`isNotificationPermissionAllowed`) no es
@@ -151,5 +161,11 @@ métodos síncronos.
 
 `HabitReminderRow` añade la acción «Editar recordatorio» al `Toggle` (el botón de su label no
 se alcanza con VoiceOver). La hoja de recordatorio admite `[.medium, .large]`.
+
+El interruptor de «Resumen del día» es un `Toggle` nativo con la etiqueta como texto, así que
+VoiceOver lee nombre, estado y trait sin nada más; la cabecera de la sección es de sistema (lleva
+`.isHeader` sola) y el pie, que dice la hora, es el elemento siguiente. Cambia de estado **antes**
+de esperar a la sincronización para que el valor que anuncia VoiceOver sea inmediato. No hay hints
+duplicados del pie ni identificadores: los tests de UI buscan por el texto visible.
 
 Las reglas comunes están en el `CLAUDE.md` raíz, en _Accesibilidad_.

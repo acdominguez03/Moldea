@@ -7,6 +7,7 @@
 
 public enum PreferenceKey: String {
     case isNotificationsEnabled = "preferences.isNotificationsEnabled"
+    case isDailySummaryEnabled = "preferences.isDailySummaryEnabled"
     case isNotificationPermissionAllowed = "preferences.isNotificationPermissionAllowed"
     case isMicrophonePermissionAllowed = "preferences.isMicrophonePermissionAllowed"
 }

@@ -46,15 +46,22 @@ struct ReminderPlannerTests {
     private func plan(
         _ candidates: [ReminderCandidate],
         budget: Int = 60,
-        horizonDays: Int = 7
+        horizonDays: Int = 7,
+        includesDailySummary: Bool = false,
+        at date: Date? = nil
     ) -> [PlannedReminder] {
         ReminderPlanner.plan(
             candidates: candidates,
-            now: now,
+            now: date ?? now,
             calendar: calendar,
             budget: budget,
+            includesDailySummary: includesDailySummary,
             horizonDays: horizonDays
         )
+    }
+
+    private func summaries(_ planned: [PlannedReminder]) -> [PlannedReminder] {
+        planned.filter { $0.kind == .summary }
     }
 
     // MARK: Hoy
@@ -178,5 +185,127 @@ struct ReminderPlannerTests {
 
         let hours = planned.map { calendar.component(.hour, from: $0.fireDate) }
         #expect(hours == [21, 21, 21, 21, 21])
+    }
+
+    // MARK: Aviso de la noche
+
+    @Test func theSummaryIsNotPlannedUnlessRequested() {
+        #expect(summaries(plan([candidate()])).isEmpty)
+    }
+
+    @Test func theSummaryIsPlannedAtTheFixedTimeForTodayWhenSomethingIsPending() {
+        let planned = summaries(plan([candidate(hour: 8)], includesDailySummary: true))
+
+        #expect(planned.count == 7)
+        #expect(planned.first?.fireDate == calendar.date(from: DateComponents(year: 2026, month: 6, day: 24, hour: 21, minute: 30)))
+    }
+
+    @Test func theSummaryIsSkippedTodayWhenEverythingIsCompleted() {
+        let planned = summaries(plan([candidate(isCompletedToday: true)], includesDailySummary: true))
+
+        #expect(planned.count == 6)
+        #expect(planned.first?.fireDate == calendar.date(from: DateComponents(year: 2026, month: 6, day: 25, hour: 21, minute: 30)))
+    }
+
+    @Test func oneStillPendingHabitKeepsTodaysSummary() {
+        let planned = summaries(plan(
+            [candidate(isCompletedToday: true), candidate(isCompletedToday: false)],
+            includesDailySummary: true
+        ))
+
+        #expect(planned.count == 7)
+    }
+
+    /// Deshacer un hábito marcado por error vuelve a dejar algo pendiente.
+    @Test func undoingTheLastCompletionBringsTodaysSummaryBack() {
+        let id = UUID()
+        let done = summaries(plan([candidate(id: id, isCompletedToday: true)], includesDailySummary: true))
+        let undone = summaries(plan([candidate(id: id, isCompletedToday: false)], includesDailySummary: true))
+
+        #expect(undone.count == done.count + 1)
+    }
+
+    @Test func theSummaryIsSkippedTodayWhenItsTimeHasPassed() {
+        let lateNight = calendar.date(from: DateComponents(year: 2026, month: 6, day: 24, hour: 22))!
+
+        let planned = summaries(plan([candidate()], includesDailySummary: true, at: lateNight))
+
+        #expect(planned.count == 6)
+        #expect(planned.first?.fireDate == calendar.date(from: DateComponents(year: 2026, month: 6, day: 25, hour: 21, minute: 30)))
+    }
+
+    @Test func habitsDoneAWeekAtATimeDoNotTriggerTheSummary() {
+        let planned = summaries(plan([candidate(frequency: .weeklyCount(timesPerWeek: 3))], includesDailySummary: true))
+
+        #expect(planned.isEmpty)
+    }
+
+    @Test func fixedDaysOnlyTriggerTheSummaryOnTheirWeekdays() {
+        // 6 = viernes. Hoy es miércoles 24: caen el 26 de junio y el 3 de julio.
+        let planned = summaries(plan(
+            [candidate(frequency: .fixedDays(weekdays: [6]))],
+            horizonDays: 14,
+            includesDailySummary: true
+        ))
+
+        #expect(planned.map { calendar.component(.weekday, from: $0.fireDate) } == [6, 6])
+    }
+
+    @Test func pausedHabitsDoNotTriggerTheSummary() {
+        #expect(summaries(plan([candidate(isActive: false)], includesDailySummary: true)).isEmpty)
+    }
+
+    @Test func aHabitWithItsOwnReminderTurnedOffStillCountsForTheSummary() {
+        let planned = plan([candidate(isEnabled: false)], includesDailySummary: true)
+
+        #expect(summaries(planned).count == 7)
+        #expect(planned.filter { $0.habitID != nil }.isEmpty)
+    }
+
+    @Test func thereIsAtMostOneSummaryPerDay() {
+        let planned = summaries(plan([candidate(), candidate(), candidate()], horizonDays: 5, includesDailySummary: true))
+
+        #expect(planned.count == 5)
+        #expect(Set(planned.map(\.identifier)).count == 5)
+    }
+
+    @Test func summaryIdentifiersShareThePrefixSoCleanupCoversThem() {
+        let identifier = ReminderPlanner.summaryIdentifier(day: now, calendar: calendar)
+
+        #expect(identifier == "habit-reminder-summary-20260624")
+        #expect(identifier.hasPrefix(ReminderPlanner.identifierPrefix))
+    }
+
+    @Test func theSummaryCompetesForTheSameBudget() {
+        // Hoy: aviso del hábito a las 20:00 y resumen a las 21:30. Con presupuesto 1 gana el primero.
+        let one = plan([candidate(hour: 20)], budget: 1, includesDailySummary: true)
+        let two = plan([candidate(hour: 20)], budget: 2, includesDailySummary: true)
+
+        #expect(one.map(\.kind) == [.habit(one.first!.habitID!)])
+        #expect(two.contains { $0.kind == .summary })
+    }
+
+    // MARK: Todo completado hoy
+
+    @Test func everythingCompletedTodayNeedsAtLeastOneHabitScheduledToday() {
+        #expect(!ReminderPlanner.isEverythingCompletedToday(candidates: [], now: now, calendar: calendar))
+        #expect(!ReminderPlanner.isEverythingCompletedToday(
+            candidates: [candidate(frequency: .weeklyCount(timesPerWeek: 3), isCompletedToday: true)],
+            now: now,
+            calendar: calendar
+        ))
+    }
+
+    @Test func everythingCompletedTodayIsFalseWhileOneIsPending() {
+        #expect(!ReminderPlanner.isEverythingCompletedToday(
+            candidates: [candidate(isCompletedToday: true), candidate(isCompletedToday: false)],
+            now: now,
+            calendar: calendar
+        ))
+        #expect(ReminderPlanner.isEverythingCompletedToday(
+            candidates: [candidate(isCompletedToday: true), candidate(isCompletedToday: true)],
+            now: now,
+            calendar: calendar
+        ))
     }
 }

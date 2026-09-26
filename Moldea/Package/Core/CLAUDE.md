@@ -291,6 +291,16 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
     "Permitir avisos", que limpia siempre y después sincroniza.
   - `scheduleReminder` ignora los hábitos **pausados**, así que quien programa pasa el `isActive`
     real. El borrado de pendientes es asíncrono, y se espera (máximo 1 s) a verlo aplicado.
+  - **Aviso de la noche** (`DailySummaryReminder`, 21:30 fijo, no configurable): un aviso extra con
+    texto fijo ("Tienes hábitos pendientes por completar") que invita a entrar a revisarlos.
+    Se planifica con `includesDailySummary`, que sale de `PreferenceKey.isDailySummaryEnabled`, y
+    solo hay uno por día con hábitos programados. Cuenta como pendiente lo mismo que la pestaña
+    Diario de Today: hábitos activos que tocan ese día (`isScheduled(on:)`), así que los de "X
+    veces por semana" no cuentan, y el aviso propio de cada hábito no influye. Hoy solo se
+    programa si queda alguno sin completar y la hora no ha pasado; al completar el último se quita,
+    y si ya había salido, se limpia del Centro de Notificaciones. Su identificador es
+    `habit-reminder-summary-<yyyyMMdd>`, con el mismo prefijo que los de los hábitos, y comparte
+    el presupuesto de 60. Solo llega si "Permitir avisos" también está activo.
   - **El widget no sincroniza.** Su intent (`QuickHabitCheckWidget/ToggleHabitIntent`) corre por
     defecto en el proceso de la extensión, y la documentación de Apple no dice si allí se
     comparten las notificaciones pendientes con la app. Usa `NoOpHabitNotificationScheduler`: lo

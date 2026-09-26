@@ -71,11 +71,13 @@ public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificat
 
         let now = Date.now
         let calendar = Calendar.current
+        let includesSummary = userDefaultsRepository.getBool(.isDailySummaryEnabled)
         let planned = ReminderPlanner.plan(
             candidates: candidates,
             now: now,
             calendar: calendar,
-            budget: Self.notificationBudget
+            budget: Self.notificationBudget,
+            includesDailySummary: includesSummary
         )
         let habitsByID = Dictionary(uniqueKeysWithValues: candidates.map { ($0.habit.id, $0.habit) })
         let pendingByID = Dictionary(pending.map { ($0.identifier, $0) }, uniquingKeysWith: { first, _ in first })
@@ -86,9 +88,9 @@ public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificat
         var idsToRemove = pending.map(\.identifier).filter { !plannedIDs.contains($0) }
         var toAdd: [PlannedReminder] = []
         for reminder in planned {
-            guard let habit = habitsByID[reminder.habitID] else { continue }
+            guard let content = makeContent(for: reminder, habitsByID: habitsByID, calendar: calendar) else { continue }
             if let existing = pendingByID[reminder.identifier] {
-                if isUpToDate(existing, for: reminder, habit: habit, calendar: calendar) { continue }
+                if isUpToDate(existing, for: reminder, expected: content) { continue }
                 idsToRemove.append(reminder.identifier)
             }
             toAdd.append(reminder)
@@ -97,21 +99,24 @@ public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificat
         await removePending(idsToRemove, from: center)
 
         // Completado hoy: si el aviso ya había salido, se limpia también del Centro de Notificaciones.
-        let deliveredToClear = candidates
+        var deliveredToClear = candidates
             .filter(\.isCompletedToday)
             .map { ReminderPlanner.identifier(habitID: $0.habit.id, day: now, calendar: calendar) }
+        // Lo mismo con el aviso de la noche cuando ya no queda ningún hábito de hoy por completar.
+        if includesSummary && ReminderPlanner.isEverythingCompletedToday(candidates: candidates, now: now, calendar: calendar) {
+            deliveredToClear.append(ReminderPlanner.summaryIdentifier(day: now, calendar: calendar))
+        }
         center.removeDeliveredNotifications(withIdentifiers: deliveredToClear)
 
         // Las más lejanas primero: si alguna vez hubiera un exceso, el sistema descarta las más
         // antiguas y así serían las que menos importan.
         for reminder in toAdd.sorted(by: { $0.fireDate > $1.fireDate }) {
-            guard let habit = habitsByID[reminder.habitID] else { continue }
+            guard let content = makeContent(for: reminder, habitsByID: habitsByID, calendar: calendar) else { continue }
             let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: reminder.fireDate)
             let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-            let weekday = calendar.component(.weekday, from: reminder.fireDate)
             let request = UNNotificationRequest(
                 identifier: reminder.identifier,
-                content: makeContent(for: habit, weekday: weekday),
+                content: content,
                 trigger: trigger
             )
             do {
@@ -124,18 +129,40 @@ public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificat
         print("[HabitNotificationScheduler] Sync — planned \(planned.count), added \(toAdd.count), removed \(idsToRemove.count).")
     }
 
+    private func makeContent(
+        for reminder: PlannedReminder,
+        habitsByID: [Habit.ID: Habit],
+        calendar: Calendar
+    ) -> UNMutableNotificationContent? {
+        switch reminder.kind {
+        case .summary:
+            return makeSummaryContent()
+        case .habit(let habitID):
+            guard let habit = habitsByID[habitID] else { return nil }
+            return makeContent(for: habit, weekday: calendar.component(.weekday, from: reminder.fireDate))
+        }
+    }
+
+    /// Texto fijo: solo invita a entrar a revisar los hábitos. Que aparezca o no lo decide el
+    /// planificador según lo que quede por completar.
+    private func makeSummaryContent() -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: CoreTextsEnum.dailySummaryTitle)
+        content.body = String(localized: CoreTextsEnum.dailySummaryBody)
+        content.sound = .default
+        return content
+    }
+
     private func isUpToDate(
         _ request: UNNotificationRequest,
         for reminder: PlannedReminder,
-        habit: Habit,
-        calendar: Calendar
+        expected: UNNotificationContent
     ) -> Bool {
         guard let trigger = request.trigger as? UNCalendarNotificationTrigger,
               let nextDate = trigger.nextTriggerDate(),
               abs(nextDate.timeIntervalSince(reminder.fireDate)) < 1
         else { return false }
 
-        let expected = makeContent(for: habit, weekday: calendar.component(.weekday, from: reminder.fireDate))
         return request.content.title == expected.title && request.content.body == expected.body
     }
 
@@ -150,7 +177,7 @@ public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificat
 
     private func makeContent(for habit: Habit, weekday: Int/*, iconPNGData: Data?*/) -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = habit.name
+        content.title = "¡\(habit.name)!"
         content.body = HabitReminderMessageBuilder.body(
             frequency: habit.schedule.frequency,
             repetitionsPerDay: habit.schedule.repetitionsPerDay

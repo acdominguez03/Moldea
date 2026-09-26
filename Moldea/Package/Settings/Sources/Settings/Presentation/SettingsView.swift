@@ -30,10 +30,17 @@ struct SettingsContentView: View {
     private var isNotificationsEnabledBinding: Binding<Bool> {
         Binding(
             get: { settingsViewModel.isNotificationsEnabled },
-            set: { _ in Task { await settingsViewModel.onIsNotificationsEnabledToggled(habits: habits) } }
+            set: { _ in Task { await settingsViewModel.onIsNotificationsEnabledToggled() } }
         )
     }
     
+    private var isDailySummaryEnabledBinding: Binding<Bool> {
+        Binding(
+            get: { settingsViewModel.isDailySummaryEnabled },
+            set: { _ in Task { await settingsViewModel.onIsDailySummaryToggled() } }
+        )
+    }
+
     init(viewModel: SettingsViewModel) {
         _settingsViewModel = State(initialValue: viewModel)
     }
@@ -98,6 +105,17 @@ struct SettingsContentView: View {
                                     }
                                 )
                             }
+                        }
+
+                        Section {
+                            Toggle(
+                                SettingsTextsEnum.dailySummaryToggle,
+                                isOn: isDailySummaryEnabledBinding
+                            )
+                        } header: {
+                            Text(SettingsTextsEnum.daySummary)
+                        } footer: {
+                            Text(SettingsTextsEnum.oneReminderWithHabitsLeft)
                         }
                     }
                 } else {

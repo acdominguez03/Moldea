@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Core
 
 public enum SettingsTextsEnum {
     private static func resource(_ key: String) -> LocalizedStringResource {
@@ -63,4 +64,19 @@ public enum SettingsTextsEnum {
     // MARK: Accessibility
     public static let editReminder = resource("settings_edit_reminder")
     public static let opensSystemSettings = resource("settings_opens_system_settings")
+    // MARK: Day Summary
+    public static let daySummary = resource("day_summary")
+    public static let dailySummaryToggle = resource("settings_daily_summary_toggle")
+
+    /// La hora es fija (`DailySummaryReminder`), pero se formatea para respetar el formato de 12 o
+    /// 24 horas del usuario.
+    public static var oneReminderWithHabitsLeft: LocalizedStringResource {
+        let time = Calendar.current.date(
+            bySettingHour: DailySummaryReminder.hour,
+            minute: DailySummaryReminder.minute,
+            second: 0,
+            of: .now
+        ) ?? .now
+        return localized("only_one_reminder_with_habits_left \(time, format: .dateTime.hour().minute())")
+    }
 }

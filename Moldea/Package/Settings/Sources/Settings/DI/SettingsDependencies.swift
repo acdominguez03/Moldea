@@ -33,6 +33,13 @@ public struct SettingsDependencies: Sendable {
             getIsNotificationPermissionAllowedUseCase: GetIsNotificationPermissionAllowedUseCase(
                 userDefaultsRepository: core.userDefaultsRepository
             ),
+            getIsDailySummaryEnabledUseCase: GetIsDailySummaryEnabledUseCase(
+                userDefaultsRepository: core.userDefaultsRepository
+            ),
+            setIsDailySummaryEnabledUseCase: SetIsDailySummaryEnabledUseCase(
+                userDefaultsRepository: core.userDefaultsRepository,
+                notificationScheduler: core.notificationScheduler
+            ),
             requestNotificationAuthorizationUseCase: core.requestNotificationAuthorization
         )
     }

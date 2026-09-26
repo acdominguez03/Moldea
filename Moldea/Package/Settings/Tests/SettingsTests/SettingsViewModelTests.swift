@@ -41,6 +41,7 @@ private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
     private(set) var scheduledHabits: [Habit] = []
     private(set) var cancelledHabitIDs: [Habit.ID] = []
     private(set) var cancelAllCallCount = 0
+    private(set) var syncCallCount = 0
 
     func scheduleReminder(for habit: Habit) async {
         scheduledHabits.append(habit)
@@ -54,7 +55,9 @@ private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
         cancelAllCallCount += 1
     }
 
-    func syncReminders() async {}
+    func syncReminders() async {
+        syncCallCount += 1
+    }
 }
 
 @MainActor
@@ -63,11 +66,13 @@ struct SettingsViewModelTests {
         isNotificationPermissionAllowedAtLaunch: Bool = true,
         refreshedPermission: Bool = true,
         isNotificationsEnabledAtLaunch: Bool = false,
-        notificationScheduler: FakeHabitNotificationScheduler = FakeHabitNotificationScheduler()
+        isDailySummaryEnabledAtLaunch: Bool = false,
+        notificationScheduler: FakeHabitNotificationScheduler = FakeHabitNotificationScheduler(),
+        userDefaultsRepository: FakeUserDefaultsRepository = FakeUserDefaultsRepository()
     ) -> (SettingsViewModel, FakeRequestNotificationAuthorizationUseCase) {
-        let userDefaultsRepository = FakeUserDefaultsRepository()
         userDefaultsRepository.saveBool(.isNotificationPermissionAllowed, isNotificationPermissionAllowedAtLaunch)
         userDefaultsRepository.saveBool(.isNotificationsEnabled, isNotificationsEnabledAtLaunch)
+        userDefaultsRepository.saveBool(.isDailySummaryEnabled, isDailySummaryEnabledAtLaunch)
         let requestUseCase = FakeRequestNotificationAuthorizationUseCase(result: refreshedPermission)
 
         let viewModel = SettingsViewModel(
@@ -81,6 +86,13 @@ struct SettingsViewModelTests {
             ),
             getIsNotificationPermissionAllowedUseCase: GetIsNotificationPermissionAllowedUseCase(
                 userDefaultsRepository: userDefaultsRepository
+            ),
+            getIsDailySummaryEnabledUseCase: GetIsDailySummaryEnabledUseCase(
+                userDefaultsRepository: userDefaultsRepository
+            ),
+            setIsDailySummaryEnabledUseCase: SetIsDailySummaryEnabledUseCase(
+                userDefaultsRepository: userDefaultsRepository,
+                notificationScheduler: notificationScheduler
             ),
             requestNotificationAuthorizationUseCase: requestUseCase
         )
@@ -122,47 +134,80 @@ struct SettingsViewModelTests {
 
     // MARK: onIsNotificationsEnabledToggled
 
-    private func makeHabit(isActive: Bool = true, hasReminder: Bool = true) -> Habit {
-        Habit(
-            id: UUID(),
-            name: "Leer",
-            color: "#007AFF",
-            icon: "book",
-            isActive: isActive,
-            createdAt: .now,
-            updatedAt: .now,
-            schedule: HabitSchedule(frequency: .daily, repetitionsPerDay: 1),
-            reminder: hasReminder ? HabitReminder(time: .now, isEnabled: true, isMutedOnWeekends: false) : nil
-        )
-    }
-
-    @Test func disablingClearsEveryPendingNotificationWithoutTouchingHabitsOneByOne() async {
+    @Test func disablingClearsEveryPendingNotificationAndDoesNotSchedule() async {
         let scheduler = FakeHabitNotificationScheduler()
         let (viewModel, _) = makeViewModel(isNotificationsEnabledAtLaunch: true, notificationScheduler: scheduler)
-        let withReminder = makeHabit()
-        let inactive = makeHabit(isActive: false)
-        let withoutReminder = makeHabit(hasReminder: false)
 
-        await viewModel.onIsNotificationsEnabledToggled(habits: [withReminder, inactive, withoutReminder])
+        await viewModel.onIsNotificationsEnabledToggled()
 
         #expect(viewModel.isNotificationsEnabled == false)
         #expect(await scheduler.cancelAllCallCount == 1)
         #expect(await scheduler.cancelledHabitIDs.isEmpty)
         #expect(await scheduler.scheduledHabits.isEmpty)
+        #expect(await scheduler.syncCallCount == 0)
     }
 
-    @Test func enablingStartsFromACleanSlateAndSchedulesActiveHabitsWithReminder() async {
+    /// Una sola sincronización programa los avisos de los hábitos y el de la noche, aunque ningún
+    /// hábito tenga aviso propio.
+    @Test func enablingStartsFromACleanSlateAndSyncsOnce() async {
         let scheduler = FakeHabitNotificationScheduler()
         let (viewModel, _) = makeViewModel(isNotificationsEnabledAtLaunch: false, notificationScheduler: scheduler)
-        let withReminder = makeHabit()
-        let inactive = makeHabit(isActive: false)
-        let withoutReminder = makeHabit(hasReminder: false)
 
-        await viewModel.onIsNotificationsEnabledToggled(habits: [withReminder, inactive, withoutReminder])
+        await viewModel.onIsNotificationsEnabledToggled()
 
         #expect(viewModel.isNotificationsEnabled == true)
         #expect(await scheduler.cancelAllCallCount == 1)
-        #expect(await scheduler.scheduledHabits.map(\.id) == [withReminder.id])
-        #expect(await scheduler.cancelledHabitIDs.isEmpty)
+        #expect(await scheduler.syncCallCount == 1)
+        #expect(await scheduler.scheduledHabits.isEmpty)
+    }
+
+    // MARK: Aviso de la noche
+
+    @Test func theDailySummaryStartsDisabled() {
+        let (viewModel, _) = makeViewModel()
+
+        #expect(viewModel.isDailySummaryEnabled == false)
+    }
+
+    @Test func theDailySummaryReadsTheSavedPreferenceAtLaunch() {
+        let (viewModel, _) = makeViewModel(isDailySummaryEnabledAtLaunch: true)
+
+        #expect(viewModel.isDailySummaryEnabled == true)
+    }
+
+    @Test func togglingTheDailySummarySavesThePreferenceAndSyncsTheReminders() async {
+        let scheduler = FakeHabitNotificationScheduler()
+        let defaults = FakeUserDefaultsRepository()
+        let (viewModel, _) = makeViewModel(notificationScheduler: scheduler, userDefaultsRepository: defaults)
+
+        await viewModel.onIsDailySummaryToggled()
+
+        #expect(viewModel.isDailySummaryEnabled == true)
+        #expect(defaults.getBool(.isDailySummaryEnabled) == true)
+        #expect(await scheduler.syncCallCount == 1)
+        #expect(await scheduler.cancelAllCallCount == 0)
+    }
+
+    @Test func togglingTheDailySummaryTwiceTurnsItOffAgain() async {
+        let scheduler = FakeHabitNotificationScheduler()
+        let defaults = FakeUserDefaultsRepository()
+        let (viewModel, _) = makeViewModel(notificationScheduler: scheduler, userDefaultsRepository: defaults)
+
+        await viewModel.onIsDailySummaryToggled()
+        await viewModel.onIsDailySummaryToggled()
+
+        #expect(viewModel.isDailySummaryEnabled == false)
+        #expect(defaults.getBool(.isDailySummaryEnabled) == false)
+        #expect(await scheduler.syncCallCount == 2)
+    }
+
+    @Test func theDailySummaryIsIndependentOfTheMainSwitch() async {
+        let defaults = FakeUserDefaultsRepository()
+        let (viewModel, _) = makeViewModel(isNotificationsEnabledAtLaunch: true, userDefaultsRepository: defaults)
+
+        await viewModel.onIsDailySummaryToggled()
+
+        #expect(viewModel.isNotificationsEnabled == true)
+        #expect(defaults.getBool(.isNotificationsEnabled) == true)
     }
 }
