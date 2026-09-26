@@ -20,7 +20,8 @@ public struct SettingsDependencies: Sendable {
     @MainActor func makeSettingsViewModel() -> SettingsViewModel {
         SettingsViewModel(
             setHabitReminderEnabledUseCase: DefaultSetHabitReminderEnabledUseCase(
-                repository: core.habitRepository
+                repository: core.habitRepository,
+                notificationScheduler: core.notificationScheduler
             ),
             getIsNotificationsEnabledUseCase: GetIsNotificationsEnabledUseCase(
                 userDefaultsRepository: core.userDefaultsRepository

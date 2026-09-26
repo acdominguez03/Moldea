@@ -45,7 +45,10 @@ final class SpeechToTextViewModel {
             repository: habitRepository,
             notificationScheduler: notificationScheduler
         )
-        completeHabitsUseCase = DefaultCompleteHabitsUseCase(repository: habitRepository)
+        completeHabitsUseCase = DefaultCompleteHabitsUseCase(
+            repository: habitRepository,
+            notificationScheduler: notificationScheduler
+        )
         getTodayHabitsUseCase = DefaultGetTodayHabitsUseCase(repository: todayHabitsRepository)
     }
 

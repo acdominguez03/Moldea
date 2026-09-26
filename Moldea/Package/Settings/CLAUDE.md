@@ -60,7 +60,8 @@ de `MainTab` como `SettingsView()`: es `public init()`, lee `\.settingsDependenc
 del paquete a partir de sus repositorios: `makeSettingsViewModel()` con
 `GetIsNotificationsEnabledUseCase`, `SetIsNotificationsEnabledUseCase`,
 `GetIsNotificationPermissionAllowedUseCase`, `RequestNotificationAuthorizationUseCase` (de `Core`)
-y `DefaultSetHabitReminderEnabledUseCase`; y `makeHabitReminderSheetViewModel(habit:)` con
+y `DefaultSetHabitReminderEnabledUseCase` (que además de guardar el ajuste cancela y reprograma las
+notificaciones de ese hábito); y `makeHabitReminderSheetViewModel(habit:)` con
 `DefaultUpdateHabitReminderUseCase`, que `SettingsContentView` usa al abrir la hoja (lee el
 entorno en `body`). Así sus tipos de `Domain` siguen siendo `internal`.
 

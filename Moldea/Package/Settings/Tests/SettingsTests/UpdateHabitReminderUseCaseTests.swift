@@ -39,6 +39,7 @@ private actor FakeHabitRepository: HabitRepository {
 private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
     private(set) var scheduledHabits: [Habit] = []
     private(set) var cancelledHabitIDs: [Habit.ID] = []
+    private(set) var cancelAllCallCount = 0
 
     func scheduleReminder(for habit: Habit) async {
         scheduledHabits.append(habit)
@@ -47,6 +48,12 @@ private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
     func cancelReminders(for habitID: Habit.ID) async {
         cancelledHabitIDs.append(habitID)
     }
+
+    func cancelAllReminders() async {
+        cancelAllCallCount += 1
+    }
+
+    func syncReminders() async {}
 }
 
 struct UpdateHabitReminderUseCaseTests {

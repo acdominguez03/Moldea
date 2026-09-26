@@ -16,7 +16,11 @@ private final class FakeUserDefaultsRepository: UserDefaultsRepository, @uncheck
 }
 
 private actor FakeSetHabitReminderEnabledUseCase: SetHabitReminderEnabledUseCase {
-    func execute(id: Habit.ID, isEnabled: Bool) async throws {}
+    private(set) var calls: [(id: Habit.ID, isEnabled: Bool)] = []
+
+    func execute(habit: Habit, isEnabled: Bool) async throws {
+        calls.append((id: habit.id, isEnabled: isEnabled))
+    }
 }
 
 private actor FakeRequestNotificationAuthorizationUseCase: RequestNotificationAuthorizationUseCase {
@@ -36,6 +40,7 @@ private actor FakeRequestNotificationAuthorizationUseCase: RequestNotificationAu
 private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
     private(set) var scheduledHabits: [Habit] = []
     private(set) var cancelledHabitIDs: [Habit.ID] = []
+    private(set) var cancelAllCallCount = 0
 
     func scheduleReminder(for habit: Habit) async {
         scheduledHabits.append(habit)
@@ -44,6 +49,12 @@ private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
     func cancelReminders(for habitID: Habit.ID) async {
         cancelledHabitIDs.append(habitID)
     }
+
+    func cancelAllReminders() async {
+        cancelAllCallCount += 1
+    }
+
+    func syncReminders() async {}
 }
 
 @MainActor
@@ -125,7 +136,7 @@ struct SettingsViewModelTests {
         )
     }
 
-    @Test func disablingCancelsRemindersOfActiveHabitsWithReminder() async {
+    @Test func disablingClearsEveryPendingNotificationWithoutTouchingHabitsOneByOne() async {
         let scheduler = FakeHabitNotificationScheduler()
         let (viewModel, _) = makeViewModel(isNotificationsEnabledAtLaunch: true, notificationScheduler: scheduler)
         let withReminder = makeHabit()
@@ -135,19 +146,23 @@ struct SettingsViewModelTests {
         await viewModel.onIsNotificationsEnabledToggled(habits: [withReminder, inactive, withoutReminder])
 
         #expect(viewModel.isNotificationsEnabled == false)
-        #expect(await scheduler.cancelledHabitIDs == [withReminder.id])
+        #expect(await scheduler.cancelAllCallCount == 1)
+        #expect(await scheduler.cancelledHabitIDs.isEmpty)
         #expect(await scheduler.scheduledHabits.isEmpty)
     }
 
-    @Test func enablingSchedulesRemindersOfActiveHabitsWithReminder() async {
+    @Test func enablingStartsFromACleanSlateAndSchedulesActiveHabitsWithReminder() async {
         let scheduler = FakeHabitNotificationScheduler()
         let (viewModel, _) = makeViewModel(isNotificationsEnabledAtLaunch: false, notificationScheduler: scheduler)
         let withReminder = makeHabit()
+        let inactive = makeHabit(isActive: false)
+        let withoutReminder = makeHabit(hasReminder: false)
 
-        await viewModel.onIsNotificationsEnabledToggled(habits: [withReminder])
+        await viewModel.onIsNotificationsEnabledToggled(habits: [withReminder, inactive, withoutReminder])
 
         #expect(viewModel.isNotificationsEnabled == true)
-        #expect(await scheduler.scheduledHabits == [withReminder])
+        #expect(await scheduler.cancelAllCallCount == 1)
+        #expect(await scheduler.scheduledHabits.map(\.id) == [withReminder.id])
         #expect(await scheduler.cancelledHabitIDs.isEmpty)
     }
 }

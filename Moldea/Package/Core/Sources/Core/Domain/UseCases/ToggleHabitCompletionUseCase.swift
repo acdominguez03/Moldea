@@ -50,15 +50,18 @@ extension ToggleHabitCompletionUseCase {
 
 public struct DefaultToggleHabitCompletionUseCase: ToggleHabitCompletionUseCase {
     private let repository: any HabitRepository
+    private let notificationScheduler: any HabitNotificationScheduler
     private let calendar: Calendar
     private let now: @Sendable () -> Date
 
     public init(
         repository: any HabitRepository,
+        notificationScheduler: any HabitNotificationScheduler,
         calendar: Calendar = .current,
         now: @escaping @Sendable () -> Date = { .now }
     ) {
         self.repository = repository
+        self.notificationScheduler = notificationScheduler
         self.calendar = calendar
         self.now = now
     }
@@ -86,9 +89,16 @@ public struct DefaultToggleHabitCompletionUseCase: ToggleHabitCompletionUseCase 
             completedAt: now()
         )
 
+        // Solo cambia lo que hay que avisar hoy al completar del todo o al deshacer (volver a 0).
+        // Un progreso parcial no toca las notificaciones.
         if wasCompleted {
+            await notificationScheduler.syncReminders()
             return .reset(total: total)
         }
-        return next == total ? .completed(total: total) : .progressed(done: next, total: total)
+        if next == total {
+            await notificationScheduler.syncReminders()
+            return .completed(total: total)
+        }
+        return .progressed(done: next, total: total)
     }
 }

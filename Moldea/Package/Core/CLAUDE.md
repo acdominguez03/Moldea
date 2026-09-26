@@ -265,6 +265,37 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
   `@MainActor`, pero el default de un `@Entry` se evalúa fuera del main actor y construye
   `CoreDependencies.preview`. El `init` solo guarda el `UserDefaultsRepository`; los métodos
   siguen en el main actor.
+- **Recordatorios: una notificación puntual por hábito y día** (`HabitNotificationScheduler`).
+  - **Por qué no repetitivos:** un `UNCalendarNotificationTrigger` con `repeats: true` no puede
+    saltarse una sola ocurrencia, y completar un hábito tiene que quitar solo la de hoy. Los
+    identificadores son `habit-reminder-<id>-<yyyyMMdd>`.
+  - **`syncReminders()` es la única operación de fondo.** Lee los hábitos y lo completado hoy
+    (`ReminderPlanSource`), calcula con `ReminderPlanner` (puro, con tests) qué tendría que haber
+    pendiente y aplica la diferencia: quita lo que sobra o cambió de hora o texto, añade lo que
+    falta y limpia del Centro de Notificaciones el aviso de hoy si el hábito ya está completado.
+    Es idempotente y se serializa. `scheduleReminder(for:)` y `cancelReminders(for:)` solo la
+    llaman: como todos los casos de uso escriben primero y llaman después, el estado guardado manda.
+  - **Quién sincroniza:** los casos de uso de crear, actualizar, borrar, pausar y los de
+    recordatorio; `DefaultToggleHabitCompletionUseCase` y `DefaultCompleteHabitsUseCase` **solo
+    al completar del todo o al deshacer** (un progreso parcial no cambia qué avisar hoy); y
+    `MoldeaApp` cada vez que la escena pasa a activa.
+  - **Reglas de `ReminderPlanner`:** hábito pausado, sin recordatorio o con el aviso apagado no
+    planifica; si hoy ya está completado se salta solo hoy; si la hora de hoy ya pasó, tampoco;
+    horizonte máximo de 28 días.
+  - **Presupuesto:** 64 pendientes por app medido en un iPhone con iOS 26, cada una cuenta como
+    una. No está en la documentación de Apple. `add` no falla al pasarse: el sistema conserva en
+    silencio las **últimas 64 añadidas**. El scheduler usa 60 y reparte por fecha: se quedan las
+    60 más próximas de todos los hábitos, así que todos tienen el mismo horizonte (con 12 hábitos
+    diarios, unos 5 días). Sin abrir la app en ese tiempo se acaban los avisos.
+  - **`cancelAllReminders()`** quita todas las pendientes de la app. Lo usa el interruptor
+    "Permitir avisos", que limpia siempre y después sincroniza.
+  - `scheduleReminder` ignora los hábitos **pausados**, así que quien programa pasa el `isActive`
+    real. El borrado de pendientes es asíncrono, y se espera (máximo 1 s) a verlo aplicado.
+  - **El widget no sincroniza.** Su intent (`QuickHabitCheckWidget/ToggleHabitIntent`) corre por
+    defecto en el proceso de la extensión, y la documentación de Apple no dice si allí se
+    comparten las notificaciones pendientes con la app. Usa `NoOpHabitNotificationScheduler`: lo
+    que complete el widget se refleja en las notificaciones en la siguiente sincronización desde
+    la app. Hasta entonces, el aviso de ese día puede sonar aunque ya esté completado.
 - **`.moldea`** (`MoldeaPreviewModifier`, `PreviewModifier`): `makeSharedContext()` siembra
   `CoreDependencies.preview` con `SampleDataSeeder` **solo si no hay hábitos**
   (`fetchCount == 0`), porque el seeder no comprueba si ya ha sembrado; `body` aplica

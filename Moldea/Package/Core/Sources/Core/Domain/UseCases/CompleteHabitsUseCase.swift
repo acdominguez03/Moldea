@@ -13,15 +13,18 @@ public protocol CompleteHabitsUseCase: Sendable {
 
 public struct DefaultCompleteHabitsUseCase: CompleteHabitsUseCase {
     private let repository: any HabitRepository
+    private let notificationScheduler: any HabitNotificationScheduler
     private let calendar: Calendar
     private let now: @Sendable () -> Date
 
     public init(
         repository: any HabitRepository,
+        notificationScheduler: any HabitNotificationScheduler,
         calendar: Calendar = .current,
         now: @escaping @Sendable () -> Date = { .now }
     ) {
         self.repository = repository
+        self.notificationScheduler = notificationScheduler
         self.calendar = calendar
         self.now = now
     }
@@ -30,6 +33,7 @@ public struct DefaultCompleteHabitsUseCase: CompleteHabitsUseCase {
         var seen = Set<Habit.ID>()
         var completed: [Habit.ID] = []
         var alreadyCompleted: [Habit.ID] = []
+        var finishedForToday = false
 
         for habitID in habitIDs where seen.insert(habitID).inserted {
             guard let todayHabit = todayHabits.first(where: { $0.id == habitID }) else {
@@ -42,14 +46,21 @@ public struct DefaultCompleteHabitsUseCase: CompleteHabitsUseCase {
             }
 
             let total = max(todayHabit.habit.schedule.repetitionsPerDay, 1)
+            let count = min(todayHabit.completedToday + 1, total)
 
             try await repository.setCompletions(
                 habitID: habitID,
                 day: calendar.startOfDay(for: todayHabit.referenceDay),
-                count: min(todayHabit.completedToday + 1, total),
+                count: count,
                 completedAt: now()
             )
             completed.append(habitID)
+            if count == total { finishedForToday = true }
+        }
+
+        // Una sola sincronización para todos: solo hace falta si alguno acaba de completarse hoy.
+        if finishedForToday {
+            await notificationScheduler.syncReminders()
         }
 
         return CompleteHabitsResult(completed: completed, alreadyCompleted: alreadyCompleted)

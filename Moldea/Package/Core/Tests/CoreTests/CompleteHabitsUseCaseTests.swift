@@ -7,10 +7,14 @@ struct CompleteHabitsUseCaseTests {
     private let referenceDay = Date(timeIntervalSince1970: 1_700_000_000)
     private let completedAt = Date(timeIntervalSince1970: 1_700_003_600)
 
-    private func makeUseCase(repository: FakeHabitRepository) -> DefaultCompleteHabitsUseCase {
+    private func makeUseCase(
+        repository: FakeHabitRepository,
+        scheduler: FakeHabitNotificationScheduler = FakeHabitNotificationScheduler()
+    ) -> DefaultCompleteHabitsUseCase {
         let completedAt = completedAt
         return DefaultCompleteHabitsUseCase(
             repository: repository,
+            notificationScheduler: scheduler,
             calendar: calendar,
             now: { completedAt }
         )
@@ -130,5 +134,39 @@ struct CompleteHabitsUseCaseTests {
                 in: [makeTodayHabit(leer)]
             )
         }
+    }
+
+    // MARK: Notificaciones
+
+    @Test func `Syncs the reminders once when a habit is finished for today`() async throws {
+        let scheduler = FakeHabitNotificationScheduler()
+        let leer = makeHabit(name: "Leer")
+        let agua = makeHabit(name: "Beber agua", repetitionsPerDay: 3)
+        let today = [makeTodayHabit(leer), makeTodayHabit(agua, completedToday: 2)]
+
+        _ = try await makeUseCase(repository: FakeHabitRepository(), scheduler: scheduler)
+            .execute(habitIDs: [leer.id, agua.id], in: today)
+
+        #expect(await scheduler.syncCallCount == 1)
+    }
+
+    @Test func `Does not touch the reminders when no habit reaches its last repetition`() async throws {
+        let scheduler = FakeHabitNotificationScheduler()
+        let agua = makeHabit(name: "Beber agua", repetitionsPerDay: 3)
+
+        _ = try await makeUseCase(repository: FakeHabitRepository(), scheduler: scheduler)
+            .execute(habitIDs: [agua.id], in: [makeTodayHabit(agua, completedToday: 0)])
+
+        #expect(await scheduler.syncCallCount == 0)
+    }
+
+    @Test func `Does not touch the reminders when everything was already completed`() async throws {
+        let scheduler = FakeHabitNotificationScheduler()
+        let agua = makeHabit(name: "Beber agua", repetitionsPerDay: 2)
+
+        _ = try await makeUseCase(repository: FakeHabitRepository(), scheduler: scheduler)
+            .execute(habitIDs: [agua.id], in: [makeTodayHabit(agua, completedToday: 2)])
+
+        #expect(await scheduler.syncCallCount == 0)
     }
 }

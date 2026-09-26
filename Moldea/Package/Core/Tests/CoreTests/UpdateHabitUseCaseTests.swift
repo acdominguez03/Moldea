@@ -26,10 +26,12 @@ struct UpdateHabitUseCaseTests {
     private func execute(
         _ input: Input,
         id: Habit.ID? = nil,
+        isActive: Bool = true,
         with useCase: DefaultUpdateHabitUseCase
     ) async throws {
         try await useCase.execute(
             id: id ?? fixedID,
+            isActive: isActive,
             name: input.name,
             color: input.color,
             icon: input.icon,
@@ -96,6 +98,19 @@ struct UpdateHabitUseCaseTests {
         #expect(await scheduler.scheduledHabits.map(\.reminder) == [
             HabitReminder(time: Date(timeIntervalSince1970: 2_000), isEnabled: true, isMutedOnWeekends: false)
         ])
+    }
+
+    /// El scheduler ignora los hábitos pausados; para eso el caso de uso tiene que pasarle el
+    /// estado real y no suponer que está activo.
+    @Test(arguments: [true, false])
+    func schedulesWithTheRealActiveState(isActive: Bool) async throws {
+        let repository = FakeHabitRepository()
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = makeUseCase(repository: repository, notificationScheduler: scheduler)
+
+        try await execute(Input(), isActive: isActive, with: useCase)
+
+        #expect(await scheduler.scheduledHabits.map(\.isActive) == [isActive])
     }
 
     // MARK: Validación

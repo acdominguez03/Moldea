@@ -35,7 +35,11 @@ struct CompleteHabitIntent: AppIntent {
         }
 
         let result = try await DefaultToggleHabitCompletionUseCase(
-            repository: SwiftDataHabitRepository(modelContainer: container)
+            repository: SwiftDataHabitRepository(modelContainer: container),
+            notificationScheduler: await UNUserNotificationCenterHabitNotificationScheduler(
+                userDefaultsRepository: UserDefaultsRepositoryImpl(),
+                planSource: SwiftDataReminderPlanSource(modelContainer: container)
+            )
         ).execute(
             habitID: todayHabit.id,
             day: todayHabit.referenceDay,

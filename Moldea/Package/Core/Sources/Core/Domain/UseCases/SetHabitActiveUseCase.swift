@@ -28,7 +28,17 @@ public struct DefaultSetHabitActiveUseCase: SetHabitActiveUseCase {
 
         if isActive {
             print("Hábito activado, guardando reminder")
-            await notificationScheduler.scheduleReminder(for: habit)
+            await notificationScheduler.scheduleReminder(for: Habit(
+                id: habit.id,
+                name: habit.name,
+                color: habit.color,
+                icon: habit.icon,
+                isActive: true,
+                createdAt: habit.createdAt,
+                updatedAt: habit.updatedAt,
+                schedule: habit.schedule,
+                reminder: habit.reminder
+            ))
         } else {
             print("Hábito desactivado, eliminando reminders")
             await notificationScheduler.cancelReminders(for: habit.id)

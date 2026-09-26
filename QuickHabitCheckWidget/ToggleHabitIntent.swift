@@ -36,8 +36,11 @@ struct ToggleHabitIntent: AppIntent {
             return .result()
         }
 
+        // Este intent corre en el proceso de la extensión, que no gestiona las notificaciones de la
+        // app: la siguiente sincronización desde la app deja las pendientes al día.
         try await DefaultToggleHabitCompletionUseCase(
-            repository: SwiftDataHabitRepository(modelContainer: container)
+            repository: SwiftDataHabitRepository(modelContainer: container),
+            notificationScheduler: NoOpHabitNotificationScheduler()
         ).execute(
             habitID: todayHabit.id,
             day: todayHabit.referenceDay,

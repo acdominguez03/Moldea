@@ -7,10 +7,12 @@ struct ToggleHabitCompletionUseCaseTests {
     private let completedAt = Date(timeIntervalSince1970: 1_700_000_000)
 
     private func makeUseCase(
-        repository: FakeHabitRepository
+        repository: FakeHabitRepository,
+        scheduler: FakeHabitNotificationScheduler = FakeHabitNotificationScheduler()
     ) -> DefaultToggleHabitCompletionUseCase {
         DefaultToggleHabitCompletionUseCase(
             repository: repository,
+            notificationScheduler: scheduler,
             calendar: .current,
             now: { self.completedAt }
         )
@@ -81,6 +83,7 @@ struct ToggleHabitCompletionUseCaseTests {
         calendar.timeZone = TimeZone(identifier: "Europe/Madrid")!
         let useCase = DefaultToggleHabitCompletionUseCase(
             repository: repository,
+            notificationScheduler: FakeHabitNotificationScheduler(),
             calendar: calendar,
             now: { self.completedAt }
         )
@@ -151,5 +154,59 @@ struct ToggleHabitCompletionUseCaseTests {
 
         #expect(result == .progressed(done: 2, total: 4))
         #expect(await repository.setCompletionsCalls.map(\.count) == [2])
+    }
+
+    // MARK: Notificaciones
+
+    @Test func completingTheLastRepetitionSyncsTheReminders() async throws {
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = makeUseCase(repository: FakeHabitRepository(), scheduler: scheduler)
+
+        try await useCase.execute(habitID: habitID, day: .now, completedCount: 3, repetitionsPerDay: 4)
+
+        #expect(await scheduler.syncCallCount == 1)
+    }
+
+    /// El toggle puede marcar un hábito por error: al volver a tocar se reinicia y hay que
+    /// recuperar el aviso de hoy.
+    @Test func resettingACompletedHabitSyncsTheReminders() async throws {
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = makeUseCase(repository: FakeHabitRepository(), scheduler: scheduler)
+
+        let result = try await useCase.execute(habitID: habitID, day: .now, completedCount: 4, repetitionsPerDay: 4)
+
+        #expect(result == .reset(total: 4))
+        #expect(await scheduler.syncCallCount == 1)
+    }
+
+    @Test func aPartialRepetitionDoesNotTouchTheReminders() async throws {
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = makeUseCase(repository: FakeHabitRepository(), scheduler: scheduler)
+
+        try await useCase.execute(habitID: habitID, day: .now, completedCount: 1, repetitionsPerDay: 4)
+
+        #expect(await scheduler.syncCallCount == 0)
+    }
+
+    @Test func addOnlyOnACompletedHabitDoesNotTouchTheReminders() async throws {
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = makeUseCase(repository: FakeHabitRepository(), scheduler: scheduler)
+
+        let result = try await useCase.execute(
+            habitID: habitID, day: .now, completedCount: 2, repetitionsPerDay: 2, mode: .addOnly
+        )
+
+        #expect(result == .alreadyCompleted(total: 2))
+        #expect(await scheduler.syncCallCount == 0)
+    }
+
+    @Test func aRepositoryFailureDoesNotTouchTheReminders() async {
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = makeUseCase(repository: FakeHabitRepository(error: RepositoryFailure()), scheduler: scheduler)
+
+        await #expect(throws: RepositoryFailure()) {
+            try await useCase.execute(habitID: habitID, day: .now, completedCount: 0, repetitionsPerDay: 1)
+        }
+        #expect(await scheduler.syncCallCount == 0)
     }
 }

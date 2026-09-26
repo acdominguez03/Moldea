@@ -38,11 +38,11 @@ public struct CoreDependencies: Sendable {
     }
 
     public var toggleHabitCompletion: any ToggleHabitCompletionUseCase {
-        DefaultToggleHabitCompletionUseCase(repository: habitRepository)
+        DefaultToggleHabitCompletionUseCase(repository: habitRepository, notificationScheduler: notificationScheduler)
     }
 
     public var completeHabits: any CompleteHabitsUseCase {
-        DefaultCompleteHabitsUseCase(repository: habitRepository)
+        DefaultCompleteHabitsUseCase(repository: habitRepository, notificationScheduler: notificationScheduler)
     }
 
     public var getTodayHabits: any GetTodayHabitsUseCase {
@@ -76,7 +76,8 @@ public struct CoreDependencies: Sendable {
             todayHabitsRepository: SwiftDataTodayHabitsRepository(modelContainer: container),
             userDefaultsRepository: userDefaultsRepository,
             notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
-                userDefaultsRepository: userDefaultsRepository
+                userDefaultsRepository: userDefaultsRepository,
+                planSource: SwiftDataReminderPlanSource(modelContainer: container)
             ),
             notificationPermissionRepository: UNUserNotificationCenterPermissionRepository(),
             microphonePermissionRepository: AVAudioApplicationMicrophonePermissionRepository(),

@@ -39,6 +39,7 @@ public struct HabitsDependencies: Sendable {
         }
         return HabitFormViewModel(
             id: habit.id,
+            isActive: habit.isActive,
             name: habit.name,
             color: habit.color,
             icon: habit.icon,

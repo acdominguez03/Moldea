@@ -1,7 +1,19 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%@" : {},
+    "%@" : {
+
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
     "%@ is not scheduled for today." : {
       "localizations" : {
         "en" : {
@@ -14,6 +26,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ no está programado para hoy."
+          }
+        }
+      }
+    },
+    "%lld de %lld pendientes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld de %2$lld pendientes"
           }
         }
       }
@@ -35,7 +57,6 @@
         }
       }
     },
-    "Complete ${habit}" : {},
     "Complete %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -52,6 +73,9 @@
           }
         }
       }
+    },
+    "Complete ${habit}" : {
+
     },
     "Complete a habit" : {
       "localizations" : {
@@ -84,6 +108,9 @@
           }
         }
       }
+    },
+    "Debug: notificaciones pendientes" : {
+
     },
     "Done! %@: %lld of %lld today." : {
       "localizations" : {
@@ -164,6 +191,21 @@
           }
         }
       }
+    },
+    "Ordenadas por próximo disparo. El sistema descarta en silencio las más antiguas al pasar de %lld." : {
+
+    },
+    "Pendientes (debug)" : {
+
+    },
+    "Recargar" : {
+
+    },
+    "Sin fecha de disparo" : {
+
+    },
+    "Sin notificaciones pendientes" : {
+
     },
     "Tells you the percentage of today's habits you have completed." : {
       "localizations" : {

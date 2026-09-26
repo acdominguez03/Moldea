@@ -12,62 +12,140 @@ import UserNotifications
 
 @MainActor
 public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificationScheduler {
-    private let userDefaultsRepository: any UserDefaultsRepository
+    /// 64 pendientes por app medido en un iPhone con iOS 26 (no está en la documentación de Apple),
+    /// menos un margen. Pasarse no da error: el sistema conserva en silencio las últimas añadidas.
+    static let notificationBudget = 60
 
-    nonisolated public init(userDefaultsRepository: any UserDefaultsRepository) {
+    private let userDefaultsRepository: any UserDefaultsRepository
+    private let planSource: any ReminderPlanSource
+
+    /// Serializa las sincronizaciones: dos a la vez se pisarían al comparar con lo pendiente.
+    private static var lastSync: Task<Void, Never>?
+
+    nonisolated public init(
+        userDefaultsRepository: any UserDefaultsRepository,
+        planSource: any ReminderPlanSource
+    ) {
         self.userDefaultsRepository = userDefaultsRepository
+        self.planSource = planSource
+    }
+
+    /// El estado que manda es el guardado: los casos de uso escriben primero y llaman después, así
+    /// que basta con sincronizar. `habit` no se usa.
+    @MainActor
+    public func scheduleReminder(for habit: Habit) async {
+        await syncReminders()
     }
 
     @MainActor
-    public func scheduleReminder(for habit: Habit) async {
-        print("[HabitNotificationScheduler] scheduleReminder(for:) called — habit: \"\(habit.name)\" (id: \(habit.id))")
+    public func syncReminders() async {
+        let previous = Self.lastSync
+        let task = Task { @MainActor in
+            await previous?.value
+            await performSync()
+        }
+        Self.lastSync = task
+        await task.value
+    }
+
+    @MainActor
+    private func performSync() async {
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+            .filter { $0.identifier.hasPrefix(ReminderPlanner.identifierPrefix) }
 
         guard userDefaultsRepository.getBool(.isNotificationsEnabled) else {
-            print("[HabitNotificationScheduler] Skipped — notifications are disabled in app settings.")
+            await removePending(pending.map(\.identifier), from: center)
+            print("[HabitNotificationScheduler] Sync — notifications are disabled in app settings; nothing pending.")
             return
         }
 
-        guard let reminder = habit.reminder, reminder.isEnabled else {
-            print("[HabitNotificationScheduler] Skipped — reminder is nil or disabled for habit \"\(habit.name)\".")
+        let candidates: [ReminderCandidate]
+        do {
+            candidates = try await planSource.fetchCandidates(on: .now)
+        } catch {
+            // Sin datos fiables no se toca nada: peor que un aviso de más es borrar los que hay.
+            print("[HabitNotificationScheduler] ✘ Sync aborted, could not read habits: \(error)")
             return
         }
 
-        let weekdays = HabitReminderMessageBuilder.weekdays(
-            frequency: habit.schedule.frequency,
-            isMutedOnWeekends: reminder.isMutedOnWeekends
+        let now = Date.now
+        let calendar = Calendar.current
+        let planned = ReminderPlanner.plan(
+            candidates: candidates,
+            now: now,
+            calendar: calendar,
+            budget: Self.notificationBudget
         )
-        guard !weekdays.isEmpty else {
-            print("[HabitNotificationScheduler] Skipped — no weekdays to schedule for habit \"\(habit.name)\" (isMutedOnWeekends: \(reminder.isMutedOnWeekends)).")
-            return
+        let habitsByID = Dictionary(uniqueKeysWithValues: candidates.map { ($0.habit.id, $0.habit) })
+        let pendingByID = Dictionary(pending.map { ($0.identifier, $0) }, uniquingKeysWith: { first, _ in first })
+        let plannedIDs = Set(planned.map(\.identifier))
+
+        // Lo que sobra (incluidos los repetitivos del esquema anterior) y lo que cambió de hora,
+        // nombre o texto se quita; lo que falta se añade.
+        var idsToRemove = pending.map(\.identifier).filter { !plannedIDs.contains($0) }
+        var toAdd: [PlannedReminder] = []
+        for reminder in planned {
+            guard let habit = habitsByID[reminder.habitID] else { continue }
+            if let existing = pendingByID[reminder.identifier] {
+                if isUpToDate(existing, for: reminder, habit: habit, calendar: calendar) { continue }
+                idsToRemove.append(reminder.identifier)
+            }
+            toAdd.append(reminder)
         }
 
-        let timeComponents = Calendar.current.dateComponents([.hour, .minute], from: reminder.time)
-        let hour = timeComponents.hour ?? -1
-        let minute = timeComponents.minute ?? -1
+        await removePending(idsToRemove, from: center)
 
-        print("[HabitNotificationScheduler] Reminder time for \"\(habit.name)\": \(String(format: "%02d:%02d", hour, minute)) — weekdays: \(weekdays.sorted()) (1 = Sunday … 7 = Saturday)")
+        // Completado hoy: si el aviso ya había salido, se limpia también del Centro de Notificaciones.
+        let deliveredToClear = candidates
+            .filter(\.isCompletedToday)
+            .map { ReminderPlanner.identifier(habitID: $0.habit.id, day: now, calendar: calendar) }
+        center.removeDeliveredNotifications(withIdentifiers: deliveredToClear)
 
-        for weekday in weekdays.sorted() {
-            var triggerComponents = timeComponents
-            triggerComponents.weekday = weekday
-
-            let identifier = notificationIdentifier(habitID: habit.id, weekday: weekday)
-            let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: true)
-
-            print("[HabitNotificationScheduler] Scheduling \"\(identifier)\" — weekday \(weekday) at \(String(format: "%02d:%02d", hour, minute)), repeats: true. Next fire date: \(trigger.nextTriggerDate().map(String.init(describing:)) ?? "unknown")")
-
-            let content = makeContent(for: habit, weekday: weekday)//, iconPNGData: iconPNGData
-            let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
-
+        // Las más lejanas primero: si alguna vez hubiera un exceso, el sistema descarta las más
+        // antiguas y así serían las que menos importan.
+        for reminder in toAdd.sorted(by: { $0.fireDate > $1.fireDate }) {
+            guard let habit = habitsByID[reminder.habitID] else { continue }
+            let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: reminder.fireDate)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            let weekday = calendar.component(.weekday, from: reminder.fireDate)
+            let request = UNNotificationRequest(
+                identifier: reminder.identifier,
+                content: makeContent(for: habit, weekday: weekday),
+                trigger: trigger
+            )
             do {
-                try await UNUserNotificationCenter.current().add(request)
-                print("[HabitNotificationScheduler] ✔ Scheduled \"\(identifier)\" successfully.")
+                try await center.add(request)
             } catch {
-                print("[HabitNotificationScheduler] ✘ Failed to schedule \"\(identifier)\": \(error)")
+                print("[HabitNotificationScheduler] ✘ Failed to schedule \"\(reminder.identifier)\": \(error)")
             }
         }
 
-        print("[HabitNotificationScheduler] Finished scheduling \(weekdays.count) request(s) for habit \"\(habit.name)\".")
+        print("[HabitNotificationScheduler] Sync — planned \(planned.count), added \(toAdd.count), removed \(idsToRemove.count).")
+    }
+
+    private func isUpToDate(
+        _ request: UNNotificationRequest,
+        for reminder: PlannedReminder,
+        habit: Habit,
+        calendar: Calendar
+    ) -> Bool {
+        guard let trigger = request.trigger as? UNCalendarNotificationTrigger,
+              let nextDate = trigger.nextTriggerDate(),
+              abs(nextDate.timeIntervalSince(reminder.fireDate)) < 1
+        else { return false }
+
+        let expected = makeContent(for: habit, weekday: calendar.component(.weekday, from: reminder.fireDate))
+        return request.content.title == expected.title && request.content.body == expected.body
+    }
+
+    @MainActor
+    private func removePending(_ identifiers: [String], from center: UNUserNotificationCenter) async {
+        guard !identifiers.isEmpty else { return }
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
+        await waitUntil {
+            await center.pendingNotificationRequests().allSatisfy { !identifiers.contains($0.identifier) }
+        }
     }
 
     private func makeContent(for habit: Habit, weekday: Int/*, iconPNGData: Data?*/) -> UNMutableNotificationContent {
@@ -120,16 +198,31 @@ public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificat
     }*/
 
     
+    /// Como `scheduleReminder`: el estado guardado manda, así que sincronizar quita lo que ya no
+    /// corresponde (hábito borrado, pausado o con el aviso apagado).
     @MainActor
     public func cancelReminders(for habitID: Habit.ID) async {
-        let identifiers = (1...7).map {
-            notificationIdentifier(habitID: habitID, weekday: $0)
-        }
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
-        print("[HabitNotificationScheduler] Cancelled pending reminders for habit id: \(habitID)")
+        await syncReminders()
     }
 
-    private func notificationIdentifier(habitID: Habit.ID, weekday: Int) -> String {
-        "habit-reminder-\(habitID.uuidString)-\(weekday)"
+    /// Quita todas las notificaciones pendientes de la app, sin depender de que la base de datos
+    /// sepa qué hay programado.
+    @MainActor
+    public func cancelAllReminders() async {
+        let center = UNUserNotificationCenter.current()
+        center.removeAllPendingNotificationRequests()
+        await waitUntil { await center.pendingNotificationRequests().isEmpty }
+        print("[HabitNotificationScheduler] Cancelled all pending reminders.")
+    }
+
+    /// El borrado de peticiones pendientes es asíncrono ("executes asynchronously, removing the
+    /// pending notification requests on a secondary thread"), así que se espera a verlo aplicado
+    /// antes de volver a programar. Máximo un segundo.
+    private func waitUntil(_ condition: () async -> Bool) async {
+        for _ in 0..<20 {
+            if await condition() { return }
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        print("[HabitNotificationScheduler] Timed out waiting for the notification center to apply the removal.")
     }
 }

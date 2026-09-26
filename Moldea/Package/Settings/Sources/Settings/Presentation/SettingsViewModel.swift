@@ -56,7 +56,7 @@ final class SettingsViewModel: BaseViewModel {
     func onHabitReminderToggled(_ habit: Habit) async {
         let isEnabled = !(habit.reminder?.isEnabled ?? false)
         await perform {
-            try await setHabitReminderEnabledUseCase.execute(id: habit.id, isEnabled: isEnabled)
+            try await setHabitReminderEnabledUseCase.execute(habit: habit, isEnabled: isEnabled)
         }
     }
     

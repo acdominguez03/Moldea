@@ -42,8 +42,20 @@ struct SetHabitActiveUseCaseTests {
         try await useCase.execute(habit: habit)
 
         #expect(await repository.setActiveCalls.map(\.isActive) == [true])
-        #expect(await scheduler.scheduledHabits == [habit])
+        #expect(await scheduler.scheduledHabits.map(\.id) == [habit.id])
         #expect(await scheduler.cancelledHabitIDs.isEmpty)
+    }
+
+    /// El hábito que recibe el caso de uso todavía está en pausa; el scheduler ignora los
+    /// pausados, así que hay que programar con el estado nuevo.
+    @Test func reactivatingSchedulesTheHabitAsActive() async throws {
+        let repository = FakeHabitRepository()
+        let scheduler = FakeHabitNotificationScheduler()
+        let useCase = DefaultSetHabitActiveUseCase(repository: repository, notificationScheduler: scheduler)
+
+        try await useCase.execute(habit: makeHabit(isActive: false))
+
+        #expect(await scheduler.scheduledHabits.map(\.isActive) == [true])
     }
 
     @Test func propagatesRepositoryErrorsWithoutTouchingNotifications() async {

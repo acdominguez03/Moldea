@@ -60,6 +60,7 @@ struct MoldeaApp: App {
                         SpeechToTextView()
                             .fittingSheetDetents()
                     }
+                    .debugNotificationsOverlay()
                 }
             }
             .environment(\.coreDependencies, dependencies.core)
@@ -77,9 +78,14 @@ struct MoldeaApp: App {
             .task {
                 MoldeaShortcuts.updateAppShortcutParameters()
             }
-            .onChange(of: scenePhase) { _, phase in
+            .onChange(of: scenePhase, initial: true) { _, phase in
                 if phase == .background {
                     MoldeaShortcuts.updateAppShortcutParameters()
+                }
+                // Repone las notificaciones de los próximos días y recoge lo que haya hecho el
+                // widget mientras la app estaba cerrada.
+                if phase == .active {
+                    Task { await dependencies.core.notificationScheduler.syncReminders() }
                 }
             }
         }

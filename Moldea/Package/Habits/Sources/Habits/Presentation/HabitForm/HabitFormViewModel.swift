@@ -30,6 +30,7 @@ final class HabitFormViewModel: BaseViewModel {
     private(set) var didSave = false
     
     private let habitID: Habit.ID?
+    private let isHabitActive: Bool
     private let createHabitUseCase: any CreateHabitUseCase
     private let updateHabitUseCase: any UpdateHabitUseCase
     
@@ -39,6 +40,7 @@ final class HabitFormViewModel: BaseViewModel {
 
     init(
         id: Habit.ID? = nil,
+        isActive: Bool = true,
         name: String = "",
         color: String = HabitPaletteColor.gray.hex,
         icon: String = HabitPaletteIcon.drop.systemName,
@@ -52,6 +54,7 @@ final class HabitFormViewModel: BaseViewModel {
         reminderTime: Date = defaultReminderTime()
     ) {
         self.habitID = id
+        self.isHabitActive = isActive
         self.createHabitUseCase = createHabitUseCase
         self.updateHabitUseCase = updateHabitUseCase
         self.weekdayItems = Self.makeWeekdays(calendar: calendar)
@@ -92,6 +95,7 @@ final class HabitFormViewModel: BaseViewModel {
             if let habitID {
                 try await updateHabitUseCase.execute(
                     id: habitID,
+                    isActive: isHabitActive,
                     name: name,
                     color: selectedColorHex,
                     icon: selectedIcon,

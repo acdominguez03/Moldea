@@ -51,6 +51,7 @@ private actor FakeCreateHabitUseCase: CreateHabitUseCase {
 
 private struct UpdateExecuteCall: Sendable, Equatable {
     let id: Habit.ID
+    let isActive: Bool
     let name: String
     let color: String
     let icon: String
@@ -71,6 +72,7 @@ private actor FakeUpdateHabitUseCase: UpdateHabitUseCase {
 
     func execute(
         id: Habit.ID,
+        isActive: Bool,
         name: String,
         color: String,
         icon: String,
@@ -83,6 +85,7 @@ private actor FakeUpdateHabitUseCase: UpdateHabitUseCase {
         calls.append(
             UpdateExecuteCall(
                 id: id,
+                isActive: isActive,
                 name: name,
                 color: color,
                 icon: icon,
@@ -105,6 +108,7 @@ private let fixedReminderTime = Date(timeIntervalSince1970: 2_000)
 struct HabitFormViewModelTests {
     private func makeViewModel(
         id: Habit.ID? = nil,
+        isActive: Bool = true,
         name: String = "",
         color: String = HabitPaletteColor.gray.hex,
         icon: String = HabitPaletteIcon.drop.systemName,
@@ -115,6 +119,7 @@ struct HabitFormViewModelTests {
     ) -> HabitFormViewModel {
         HabitFormViewModel(
             id: id,
+            isActive: isActive,
             name: name,
             color: color,
             icon: icon,
@@ -332,6 +337,7 @@ struct HabitFormViewModelTests {
         #expect(await updateUseCase.calls == [
             UpdateExecuteCall(
                 id: id,
+                isActive: true,
                 name: "Meditar cada día",
                 color: "#3A6BC6",
                 icon: "leaf",
@@ -342,6 +348,15 @@ struct HabitFormViewModelTests {
                 isMutedOnWeekends: false
             )
         ])
+    }
+
+    @Test func savingAPausedHabitKeepsItPaused() async {
+        let updateUseCase = FakeUpdateHabitUseCase()
+        let viewModel = makeViewModel(id: UUID(), isActive: false, name: "Meditar", updateUseCase: updateUseCase)
+
+        await viewModel.save()
+
+        #expect(await updateUseCase.calls.map(\.isActive) == [false])
     }
 
     @Test func aSuccessfulUpdateMarksDidSaveWithoutError() async {

@@ -23,15 +23,15 @@ struct SetIsNotificationsEnabledUseCase: SetIsNotificationsEnabledUseCaseProtoco
     func execute(isEnabled: Bool, habits: [Habit]) async throws {
         repository.saveBool(PreferenceKey.isNotificationsEnabled, isEnabled)
 
-        let habitsWithReminder = habits.filter { $0.isActive && $0.hasActiveReminder }
-        if isEnabled {
-            for habit in habitsWithReminder {
-                await notificationScheduler.scheduleReminder(for: habit)
-            }
-        } else {
-            for habit in habitsWithReminder {
-                await notificationScheduler.cancelReminders(for: habit.id)
-            }
+        // Limpieza total en los dos sentidos: no depende de que la base de datos sepa qué hay
+        // programado, así que también quita restos de hábitos pausados, borrados o con el aviso
+        // ya apagado.
+        await notificationScheduler.cancelAllReminders()
+
+        guard isEnabled else { return }
+
+        for habit in habits where habit.isActive && habit.hasActiveReminder {
+            await notificationScheduler.scheduleReminder(for: habit)
         }
     }
 }

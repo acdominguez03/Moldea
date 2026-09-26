@@ -10,6 +10,7 @@ import Foundation
 public protocol UpdateHabitUseCase: Sendable {
     func execute(
         id: Habit.ID,
+        isActive: Bool,
         name: String,
         color: String,
         icon: String,
@@ -32,6 +33,7 @@ public struct DefaultUpdateHabitUseCase: UpdateHabitUseCase {
 
     public func execute(
         id: Habit.ID,
+        isActive: Bool,
         name: String,
         color: String,
         icon: String,
@@ -73,7 +75,7 @@ public struct DefaultUpdateHabitUseCase: UpdateHabitUseCase {
             name: trimmedName,
             color: color,
             icon: icon,
-            isActive: true,
+            isActive: isActive,
             createdAt: date,
             updatedAt: date,
             schedule: schedule,
