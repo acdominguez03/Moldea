@@ -254,6 +254,14 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
   año de `Calendar.current`) e `init(_ interval: DateInterval, date:)` para rangos que no son un
   componente del calendario, como los 10 últimos días de la vista diaria de `Statistics`. El
   primero calcula su intervalo y delega en el segundo.
+- **`DebugHistorySeeder`** (`#if DEBUG`, `@ModelActor`): siembra ~1 año de historial (8 hábitos,
+  unas 3.000 completions, con tendencias distintas y uno en pausa) para ver las gráficas de
+  `Statistics` con datos. Se lanza desde un `.task` de `MoldeaApp`, en su propio contexto y fuera
+  del hilo principal, **una sola vez por instalación** (marca `debug.yearHistorySeeded` en
+  `UserDefaults`) y **solo si no hay ningún hábito**, así que no toca datos que ya tengas. No corre
+  con `-inMemoryStore` (tests de UI). Es determinista (semilla fija) y los hábitos no llevan
+  recordatorio. Escribe en consola cuánto ha tardado. Para volver a sembrar: borra la app. No lo
+  usan los previews: esos siguen con `SampleDataSeeder`. Ya que vive en `Core`, en Release ni se compila.
 - **`PreferenceKey`** (`public enum`, raw `String`): claves de `UserDefaults`. Hoy tiene
   `isNotificationsEnabled` (preferencia de producto: "quiero que mis hábitos avisen", la que
   controla `Settings`), `isNotificationPermissionAllowed` (espejo del permiso real del

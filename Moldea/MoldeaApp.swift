@@ -80,6 +80,13 @@ struct MoldeaApp: App {
             .task {
                 MoldeaShortcuts.updateAppShortcutParameters()
             }
+            #if DEBUG
+            .task {
+                // Los tests de UI usan un almacén en memoria y esperan que esté vacío.
+                guard !Self.usesInMemoryStore else { return }
+                try? await DebugHistorySeeder(modelContainer: modelContainer).seedIfNeeded()
+            }
+            #endif
             .onChange(of: scenePhase, initial: true) { _, phase in
                 if phase == .background {
                     MoldeaShortcuts.updateAppShortcutParameters()
