@@ -36,7 +36,7 @@ struct CompleteHabitIntent: AppIntent {
 
         let result = try await DefaultToggleHabitCompletionUseCase(
             repository: SwiftDataHabitRepository(modelContainer: container),
-            notificationScheduler: await UNUserNotificationCenterHabitNotificationScheduler(
+            notificationScheduler: UNUserNotificationCenterHabitNotificationScheduler(
                 userDefaultsRepository: UserDefaultsRepositoryImpl(),
                 planSource: SwiftDataReminderPlanSource(modelContainer: container)
             )

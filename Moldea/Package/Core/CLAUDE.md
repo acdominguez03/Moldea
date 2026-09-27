@@ -196,6 +196,29 @@ Esto sustituye al `habits.filter(\.isCompletedToday).count` que hacía `TodayVie
 medía mal la pestaña semanal: `isCompletedToday` es el objetivo **del día**, así que un hábito de
 3 veces por semana con 2 días hechos contaba 0 mientras no se marcase hoy.
 
+### Periodos de inactividad
+
+Un hábito se puede desactivar y reactivar tantas veces como se quiera, y las estadísticas tienen
+que respetar lo que estaba activo cada día. Por eso `Habit` lleva `inactivePeriods:
+[HabitInactivePeriod]` (`start`, `end?`; `end == nil` = sigue desactivado). En `HabitEntity` es un
+atributo `Codable` compuesto con valor por defecto `[]`, no una tabla: nunca se consulta por
+separado y la migración ligera lo cubre.
+
+- **Quién los escribe:** `SwiftDataHabitRepository.setActive`. Desactivar abre un periodo (solo
+  si no hay ya uno abierto); activar cierra el último abierto con `updatedAt`.
+- **Regla del día** (`Habit.isActive(on:calendar:)`): D es inactivo si
+  `startOfDay(start) ≤ D < startOfDay(end)`. El día de la desactivación no cuenta (por eso el
+  hábito desaparece de Hoy al momento), el de la reactivación sí, y desactivar y reactivar el
+  mismo día deja el día intacto.
+- **Datos anteriores al campo:** un hábito con `isActive == false` sin periodo abierto se trata
+  como inactivo desde `updatedAt`. Sus días pasados cuentan como activos.
+- `Habit.activeDays(in:)` cuenta los días activos de un intervalo; lo usa `Statistics` para
+  prorratear los `weeklyCount`.
+- `ScheduledHabitsBuilder` descarta los hábitos inactivos en `referenceDay`
+  (`onlyActiveOnReferenceDay`, `true` por defecto: Hoy, widget, recordatorios).
+  `AllHabitsInPeriodQuery` pasa `false`: las estadísticas reciben todos los hábitos y filtran día
+  a día en `HabitOccurrencesBuilder`.
+
 ## Data
 
 Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.

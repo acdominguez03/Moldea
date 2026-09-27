@@ -12,6 +12,7 @@ import Core
 final class YearChartViewModel {
     private(set) var totalProgress: Int = 0
     private(set) var data: [HabitStatistic]
+    private(set) var visibleHabits: [TodayHabit] = []
 
     private let calculateHabitProgressUseCase: CalculateHabitsProgressUseCaseProtocol
     private let occurrencesBuilder: HabitOccurrencesBuilder
@@ -35,13 +36,20 @@ final class YearChartViewModel {
         for (index, occurrences) in occurrencesByMonth.enumerated() where data.indices.contains(index) {
             data[index].percentage = progress(of: occurrences)
         }
+
+        visibleHabits = habits.filter {
+            !yearOccurrences(of: $0, date: date).isEmpty
+        }
     }
 
     func percentage(for habit: TodayHabit, date: Date = .now) -> Int {
-        let occurrences = occurrencesBuilder.monthStarts(ofYearContaining: date).flatMap {
+        progress(of: yearOccurrences(of: habit, date: date))
+    }
+
+    private func yearOccurrences(of habit: TodayHabit, date: Date) -> [TodayHabit] {
+        occurrencesBuilder.monthStarts(ofYearContaining: date).flatMap {
             occurrencesBuilder.monthOccurrences(of: [habit], containing: $0, until: date)
         }
-        return progress(of: occurrences)
     }
 
     private func progress(of occurrences: [TodayHabit]) -> Int {

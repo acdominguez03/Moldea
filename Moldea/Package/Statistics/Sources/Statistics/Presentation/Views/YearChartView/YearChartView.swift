@@ -27,7 +27,7 @@ struct YearChartView: View {
 
             ProgressBarChart(title: StatisticsTextsEnum.chartTitleYear, statistics: yearChartViewModel.data)
 
-            HabitProgressList(habits: yearlyHabits) {
+            HabitProgressList(habits: yearChartViewModel.visibleHabits) {
                 yearChartViewModel.percentage(for: $0)
             }
         }
@@ -38,7 +38,10 @@ struct YearChartView: View {
     }
 
     private var chartInput: [Int] {
-        yearlyHabits.map(\.completions.count) + [yearlyHabits.count]
+        yearlyHabits.map(\.completions.count)
+            + yearlyHabits.map(\.habit.inactivePeriods.count)
+            + yearlyHabits.map { $0.habit.isActive ? 1 : 0 }
+            + [yearlyHabits.count]
     }
 }
 

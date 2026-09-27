@@ -17,6 +17,7 @@ public struct Habit: Sendable, Equatable, Identifiable {
     public let updatedAt: Date
     public let schedule: HabitSchedule
     public let reminder: HabitReminder?
+    public let inactivePeriods: [HabitInactivePeriod]
 
     public init(
         id: UUID,
@@ -27,7 +28,8 @@ public struct Habit: Sendable, Equatable, Identifiable {
         createdAt: Date,
         updatedAt: Date,
         schedule: HabitSchedule,
-        reminder: HabitReminder? = nil
+        reminder: HabitReminder? = nil,
+        inactivePeriods: [HabitInactivePeriod] = []
     ) {
         self.id = id
         self.name = name
@@ -38,11 +40,38 @@ public struct Habit: Sendable, Equatable, Identifiable {
         self.updatedAt = updatedAt
         self.schedule = schedule
         self.reminder = reminder
+        self.inactivePeriods = inactivePeriods
     }
 }
 
 public extension Habit {
     var hasActiveReminder: Bool {
         reminder?.isEnabled ?? false
+    }
+
+    func isActive(on day: Date, calendar: Calendar = .current) -> Bool {
+        !effectiveInactivePeriods.contains { $0.contains(day: day, calendar: calendar) }
+    }
+
+    func activeDays(in interval: DateInterval, calendar: Calendar = .current) -> Int {
+        var count = 0
+        var day = calendar.startOfDay(for: interval.start)
+        while day < interval.end {
+            if isActive(on: day, calendar: calendar) {
+                count += 1
+            }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else {
+                break
+            }
+            day = next
+        }
+        return count
+    }
+
+    private var effectiveInactivePeriods: [HabitInactivePeriod] {
+        guard !isActive, !inactivePeriods.contains(where: \.isOpen) else {
+            return inactivePeriods
+        }
+        return inactivePeriods + [HabitInactivePeriod(start: updatedAt)]
     }
 }

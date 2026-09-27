@@ -17,6 +17,7 @@ final class HabitEntity {
     var active: Bool
     var createdAt: Date
     var updatedAt: Date
+    var inactivePeriods: [HabitInactivePeriod] = []
 
     @Relationship(deleteRule: .cascade, inverse: \HabitScheduleEntity.habit)
     var schedule: HabitScheduleEntity?

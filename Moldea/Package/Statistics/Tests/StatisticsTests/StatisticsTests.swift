@@ -16,6 +16,7 @@ private func date(_ year: Int, _ month: Int, _ day: Int) -> Date {
 private func makeTodayHabit(
     frequency: HabitFrequency = .daily,
     completedDays: [Date] = [],
+    inactivePeriods: [HabitInactivePeriod] = [],
     referenceDay: Date
 ) -> TodayHabit {
     let habit = Habit(
@@ -23,10 +24,11 @@ private func makeTodayHabit(
         name: "Leer",
         color: "#5B6470",
         icon: "book",
-        isActive: true,
+        isActive: !inactivePeriods.contains(where: \.isOpen),
         createdAt: .distantPast,
         updatedAt: .distantPast,
-        schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: 1)
+        schedule: HabitSchedule(frequency: frequency, repetitionsPerDay: 1),
+        inactivePeriods: inactivePeriods
     )
     let completions = completedDays.map {
         HabitCompletion(id: UUID(), habitID: habit.id, day: $0, repetitionIndex: 0, completedAt: $0)
@@ -79,6 +81,62 @@ struct HabitOccurrencesBuilderTests {
         #expect(occurrences.count == 2)
         #expect(progress.completedUnits == 2)
         #expect(progress.totalUnits == 4)
+    }
+}
+
+struct InactivePeriodOccurrencesTests {
+    private let builder = HabitOccurrencesBuilder(calendar: calendar)
+    private let week = DateInterval(start: date(2026, 9, 6), end: date(2026, 9, 13))
+
+    @Test func inactiveDaysAreNotExpected() {
+        let habit = makeTodayHabit(
+            inactivePeriods: [HabitInactivePeriod(start: date(2026, 9, 8), end: date(2026, 9, 10))],
+            referenceDay: date(2026, 9, 10)
+        )
+
+        #expect(builder.occurrences(of: [habit], on: date(2026, 9, 7)).count == 1)
+        #expect(builder.occurrences(of: [habit], on: date(2026, 9, 9)).isEmpty)
+        #expect(builder.occurrences(of: [habit], on: date(2026, 9, 10)).count == 1)
+        #expect(builder.occurrences(of: [habit], in: week, until: date(2026, 9, 12)).count == 5)
+    }
+
+    @Test func weeklyTargetIsProratedByActiveDays() throws {
+        let habit = makeTodayHabit(
+            frequency: .weeklyCount(timesPerWeek: 3),
+            completedDays: [date(2026, 9, 7), date(2026, 9, 11)],
+            inactivePeriods: [HabitInactivePeriod(start: date(2026, 9, 10))],
+            referenceDay: date(2026, 9, 11)
+        )
+
+        let occurrence = try #require(builder.weeklyOccurrence(of: habit, in: week))
+
+        #expect(occurrence.habit.schedule.frequency == .weeklyCount(timesPerWeek: 2))
+        #expect(occurrence.completions.map(\.day) == [date(2026, 9, 7)])
+    }
+
+    @Test func fullyActiveWeekKeepsItsTarget() throws {
+        let habit = makeTodayHabit(frequency: .weeklyCount(timesPerWeek: 3), referenceDay: date(2026, 9, 11))
+
+        let occurrence = try #require(builder.weeklyOccurrence(of: habit, in: week))
+
+        #expect(occurrence.habit.schedule.frequency == .weeklyCount(timesPerWeek: 3))
+    }
+
+    @Test func habitInactiveTheWholeWeekIsNotShown() {
+        let today = date(2026, 9, 10)
+        let inactive = makeTodayHabit(
+            frequency: .weeklyCount(timesPerWeek: 3),
+            inactivePeriods: [HabitInactivePeriod(start: date(2026, 9, 1))],
+            referenceDay: today
+        )
+        let active = makeTodayHabit(referenceDay: today)
+        let viewModel = WeekChartViewModel(calculateHabitProgressUseCase: CalculateHabitsProgressUseCase(), calendar: calendar)
+
+        viewModel.getWeeklyPercentages(habits: [inactive, active], date: today)
+
+        #expect(builder.weeklyOccurrence(of: inactive, in: week) == nil)
+        #expect(viewModel.visibleHabits.map(\.id) == [active.id])
+        #expect(viewModel.weeklyStatistic == nil)
     }
 }
 

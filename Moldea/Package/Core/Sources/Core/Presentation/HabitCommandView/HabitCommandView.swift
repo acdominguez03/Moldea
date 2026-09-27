@@ -125,7 +125,9 @@ struct HabitCommandView: View {
             HabitCommandOutcomeSummary(outcome: outcome)
 
             if case .completed = outcome {
-                HabitCommandRepeatButton(onRepeat: { dismiss() })
+                HabitCommandRepeatButton(onRepeat: {
+                    dismiss()
+                })
             }
 
             if isVoiceOverEnabled, viewModel.shouldAutoDismiss {
@@ -133,6 +135,7 @@ struct HabitCommandView: View {
                     Text(CoreTextsEnum.close)
                 }
                 .buttonStyle(.glassProminent)
+                .controlSize(.large)
                 .buttonSizing(.flexible)
             }
         case .failed:
@@ -199,6 +202,7 @@ private struct HabitCommandConfirmation<Card: View>: View {
             .buttonStyle(.glassProminent)
         }
         .buttonSizing(.flexible)
+        .controlSize(.large)
         .disabled(isConfirming)
     }
 }
@@ -234,8 +238,9 @@ private struct HabitCommandRepeatButton: View {
         Button(action: onRepeat) {
             Text(CoreTextsEnum.aiCommandRepeat)
         }
-        .buttonStyle(.glass)
+        .buttonStyle(.glassProminent)
         .buttonSizing(.flexible)
+        .controlSize(.large)
     }
 }
 

@@ -44,6 +44,7 @@ public struct AllHabitsInPeriodQuery: DynamicProperty {
             from: habits,
             with: periodCompletions,
             referenceDay: referenceDay,
+            onlyActiveOnReferenceDay: false,
             matching: { _ in true }
         )
     }

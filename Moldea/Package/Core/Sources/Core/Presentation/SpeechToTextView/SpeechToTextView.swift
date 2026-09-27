@@ -67,7 +67,7 @@ struct SpeechToTextContentView: View {
                     viewModel.stop()
                     dismiss()
                 } label: {
-                    Text(CoreTextsEnum.close)
+                    Image(systemName: "xmark")
                 }
                 .disabled(!viewModel.canClose)
             }
@@ -124,13 +124,14 @@ struct SpeechToTextContentView: View {
 
             WaveAnimation(isActive: viewModel.isTranscribing)
 
-            Button {
-                Task { await viewModel.finishAndRecognize() }
-            } label: {
-                Text(CoreTextsEnum.finish)
+            Button(CoreTextsEnum.finish) {
+                Task {
+                    await viewModel.finishAndRecognize()
+                }
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.glassProminent)
             .buttonSizing(.flexible)
+            .controlSize(.large)
             .disabled(!viewModel.canFinish)
             
             Text(CoreTextsEnum.speechToTextDescription)
@@ -141,4 +142,8 @@ struct SpeechToTextContentView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 40)
     }
+}
+
+#Preview {
+    SpeechToTextView()
 }

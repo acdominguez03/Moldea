@@ -62,6 +62,7 @@ Las tablas describen el modelo lógico. Cómo se materializa en código (entidad
 | active     | bool                                                 |
 | created_at | date                                                 |
 | updated_at | date                                                 |
+| inactive_periods | `[HabitInactivePeriod]` (`start`, `end?`) — historial de desactivaciones; ver `Core/CLAUDE.md`, _Periodos de inactividad_ |
 
 **HabitSchedule**
 

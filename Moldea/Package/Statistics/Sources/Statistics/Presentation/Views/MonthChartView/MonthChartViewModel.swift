@@ -12,6 +12,7 @@ import Core
 final class MonthChartViewModel {
     private(set) var totalProgress: Int = 0
     private(set) var data: [HabitStatistic]
+    private(set) var visibleHabits: [TodayHabit] = []
 
     private let calculateHabitProgressUseCase: CalculateHabitsProgressUseCaseProtocol
     private let occurrencesBuilder: HabitOccurrencesBuilder
@@ -34,6 +35,10 @@ final class MonthChartViewModel {
 
         for (index, occurrences) in occurrencesByWeek.enumerated() where data.indices.contains(index) {
             data[index].percentage = progress(of: occurrences)
+        }
+
+        visibleHabits = habits.filter {
+            !occurrencesBuilder.monthOccurrences(of: [$0], containing: date, until: date).isEmpty
         }
     }
 

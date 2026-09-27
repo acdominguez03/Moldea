@@ -135,6 +135,21 @@ para los semanales). Esa lista se puntúa con `CalculateHabitsProgressUseCase` y
 que aplica `dailyTarget` o `weeklyTarget` según la frecuencia. El % total, el de cada barra y el
 de cada hábito salen de la misma llamada sobre subconjuntos distintos.
 
+## Hábitos desactivados
+
+Los días en los que un hábito estaba desactivado no cuentan (regla del día en `Core/CLAUDE.md`,
+_Periodos de inactividad_); los que estaba activo, sí, aunque hoy esté desactivado.
+
+- **Diarios y días fijos:** `HabitOccurrencesBuilder` no genera ocurrencia para un día inactivo.
+- **`weeklyCount`:** `weeklyOccurrence(of:in:)` prorratea el objetivo con los días activos del
+  periodo (semana o tramo del mes): `ceil(timesPerWeek × díasActivos / díasDelPeriodo)`, mínimo 1,
+  y solo con las completions de días activos. Sin ningún día activo devuelve `nil`. Lo usan los
+  tramos de Mes/Año y el total, la barra «Sem» y el % por hábito de Semana.
+- **Lista «Por hábito»:** Semana, Mes y Año pintan `visibleHabits` del view model: solo los hábitos
+  con alguna ocurrencia en el periodo. Día ya usa `dayHabits`.
+- `chartInput` incluye `inactivePeriods.count` e `isActive` para recalcular al activar o
+  desactivar aunque no cambien las completions.
+
 ## Vista diaria
 
 `DayChartView` (pestaña **Día**) enseña un carrusel horizontal (`ScrollView` + `LazyHStack`) con

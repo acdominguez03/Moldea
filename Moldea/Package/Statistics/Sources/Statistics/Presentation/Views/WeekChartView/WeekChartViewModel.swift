@@ -13,6 +13,7 @@ final class WeekChartViewModel {
     private(set) var totalProgress: Int = 0
     private(set) var weeklyStatistic: HabitStatistic?
     private(set) var data: [HabitStatistic]
+    private(set) var visibleHabits: [TodayHabit] = []
 
     private let calculateHabitProgressUseCase: CalculateHabitsProgressUseCaseProtocol
     private let calendar: Calendar
@@ -33,7 +34,7 @@ final class WeekChartViewModel {
     }
 
     func getWeeklyPercentages(habits: [TodayHabit], date: Date = .now) {
-        let wholeWeek = weekOccurrences(of: habits, date: date) + weeklyCountHabits(from: habits)
+        let wholeWeek = weekOccurrences(of: habits, date: date) + weeklyCountHabits(from: habits, date: date)
         totalProgress = calculateHabitProgressUseCase
             .execute(habits: wholeWeek, scope: .all)
             .percentage
@@ -45,13 +46,16 @@ final class WeekChartViewModel {
                 .percentage
         }
 
-        weeklyStatistic = makeWeeklyStatistic(from: habits)
+        weeklyStatistic = makeWeeklyStatistic(from: habits, date: date)
+        visibleHabits = habits.filter {
+            !weekOccurrences(of: [$0], date: date).isEmpty || !weeklyCountHabits(from: [$0], date: date).isEmpty
+        }
     }
 
     func percentage(for habit: TodayHabit, date: Date = .now) -> Int {
         if case .weeklyCount = habit.habit.schedule.frequency {
             return calculateHabitProgressUseCase
-                .execute(habits: [habit], scope: .weekly)
+                .execute(habits: weeklyCountHabits(from: [habit], date: date), scope: .weekly)
                 .percentage
         }
 
@@ -89,17 +93,17 @@ final class WeekChartViewModel {
         }
     }
 
-    private func weeklyCountHabits(from habits: [TodayHabit]) -> [TodayHabit] {
-        habits.filter {
-            if case .weeklyCount = $0.habit.schedule.frequency {
-                return true
-            }
-            return false
+    private func weeklyCountHabits(from habits: [TodayHabit], date: Date) -> [TodayHabit] {
+        guard let week = calendar.dateInterval(of: .weekOfYear, for: date) else {
+            return []
+        }
+        return habits.compactMap {
+            occurrencesBuilder.weeklyOccurrence(of: $0, in: week)
         }
     }
 
-    private func makeWeeklyStatistic(from habits: [TodayHabit]) -> HabitStatistic? {
-        let weeklyHabits = weeklyCountHabits(from: habits)
+    private func makeWeeklyStatistic(from habits: [TodayHabit], date: Date) -> HabitStatistic? {
+        let weeklyHabits = weeklyCountHabits(from: habits, date: date)
 
         guard !weeklyHabits.isEmpty else {
             return nil

@@ -60,7 +60,8 @@ struct DefaultSetHabitReminderEnabledUseCase: SetHabitReminderEnabledUseCase {
                 time: habit.reminder?.time ?? defaultTime,
                 isEnabled: true,
                 isMutedOnWeekends: habit.reminder?.isMutedOnWeekends ?? false
-            )
+            ),
+            inactivePeriods: habit.inactivePeriods
         ))
     }
 

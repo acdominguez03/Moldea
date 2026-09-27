@@ -57,7 +57,8 @@ struct DefaultUpdateHabitReminderUseCase: UpdateHabitReminderUseCase {
             createdAt: habit.createdAt,
             updatedAt: date,
             schedule: habit.schedule,
-            reminder: reminder
+            reminder: reminder,
+            inactivePeriods: habit.inactivePeriods
         ))
     }
 }

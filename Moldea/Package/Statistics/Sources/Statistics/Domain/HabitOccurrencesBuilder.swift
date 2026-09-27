@@ -53,27 +53,20 @@ struct HabitOccurrencesBuilder {
         let days = days(in: bucket, until: lastDay)
 
         return habits.flatMap { todayHabit in
+            if case .weeklyCount = todayHabit.habit.schedule.frequency {
+                return [weeklyOccurrence(of: todayHabit, in: bucket)].compactMap { $0 }
+            }
+
             let bucketCompletions = todayHabit.completions.filter {
                 $0.day >= bucket.start && $0.day < bucket.end
             }
-
-            if case .weeklyCount = todayHabit.habit.schedule.frequency {
-                return [
-                    TodayHabit(
-                        habit: todayHabit.habit,
-                        completions: bucketCompletions,
-                        referenceDay: bucket.start,
-                        calendar: calendar
-                    )
-                ]
-            }
-
             let completionsByDay = Dictionary(grouping: bucketCompletions) {
                 calendar.startOfDay(for: $0.day)
             }
             return days.compactMap { day in
                 let weekday = calendar.component(.weekday, from: day)
-                guard todayHabit.habit.schedule.frequency.isScheduled(on: weekday) else {
+                guard todayHabit.habit.schedule.frequency.isScheduled(on: weekday),
+                      todayHabit.habit.isActive(on: day, calendar: calendar) else {
                     return nil
                 }
                 return TodayHabit(
@@ -98,7 +91,8 @@ struct HabitOccurrencesBuilder {
         let weekday = calendar.component(.weekday, from: referenceDay)
 
         return habits.compactMap { todayHabit in
-            guard todayHabit.habit.schedule.frequency.isScheduled(on: weekday) else {
+            guard todayHabit.habit.schedule.frequency.isScheduled(on: weekday),
+                  todayHabit.habit.isActive(on: referenceDay, calendar: calendar) else {
                 return nil
             }
             return TodayHabit(
@@ -110,6 +104,51 @@ struct HabitOccurrencesBuilder {
                 calendar: calendar
             )
         }
+    }
+
+    func weeklyOccurrence(of todayHabit: TodayHabit, in period: DateInterval) -> TodayHabit? {
+        let habit = todayHabit.habit
+        guard case .weeklyCount(let timesPerWeek) = habit.schedule.frequency else {
+            return nil
+        }
+
+        let activeDays = habit.activeDays(in: period, calendar: calendar)
+        guard activeDays > 0 else {
+            return nil
+        }
+
+        let totalDays = days(in: period, until: .distantFuture).count
+        let completions = todayHabit.completions.filter {
+            $0.day >= period.start && $0.day < period.end && habit.isActive(on: $0.day, calendar: calendar)
+        }
+
+        return TodayHabit(
+            habit: activeDays < totalDays
+                ? prorated(habit, timesPerWeek: timesPerWeek, activeDays: activeDays, totalDays: totalDays)
+                : habit,
+            completions: completions,
+            referenceDay: period.start,
+            calendar: calendar
+        )
+    }
+
+    private func prorated(_ habit: Habit, timesPerWeek: Int, activeDays: Int, totalDays: Int) -> Habit {
+        let target = (timesPerWeek * activeDays + totalDays - 1) / totalDays
+        return Habit(
+            id: habit.id,
+            name: habit.name,
+            color: habit.color,
+            icon: habit.icon,
+            isActive: habit.isActive,
+            createdAt: habit.createdAt,
+            updatedAt: habit.updatedAt,
+            schedule: HabitSchedule(
+                frequency: .weeklyCount(timesPerWeek: max(target, 1)),
+                repetitionsPerDay: habit.schedule.repetitionsPerDay
+            ),
+            reminder: habit.reminder,
+            inactivePeriods: habit.inactivePeriods
+        )
     }
 
     private func days(in bucket: DateInterval, until lastDay: Date) -> [Date] {

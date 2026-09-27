@@ -27,7 +27,7 @@ struct WeekChartView: View {
 
             ProgressBarChart(title: StatisticsTextsEnum.chartTitleWeek, statistics: weekChartViewModel.chartData)
             
-            HabitProgressList(habits: weeklyHabits) {
+            HabitProgressList(habits: weekChartViewModel.visibleHabits) {
                 weekChartViewModel.percentage(for: $0)
             }
         }
@@ -38,7 +38,10 @@ struct WeekChartView: View {
     }
     
     private var chartInput: [Int] {
-        weeklyHabits.map(\.completions.count) + [weeklyHabits.count]
+        weeklyHabits.map(\.completions.count)
+            + weeklyHabits.map(\.habit.inactivePeriods.count)
+            + weeklyHabits.map { $0.habit.isActive ? 1 : 0 }
+            + [weeklyHabits.count]
     }
 }
 

@@ -52,6 +52,11 @@ public actor SwiftDataHabitRepository: HabitRepository {
 
         entity.active = isActive
         entity.updatedAt = updatedAt
+        entity.inactivePeriods = Self.inactivePeriods(
+            entity.inactivePeriods,
+            settingActive: isActive,
+            at: updatedAt
+        )
 
         do {
             try modelContext.save()
@@ -59,6 +64,28 @@ public actor SwiftDataHabitRepository: HabitRepository {
             modelContext.rollback()
             throw error
         }
+    }
+
+    static func inactivePeriods(
+        _ periods: [HabitInactivePeriod],
+        settingActive isActive: Bool,
+        at date: Date
+    ) -> [HabitInactivePeriod] {
+        let openIndex = periods.lastIndex(where: \.isOpen)
+
+        if isActive {
+            guard let openIndex else {
+                return periods
+            }
+            var periods = periods
+            periods[openIndex] = HabitInactivePeriod(start: periods[openIndex].start, end: date)
+            return periods
+        }
+
+        guard openIndex == nil else {
+            return periods
+        }
+        return periods + [HabitInactivePeriod(start: date)]
     }
 
     public func setReminderEnabled(

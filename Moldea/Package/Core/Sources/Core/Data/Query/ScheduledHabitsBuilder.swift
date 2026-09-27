@@ -12,6 +12,7 @@ enum ScheduledHabitsBuilder {
         from entities: [HabitEntity],
         with completions: [HabitCompletionEntity],
         referenceDay: Date,
+        onlyActiveOnReferenceDay: Bool = true,
         matching isScheduled: (HabitFrequency) -> Bool
     ) -> [TodayHabit] {
         let completionsByHabit = Dictionary(grouping: completions) {
@@ -21,13 +22,20 @@ enum ScheduledHabitsBuilder {
         return entities.compactMap { entity in
             do {
                 let habit = try HabitMapper.toDomain(entity)
+                
                 guard isScheduled(habit.schedule.frequency) else {
                     return nil
                 }
+
+                guard !onlyActiveOnReferenceDay || habit.isActive(on: referenceDay) else {
+                    return nil
+                }
+
                 let habitCompletions = try (completionsByHabit[entity.persistentModelID] ?? [])
                     .map {
                         try HabitCompletionMapper.toDomain($0)
                     }
+
                 return TodayHabit(
                     habit: habit,
                     completions: habitCompletions,

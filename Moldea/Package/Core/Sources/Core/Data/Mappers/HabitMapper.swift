@@ -30,7 +30,8 @@ enum HabitMapper {
                 frequency: try frequency(of: schedule, habitID: entity.id),
                 repetitionsPerDay: schedule.repetitionsPerDay
             ),
-            reminder: entity.reminder.map(toDomain)
+            reminder: entity.reminder.map(toDomain),
+            inactivePeriods: entity.inactivePeriods
         )
     }
 
@@ -44,6 +45,7 @@ enum HabitMapper {
             createdAt: habit.createdAt,
             updatedAt: habit.updatedAt
         )
+        entity.inactivePeriods = habit.inactivePeriods
         apply(habit.schedule, to: entity)
         apply(habit.reminder, to: entity)
         return entity
