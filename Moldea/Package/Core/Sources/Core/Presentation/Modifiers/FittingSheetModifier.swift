@@ -15,7 +15,7 @@ private struct FittingSheetModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .fixedSize(horizontal: false, vertical: true)
+            .fixedSize(horizontal: false, vertical: !dynamicTypeSize.isAccessibilitySize)
             .onGeometryChange(for: CGFloat.self) { proxy in
                 proxy.size.height
             } action: { newHeight in
@@ -25,11 +25,10 @@ private struct FittingSheetModifier: ViewModifier {
     }
 
     private var detents: Set<PresentationDetent> {
-        var detents = Set([PresentationDetent.height(measuredHeight)]).union(extraDetents)
         if dynamicTypeSize.isAccessibilitySize {
-            detents.insert(.large)
+            return extraDetents.union([.large])
         }
-        return detents
+        return Set([PresentationDetent.height(measuredHeight)]).union(extraDetents)
     }
 }
 

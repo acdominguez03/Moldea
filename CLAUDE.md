@@ -519,8 +519,9 @@ Objetivo: poder marcar en App Store Connect las etiquetas de **VoiceOver**, **Dy
 - Nada de `.lineLimit` en contenido. La excepción son las anotaciones de la gráfica, topadas a
   `.xxxLarge` con `.dynamicTypeSize(...)` porque 12 meses no caben; VoiceOver y el descriptor
   tienen la información completa.
-- Las hojas con altura medida (`fittingSheetDetents`) añaden `.large` en tamaños de
-  accesibilidad; la de recordatorios usa `[.medium, .large]`.
+- Las hojas con altura medida (`fittingSheetDetents`) pasan a `.large` sin `fixedSize` en
+  tamaños de accesibilidad, para que el `ScrollView` del contenido pueda desplazarse; la de
+  recordatorios usa `[.medium, .large]`.
 
 **Contraste**
 

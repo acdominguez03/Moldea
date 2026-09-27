@@ -79,7 +79,7 @@ contenido de esa hoja lo inyecta quien compone la vista con el `@ViewBuilder she
 que `Navigation` no conozca la feature de entrada de voz. Los `presentationDetents` **no** se
 fijan aquí: un `presentationDetents` aplicado por encima gana sobre el que declare el contenido
 inyectado, así que es `sheetContent` quien decide el tamaño. Hoy lo hace `MoldeaApp`, que pasa
-`SpeechToTextView()` de `Core` con `.presentationDetents([.medium, .large])`.
+`SpeechToTextView()` de `Core` con `.fittingSheetDetents()`.
 
 Antes de presentar la hoja, `MainTabsView` espera a `prepareSheet: () async -> Void` (por
 defecto vacío). `MoldeaApp` lo usa para pedir el permiso de micrófono, así la alerta del sistema

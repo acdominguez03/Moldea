@@ -410,7 +410,10 @@ ambos botones quedan deshabilitados (`isFinishing`), y el texto se congela en
 `transcriptForAI` para que un reinicio posterior de la escucha no lo borre.
 
 La vista **no** fija `presentationDetents`: los decide quien la presenta (hoy `MoldeaApp`, con
-`[.medium, .large]`).
+`.fittingSheetDetents()`). En tamaños de accesibilidad el contenido va en un `ScrollView`, así
+que `FittingSheetModifier` quita el `fixedSize` vertical y deja solo `.large` (más los
+`extraDetents`): con el `fixedSize` el `ScrollView` crecería hasta su contenido y no se podría
+desplazar.
 
 ### `SpeechToTextViewModel`
 
