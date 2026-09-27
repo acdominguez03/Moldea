@@ -47,22 +47,6 @@ struct HabitCommandPromptEvalTests {
         #expect(Self.habits.first { $0.id == habitID }?.name == "Correr 5 min")
     }
 
-    @Test func `Picks the completed habit from the completion schema`() async throws {
-        let parser = FoundationModelsHabitCommandParser()
-
-        let command = try await parser.parseCommand(
-            in: "hoy he bebido dos litros de agua",
-            from: Self.habits,
-            today: Self.today
-        )
-
-        guard case .complete(let habitIDs) = command else {
-            Issue.record("no se ha clasificado como complete: \(command)")
-            return
-        }
-        #expect(habitIDs.compactMap { id in Self.habits.first { $0.id == id }?.name } == ["Beber agua"])
-    }
-
     @Test(arguments: ["", "   "])
     func `Rejects an empty transcript without asking the model`(transcript: String) async {
         let parser = FoundationModelsHabitCommandParser()

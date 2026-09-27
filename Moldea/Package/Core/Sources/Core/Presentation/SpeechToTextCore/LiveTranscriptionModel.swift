@@ -41,12 +41,12 @@ final class LiveTranscriptionModel {
     private var analyzer: SpeechAnalyzer?
     private var audioEngine: AVAudioEngine?
     private var inputBuilder: AsyncStream<AnalyzerInput>.Continuation?
-    private var captureSession: AVCaptureSession?
-    
-    // `CaptureInputSequenceProvider` es de iOS 27 asi que se guarda como AnyObject
-    private var captureProvider: AnyObject?
+
+    // `CaptureSessionRunner` es de iOS 27 asi que se guarda como AnyObject
+    private var captureSession: AnyObject?
     private var sessionTask: Task<Void, Never>?
     private var resultsTask: Task<Void, Never>?
+    private var analysisTask: Task<CMTime?, any Error>?
     
     func toggleTranscribing() {
         switch phase {
@@ -82,7 +82,8 @@ final class LiveTranscriptionModel {
     func stopTranscribing() {
         guard phase == .transcribing else { return }
         phase = .idle
-        
+
+        analysisTask?.cancel()
         stopEngine()
         stopCaptureSession()
         inputBuilder?.finish()
@@ -141,12 +142,11 @@ final class LiveTranscriptionModel {
 #if compiler(>=6.3)
     @available(iOS 27, *)
     private func analyzeCaptureSession(transcriber: TranscriberEnum) async throws {
-        let provider = try await run(.audioEngine) {
-            try await Self.makeCaptureProvider(for: transcriber.module)
+        let (runner, inputSequence) = try await run(.audioEngine) {
+            try await Self.makeCaptureSource(for: transcriber.module)
         }
-        captureProvider = provider
-        captureSession = provider.captureSession
-        
+        captureSession = runner
+
         guard let analyzerFormat = await SpeechAnalyzer.bestAvailableAudioFormat(
             compatibleWith: [transcriber.module]
         ) else {
@@ -157,8 +157,7 @@ final class LiveTranscriptionModel {
         let analyzer = try await prepareAnalyzer(for: transcriber, format: analyzerFormat)
         observeResults(of: transcriber)
         
-        let inputSequence = provider.analyzerInputs
-        provider.captureSession.startRunning()
+        await runner.startRunning()
         phase = .transcribing
         
         try await analyze(inputSequence, with: analyzer)
@@ -203,16 +202,18 @@ final class LiveTranscriptionModel {
 #if compiler(>=6.3)
     @available(iOS 27, *)
     @concurrent
-    private nonisolated static func makeCaptureProvider(
+    private nonisolated static func makeCaptureSource(
         for module: any SpeechModule
-    ) async throws -> sending CaptureInputSequenceProvider {
+    ) async throws -> (runner: CaptureSessionRunner, inputs: some Sendable & AsyncSequence<AnalyzerInput, any Error>) {
         guard let captureDevice = AVCaptureDevice.default(.microphone, for: .audio, position: .unspecified) else {
             throw TranscriptionErrorEnum.microphoneUnavailable
         }
-        return try await CaptureInputSequenceProvider.providerWithSession(
+        let provider = try await CaptureInputSequenceProvider.providerWithSession(
             from: captureDevice,
             compatibleWith: [module]
         )
+        let inputs = provider.analyzerInputs
+        return (CaptureSessionRunner(provider: provider), inputs)
     }
 #endif
     
@@ -233,8 +234,16 @@ final class LiveTranscriptionModel {
         _ inputSequence: InputSequence,
         with analyzer: SpeechAnalyzer
     ) async throws where InputSequence: Sendable & AsyncSequence, InputSequence.Element == AnalyzerInput {
+        let consumer = Task { try await analyzer.analyzeSequence(inputSequence) }
+        analysisTask = consumer
+        defer { analysisTask = nil }
+
         try await run(.analysis) {
-            let lastSampleTime = try await analyzer.analyzeSequence(inputSequence)
+            let lastSampleTime = try await withTaskCancellationHandler {
+                try await consumer.value
+            } onCancel: {
+                consumer.cancel()
+            }
             if let lastSampleTime {
                 try await analyzer.finalizeAndFinish(through: lastSampleTime)
             } else {
@@ -441,10 +450,12 @@ final class LiveTranscriptionModel {
     }
     
     private func stopCaptureSession() {
-        guard let captureSession else { return }
-        captureSession.stopRunning()
-        self.captureSession = nil
-        captureProvider = nil
+#if compiler(>=6.3)
+        if #available(iOS 27, *), let runner = captureSession as? CaptureSessionRunner {
+            Task { await runner.stopRunning() }
+        }
+#endif
+        captureSession = nil
     }
     
     private func tearDown() async {
@@ -463,3 +474,22 @@ final class LiveTranscriptionModel {
         }
     }
 }
+
+#if compiler(>=6.3)
+@available(iOS 27, *)
+private actor CaptureSessionRunner {
+    private let provider: CaptureInputSequenceProvider
+
+    init(provider: sending CaptureInputSequenceProvider) {
+        self.provider = provider
+    }
+
+    func startRunning() {
+        provider.captureSession.startRunning()
+    }
+
+    func stopRunning() {
+        provider.captureSession.stopRunning()
+    }
+}
+#endif

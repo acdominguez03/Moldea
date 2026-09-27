@@ -33,24 +33,17 @@ struct HabitCommandSample: Sendable, CustomStringConvertible {
 
 enum HabitCommandSamples {
     static let all: [HabitCommandSample] = [
-        .init(phrase: "quiero crear un hábito de leer todos los días", expected: .create),
+        .init(phrase: "añade tocar el piano todos los días", expected: .create),
         .init(phrase: "añade nadar tres veces por semana", expected: .create),
-        .init(phrase: "quiero empezar a meditar los lunes y los viernes", expected: .create),
         .init(phrase: "crea el hábito de leer la biblia los lunes y los miércoles", expected: .create),
-        .init(phrase: "quiero estirar dos veces al día", expected: .create),
-        .init(phrase: "borra el hábito de correr", expected: .delete),
-        .init(phrase: "quita el hábito de leer", expected: .delete),
-        .init(phrase: "ya no quiero beber agua", expected: .delete),
+
         .init(phrase: "hoy he bebido dos litros de agua", expected: .complete),
-        .init(
-            phrase: "he bebido dos litros de agua, he caminado veinte minutos y he salido a correr media hora",
-            expected: .complete
-        ),
-        .init(phrase: "hoy no he corrido", expected: .complete),
-        .init(phrase: "marca leer como hecho", expected: .complete),
-        .init(phrase: "I want to create a habit of reading every day", expected: .create),
-        .init(phrase: "delete the running habit", expected: .delete),
-        .init(phrase: "I drank two litres of water today", expected: .complete),
+        .init(phrase: "he tocado el piano pero no he dormido bien", expected: .complete),
+        .init(phrase: "hoy he tocado la guitarra", expected: .complete),
+
+        .init(phrase: "borra el hábito de tocar el piano", expected: .delete),
+        .init(phrase: "quita el de nadar", expected: .delete),
+        .init(phrase: "elimina el hábito de tocar la guitarra", expected: .delete),
     ]
 
     static let rotationKey = "com.moldea.debug.habitCommandSampleIndex"

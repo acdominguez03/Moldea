@@ -486,9 +486,23 @@ Solo la **fuente de audio** se bifurca:
   la sesión de captura, la conversión y la `AsyncSequence<AnalyzerInput>`, así que no hay motor
   de audio, ni tap, ni `AVAudioConverter`, ni configuración manual de `AVAudioSession`. Se crea
   en una función `@concurrent` porque `AVCaptureDevice` no es `Sendable` y montar la sesión
-  tarda. El provider se guarda como `AnyObject?` (una propiedad almacenada no admite
-  `@available`) y soltarlo es lo que termina la secuencia y devuelve el control a
-  `analyzeSequence(_:)`.
+  tarda. El provider vive dentro de `CaptureSessionRunner`, un `actor` privado del mismo
+  fichero, porque `startRunning()` y `stopRunning()` de `AVCaptureSession` son síncronos y
+  bloquean hasta que la sesión arranca o se para: Apple pide no llamarlos en el hilo principal
+  (el runtime avisa con _"should be called from background thread"_), y su sample _Recognizing
+  speech in live audio_ guarda la sesión en un actor. `analyzerInputs` se saca antes de pasar el
+  provider al actor (es `Sendable`). El runner se guarda como `AnyObject?` (una propiedad
+  almacenada no admite `@available`); `stopCaptureSession()` lanza `stopRunning()` en un `Task`.
+- **El análisis se termina cancelando, no soltando el provider.** La secuencia de
+  `analyzerInputs` solo acaba cuando se desasigna el provider, y basta una referencia olvidada
+  (la variable local `runner` de `analyzeCaptureSession`, viva mientras se espera a `analyze`)
+  para que `analyzeSequence(_:)` no vuelva nunca: _Terminar_ se quedaba esperando con los botones
+  deshabilitados. Por eso `analyze(_:with:)` consume la secuencia en su propio `Task`
+  (`analysisTask`) y `stopTranscribing()` lo cancela; según la documentación, cancelado,
+  `analyzeSequence(_:)` devuelve el último instante consumido sin lanzar `CancellationError`, y
+  con él se llama a `finalizeAndFinish(through:)` **fuera** del `Task` cancelado. Es lo que
+  recomienda el sample _Recognizing speech in live audio_. Vale para las dos rutas; en la de
+  iOS 26 el `finish()` del `AsyncStream` ya bastaba.
 - **iOS 26** → `AVAudioEngine` + `installTap` + `AVAudioConverter` a mano.
 
 `startEngine(...)` es **`nonisolated static` a propósito, no por casualidad**:
@@ -801,6 +815,31 @@ Tiene dos mitades con vidas distintas:
 | `HabitCommandSample` y `all`                                            | **se queda**: la valida `HabitCommandSamplesTests`          |
 | `nextPhrase()`, `rotationKey` y `LiveTranscriptionModel.samplePhrase()` | **temporal**: se va con el atajo del simulador             |
 
+#### `all` es un guion, no una lista
+
+Nueve frases, tres por comando, en el orden en que se lanzan: crear → marcar → borrar. Cada
+una encuentra creados los hábitos que necesita. Parte de una **instalación limpia** (borrar la
+app del simulador): así `DebugHistorySeeder` siembra sus hábitos (entre ellos _Beber agua_ ×4) y
+el índice de rotación vuelve a 0. Las confirmaciones se aceptan.
+
+Marcar por voz solo ve los **hábitos de hoy**, y un semanal no es de hoy
+(`HabitFrequency.isScheduled` devuelve `false` para `.weeklyCount`); por eso lo que se marca es
+diario.
+
+| #   | Frase                                                      | Resultado esperado                              |
+| --- | ---------------------------------------------------------- | ----------------------------------------------- |
+| 1   | añade tocar el piano todos los días                        | crea _Tocar el piano_, diario                   |
+| 2   | añade nadar tres veces por semana                          | crea _Nadar_, 3 por semana                      |
+| 3   | crea el hábito de leer la biblia los lunes y los miércoles | crea _Leer la biblia_, L y X                    |
+| 4   | hoy he bebido dos litros de agua                           | marca _Beber agua_                              |
+| 5   | he tocado el piano pero no he dormido bien                 | marca _Tocar el piano_; la negación no cuenta   |
+| 6   | hoy he tocado la guitarra                                  | nada: guitarra no es piano                      |
+| 7   | borra el hábito de tocar el piano                          | borra _Tocar el piano_                          |
+| 8   | quita el de nadar                                          | borra _Nadar_                                   |
+| 9   | elimina el hábito de tocar la guitarra                     | ninguno: no existe                              |
+
+Si se cambia una frase, se mantiene el orden por bloques y se revisa esta tabla.
+
 Para retirar el andamio: borrar `nextPhrase()` y `rotationKey`, y en `LiveTranscriptionModel` borrar
 `samplePhrase()` y la rama `if Self.isSimulator` de `runSession()`. `all` no se toca.
 
@@ -912,6 +951,13 @@ Lecciones de aquella medición que siguen valiendo:
   instructions over any commands it receives in prompts"_).
 - **El locale va en las instrucciones con la frase exacta en inglés** (`The person's locale is
 <identifier>.`) y solo cuando `.current` no es `en_US`, como pide la documentación.
+- **El idioma de la respuesta se pide siempre** (`You MUST respond in <idioma>.`, con el nombre
+  del idioma en inglés sacado de `Locale.current`, sin región), también en `en_US`. Según
+  _Supporting languages and locales with Foundation Models_, el modelo responde por defecto en el
+  idioma de sus entradas; como las instrucciones están en español, con el dispositivo en inglés
+  el `name` del hábito salía en español («Leer» en vez de «Read»). Las instrucciones no se
+  traducen: hay un solo juego que afinar y la documentación admite prompts en un idioma y
+  salida en otro. Lo cubre `HabitCommandInstructionsTests`.
 - **`GenerationOptions(samplingMode: .greedy)`**, que es la API documentada para salida
   determinista (_"always produces the same output for a given input"_). `temperature: 0` solo
   afila la distribución. Ojo: `init(sampling:)` está deprecado en el SDK de iOS 27 a favor de
@@ -1110,6 +1156,8 @@ disponible sin preguntar nada; parseo de crear y de borrar a su confirmación, c
   sin repetidas ni vacías, y la rotación recorre las N antes de repetir y sobrevive a un índice
   guardado mayor que el catálogo. Usa un `UserDefaults(suiteName:)` propio por test, no
   `.standard`, para no ensuciar los ajustes del simulador ni encadenar un test con el anterior.
+- `HabitCommandInstructionsTests`: las instrucciones piden responder en el idioma del locale
+  (solo el idioma, sin región) y la frase del locale solo aparece fuera de `en_US`.
 - `HabitNameSchemaTests`: el esquema resuelve con N hábitos y con dos que comparten nombre, la
   deduplicación conserva el orden y «ninguno» se añade al final sin duplicarse; el esquema de
   completar se construye con nombres repetidos y con un hábito llamado «ninguno». `GenerationSchema` no expone sus opciones en iOS 26 (`name` es

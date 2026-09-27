@@ -211,14 +211,30 @@ enum HabitCommandInstructions {
     }
 
     private static func localized(_ instructions: String, locale: Locale) -> String {
+        let responseLanguage = "You MUST respond in \(languageName(of: locale))."
+
         guard !Locale.Language(identifier: "en_US").isEquivalent(to: locale.language) else {
-            return instructions
+            return """
+                \(instructions)
+
+                \(responseLanguage)
+                """
         }
 
         return """
             \(instructions)
 
             The person's locale is \(locale.identifier).
+            \(responseLanguage)
             """
+    }
+
+    static func languageName(of locale: Locale) -> String {
+        let english = Locale(identifier: "en_US")
+        guard let code = locale.language.languageCode?.identifier,
+              let name = english.localizedString(forLanguageCode: code) else {
+            return english.localizedString(forLanguageCode: "en") ?? "English"
+        }
+        return name
     }
 }
