@@ -14,7 +14,11 @@ public struct HabitsView: View {
     public init() {}
 
     public var body: some View {
-        HabitsContentView(viewModel: dependencies.makeHabitsViewModel())
+        if let dependencies {
+            HabitsContentView(viewModel: dependencies.makeHabitsViewModel())
+        } else {
+            MissingDependenciesView(HabitsDependencies.self)
+        }
     }
 }
 
@@ -119,4 +123,5 @@ struct HabitsContentView: View {
 
 #Preview(traits: .moldea) {
     HabitsView()
+        .environment(\.habitsDependencies, .preview)
 }

@@ -15,7 +15,14 @@ public struct SettingsView: View {
     public init() {}
 
     public var body: some View {
-        SettingsContentView(viewModel: dependencies.makeSettingsViewModel())
+        if let dependencies {
+            SettingsContentView(
+                viewModel: dependencies.makeSettingsViewModel(),
+                makeReminderSheetViewModel: dependencies.makeHabitReminderSheetViewModel(habit:)
+            )
+        } else {
+            MissingDependenciesView(SettingsDependencies.self)
+        }
     }
 }
 
@@ -25,7 +32,8 @@ struct SettingsContentView: View {
     @HabitsQuery private var habits: [Habit]
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
-    @Environment(\.settingsDependencies) private var dependencies
+
+    private let makeReminderSheetViewModel: @MainActor (Habit) -> HabitReminderSheetViewModel
 
     private var isNotificationsEnabledBinding: Binding<Bool> {
         Binding(
@@ -41,8 +49,12 @@ struct SettingsContentView: View {
         )
     }
 
-    init(viewModel: SettingsViewModel) {
+    init(
+        viewModel: SettingsViewModel,
+        makeReminderSheetViewModel: @escaping @MainActor (Habit) -> HabitReminderSheetViewModel
+    ) {
         _settingsViewModel = State(initialValue: viewModel)
+        self.makeReminderSheetViewModel = makeReminderSheetViewModel
     }
 
     private func openNotificationSettings() {
@@ -155,7 +167,7 @@ struct SettingsContentView: View {
             .sheet(item: $habitToEditReminder) { habit in
                 HabitReminderSheet(
                     habit: habit,
-                    habitReminderSheetViewModel: dependencies.makeHabitReminderSheetViewModel(habit: habit)
+                    habitReminderSheetViewModel: makeReminderSheetViewModel(habit)
                 )
                 .presentationDetents([.medium, .large])
             }
@@ -173,4 +185,5 @@ struct SettingsContentView: View {
 
 #Preview(traits: .moldea) {
     SettingsView()
+        .environment(\.settingsDependencies, .preview)
 }

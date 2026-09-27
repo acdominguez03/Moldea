@@ -14,7 +14,11 @@ public struct TodayView: View {
     public init() {}
 
     public var body: some View {
-        TodayContentView(viewModel: dependencies.makeTodayViewModel())
+        if let dependencies {
+            TodayContentView(viewModel: dependencies.makeTodayViewModel())
+        } else {
+            MissingDependenciesView(TodayDependencies.self)
+        }
     }
 }
 
@@ -122,4 +126,5 @@ struct TodayContentView: View {
 
 #Preview(traits: .moldea) {
     TodayView()
+        .environment(\.todayDependencies, .preview)
 }

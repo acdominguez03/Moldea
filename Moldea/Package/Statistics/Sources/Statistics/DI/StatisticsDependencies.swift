@@ -35,5 +35,5 @@ public struct StatisticsDependencies: Sendable {
 }
 
 extension EnvironmentValues {
-    @Entry public var statisticsDependencies = StatisticsDependencies.preview
+    @Entry public var statisticsDependencies: StatisticsDependencies? = nil
 }

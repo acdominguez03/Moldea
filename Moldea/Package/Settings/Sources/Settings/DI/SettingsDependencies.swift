@@ -60,5 +60,5 @@ public struct SettingsDependencies: Sendable {
 }
 
 extension EnvironmentValues {
-    @Entry public var settingsDependencies = SettingsDependencies.preview
+    @Entry public var settingsDependencies: SettingsDependencies? = nil
 }

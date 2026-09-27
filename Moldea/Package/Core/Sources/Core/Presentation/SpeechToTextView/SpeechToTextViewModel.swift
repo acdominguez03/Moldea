@@ -13,12 +13,10 @@ final class SpeechToTextViewModel {
     private(set) var isFinishing = false
     private(set) var isPresentingCommand = false
     private(set) var transcriptForAI = ""
+    private(set) var commandViewModel: HabitCommandViewModel?
 
-    let parser: any HabitCommandParsing
-    let createHabitUseCase: any CreateHabitUseCase
-    let deleteHabitUseCase: any DeleteHabitUseCase
-    let completeHabitsUseCase: any CompleteHabitsUseCase
-    let getTodayHabitsUseCase: any GetTodayHabitsUseCase
+    private let parser: any HabitCommandParsing
+    private let makeCommandViewModel: @MainActor () -> HabitCommandViewModel
 
     private let transcription = LiveTranscriptionModel()
 
@@ -31,25 +29,11 @@ final class SpeechToTextViewModel {
     var canClose: Bool { !transcription.isPreparing && !isFinishing }
 
     init(
-        habitRepository: any HabitRepository,
-        todayHabitsRepository: any TodayHabitsRepository,
-        notificationScheduler: any HabitNotificationScheduler,
-        parser: any HabitCommandParsing = FoundationModelsHabitCommandParser()
+        parser: any HabitCommandParsing,
+        makeCommandViewModel: @escaping @MainActor () -> HabitCommandViewModel
     ) {
         self.parser = parser
-        createHabitUseCase = DefaultCreateHabitUseCase(
-            repository: habitRepository,
-            notificationScheduler: notificationScheduler
-        )
-        deleteHabitUseCase = DefaultDeleteHabitUseCase(
-            repository: habitRepository,
-            notificationScheduler: notificationScheduler
-        )
-        completeHabitsUseCase = DefaultCompleteHabitsUseCase(
-            repository: habitRepository,
-            notificationScheduler: notificationScheduler
-        )
-        getTodayHabitsUseCase = DefaultGetTodayHabitsUseCase(repository: todayHabitsRepository)
+        self.makeCommandViewModel = makeCommandViewModel
     }
 
     func start() async {
@@ -67,6 +51,7 @@ final class SpeechToTextViewModel {
         isFinishing = true
         await transcription.finishTranscribing()
         transcriptForAI = transcription.transcript
+        commandViewModel = makeCommandViewModel()
         isFinishing = false
         isPresentingCommand = true
     }

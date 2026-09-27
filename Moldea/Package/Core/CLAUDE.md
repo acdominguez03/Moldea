@@ -13,7 +13,7 @@ antes de tocar `Domain` o `Data`.
 
 ## Configuración
 
-- `swift-tools-version: 6.2`
+- `swift-tools-version: 6.4`
 - Plataforma mínima: `.iOS(.v26)`
 - `swiftSettings`: `.enableUpcomingFeature("ApproachableConcurrency")` en target y test target
 
@@ -23,6 +23,7 @@ antes de tocar `Domain` o `Data`.
 Sources/Core/
 ├── DI/
 │   ├── CoreDependencies.swift           # contenedor + @Entry \.coreDependencies
+│   ├── MissingDependenciesView.swift    # lo que pinta una vista raíz sin inyección
 │   └── MoldeaPreviewModifier.swift      # trait .moldea para previews
 ├── Domain/
 │   ├── Entities/
@@ -46,6 +47,8 @@ Sources/Core/
 │   │   └── CompleteHabitsUseCase.swift   # protocolo + DefaultCompleteHabitsUseCase
 │   └── HabitCommandParsing.swift
 ├── Data/
+│   ├── Preview/
+│   │   └── PreviewRepositories.swift     # implementaciones de CoreDependencies.preview
 │   ├── Model/
 │   │   ├── HabitEntity.swift
 │   │   ├── HabitScheduleEntity.swift
@@ -297,13 +300,23 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
   permisos y `todayProgressStore`) y expone los casos de uso de `Core` como propiedades
   calculadas. `modelContainer` es `internal`: solo lo necesita el trait de previews.
   - `live(container:)` monta las implementaciones reales; la llama `AppDependencies`.
-  - `preview` es un `static let` sobre `MoldeaSchema.makeModelContainer(inMemory: true)` y es el
-    default de `@Entry var coreDependencies`. Tiene que ser `static let` para que el default sea
-    estable (ver _Composición_ en el `CLAUDE.md` raíz).
+  - `preview` es un `static let` solo para previews, sobre
+    `MoldeaSchema.makeModelContainer(inMemory: true)`. **No** es `live(...)`: usa
+    `NoOpHabitNotificationScheduler` y los tipos de `Data/Preview/PreviewRepositories.swift`
+    (`InMemoryUserDefaultsRepository`, que arranca con permiso y avisos activados;
+    `NoOpTodayProgressStore`; y permisos de notificaciones y micrófono siempre concedidos), así que
+    no toca disco, notificaciones ni el App Group.
+  - `@Entry var coreDependencies: CoreDependencies? = nil`: sin default real. Quien lo lee
+    (`SpeechToTextView`) pinta `MissingDependenciesView` si falta la inyección (ver _Composición_
+    en el `CLAUDE.md` raíz).
+  - `makeSpeechToTextViewModel()` crea **un** `FoundationModelsHabitCommandParser` y se lo pasa
+    al view model de voz junto con una factoría que llama a `makeHabitCommandViewModel(parser:)`
+    con ese mismo parser: el que se precalienta en `start()` es el que recibe la primera petición.
+- **`MissingDependenciesView(_:)`** (público): lo pinta una vista raíz cuando su `@Entry` es
+  `nil`. `assertionFailure` con el nombre del tipo en Debug; en Release no pinta nada.
 - **`UNUserNotificationCenterHabitNotificationScheduler.init` es `nonisolated`.** El tipo es
-  `@MainActor`, pero el default de un `@Entry` se evalúa fuera del main actor y construye
-  `CoreDependencies.preview`. El `init` solo guarda el `UserDefaultsRepository`; los métodos
-  siguen en el main actor.
+  `@MainActor`, pero `live(container:)` no lo es. El `init` solo guarda el
+  `UserDefaultsRepository`; los métodos siguen en el main actor.
 - **Recordatorios: una notificación puntual por hábito y día** (`HabitNotificationScheduler`).
   - **Por qué no repetitivos:** un `UNCalendarNotificationTrigger` con `repeats: true` no puede
     saltarse una sola ocurrencia, y completar un hábito tiene que quitar solo la de hoy. Los
@@ -766,9 +779,14 @@ pide la documentación no existe entre una petición y la siguiente.
 
 `SpeechToTextView` es `public init()` y lee `\.coreDependencies`; en su `body` pinta
 `SpeechToTextContentView(viewModel: dependencies.makeSpeechToTextViewModel())`, que es la
-pantalla descrita arriba (patrón `XView` / `XContentView` del `CLAUDE.md` raíz).
-`SpeechToTextViewModel.init` no cambia: sigue recibiendo los repositorios y el scheduler y
-construye los casos de uso por dentro. `MoldeaApp` solo escribe `SpeechToTextView()`.
+pantalla descrita arriba (patrón `XView` / `XContentView` del `CLAUDE.md` raíz), o
+`MissingDependenciesView` si no hay inyección. `MoldeaApp` solo escribe `SpeechToTextView()`.
+
+Ningún view model construye casos de uso. `SpeechToTextViewModel.init(parser:makeCommandViewModel:)`
+solo recibe el parser (para `prepare()`) y una factoría; en `finishAndRecognize()` crea con ella
+`commandViewModel`, y la vista empuja `HabitCommandView(transcript:viewModel:onFinish:)` con ese
+view model ya construido. Los casos de uso de `HabitCommandViewModel` los pone
+`CoreDependencies.makeHabitCommandViewModel(parser:)` a partir de sus propiedades calculadas.
 
 ### Frases de ejemplo: andamio con fecha de caducidad
 

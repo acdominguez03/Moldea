@@ -19,24 +19,12 @@ struct HabitCommandView: View {
 
     init(
         transcript: String,
-        createHabitUseCase: any CreateHabitUseCase,
-        deleteHabitUseCase: any DeleteHabitUseCase,
-        completeHabitsUseCase: any CompleteHabitsUseCase,
-        getTodayHabitsUseCase: any GetTodayHabitsUseCase,
-        onFinish: @escaping () -> Void,
-        parser: any HabitCommandParsing = FoundationModelsHabitCommandParser()
+        viewModel: HabitCommandViewModel,
+        onFinish: @escaping () -> Void
     ) {
         self.transcript = transcript
         self.onFinish = onFinish
-        _viewModel = State(
-            initialValue: HabitCommandViewModel(
-                parser: parser,
-                createHabitUseCase: createHabitUseCase,
-                deleteHabitUseCase: deleteHabitUseCase,
-                completeHabitsUseCase: completeHabitsUseCase,
-                getTodayHabitsUseCase: getTodayHabitsUseCase
-            )
-        )
+        _viewModel = State(initialValue: viewModel)
     }
 
     var body: some View {

@@ -71,7 +71,7 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
         return try await mappingErrors {
             let response = try await session.respond(
                 generating: GenerableCommandDecision.self,
-                options: GenerationOptions(sampling: .greedy)
+                options: GenerationOptions(samplingMode: .greedy)
             ) {
                 "Frase del usuario: \(phrase)"
 
@@ -88,7 +88,7 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
         let generated: GenerableHabitDraft = try await mappingErrors {
             let response = try await session.respond(
                 generating: GenerableHabitDraft.self,
-                options: GenerationOptions(sampling: .greedy)
+                options: GenerationOptions(samplingMode: .greedy)
             ) {
                 "Frase del usuario: \(phrase)"
 
@@ -119,7 +119,7 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
         let (activity, name): (String, String) = try await mappingErrors {
             let response = try await session.respond(
                 schema: schema,
-                options: GenerationOptions(sampling: .greedy)
+                options: GenerationOptions(samplingMode: .greedy)
             ) {
                 "Hábitos del usuario: \(names.joined(separator: "; "))"
 
@@ -150,7 +150,7 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
         return try await mappingErrors {
             let response = try await session.respond(
                 generating: GenerableActivityMatch.self,
-                options: GenerationOptions(sampling: .greedy)
+                options: GenerationOptions(samplingMode: .greedy)
             ) {
                 "Actividad del usuario: \(activity)"
 
@@ -185,7 +185,7 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
         let done: [(activity: String, habit: String)] = try await mappingErrors {
             let response = try await session.respond(
                 schema: schema,
-                options: GenerationOptions(sampling: .greedy)
+                options: GenerationOptions(samplingMode: .greedy)
             ) {
                 "Hábitos de hoy del usuario: \(names.map(Self.singleLine).joined(separator: "; "))"
 

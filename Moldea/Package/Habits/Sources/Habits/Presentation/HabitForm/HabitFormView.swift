@@ -13,10 +13,14 @@ struct HabitFormView: View {
     var editing: Habit? = nil
 
     var body: some View {
-        HabitFormContentView(
-            habitFormViewModel: dependencies.makeHabitFormViewModel(editing: editing),
-            iconCatalog: dependencies.iconCatalog
-        )
+        if let dependencies {
+            HabitFormContentView(
+                habitFormViewModel: dependencies.makeHabitFormViewModel(editing: editing),
+                iconCatalog: dependencies.iconCatalog
+            )
+        } else {
+            MissingDependenciesView(HabitsDependencies.self)
+        }
     }
 }
 
@@ -197,4 +201,5 @@ struct HabitFormContentView: View {
 
 #Preview {
     HabitFormView()
+        .environment(\.habitsDependencies, .preview)
 }

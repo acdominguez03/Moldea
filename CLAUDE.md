@@ -150,7 +150,7 @@ Si añades un paquete nuevo a mano, necesita las dos cosas o no compilará bien.
 
 Todos los `Package.swift` son iguales salvo el nombre y las dependencias:
 
-- `swift-tools-version: 6.2`
+- `swift-tools-version: 6.4`
 - `platforms: [.iOS(.v26)]`
 - `swiftSettings: [.enableUpcomingFeature("ApproachableConcurrency")]` en target y test target
 - un `.library` con el mismo nombre del paquete y un `.testTarget` `<Nombre>Tests`
@@ -326,11 +326,22 @@ Inyección por entorno, **un contenedor de dependencias por paquete**, cada uno 
 - **`MoldeaApp`** crea el `ModelContainer` una vez, construye `AppDependencies.live(container:)`
   y aplica sobre `RootView` `.modelContainer(_:)` y los cinco `.environment(\.<clave>, …)`. El
   sheet de `MainTabsView` los hereda.
-- **Los defaults del `@Entry` son `XDependencies.preview`, un `static let`**, sobre un contenedor
-  en memoria. Tiene que ser estable: SwiftUI reevalúa el default en cada lectura que cae a él, y
-  una instancia nueva invalidaría a todos los lectores con cualquier cambio de entorno (guía de
-  _Environment_ de Apple). Contrapartida: una vista a la que se le olvide la inyección funciona
-  **en silencio** contra el almacén en memoria y pierde los datos.
+- **Los `@Entry` son opcionales con default `nil`** (`XDependencies? = nil`), y la inyección
+  ausente se detecta: la vista raíz hace `if let dependencies { … } else {
+  MissingDependenciesView(XDependencies.self) }`, que lanza un `assertionFailure` en Debug y no
+  pinta nada en Release. Se descartó un default real (aunque fuese `.preview`): una vista sin
+  inyección funcionaría en silencio contra él. `nil` es además un default estable, que es lo que
+  pide la guía de _Environment_ de Apple (SwiftUI reevalúa el default en cada lectura que cae a
+  él).
+- **Solo las vistas raíz leen el entorno** (`HabitsView`, `HabitFormView`, `TodayView`,
+  `StatisticsView`, `SettingsView`, `SpeechToTextView`). Las subvistas reciben por `init` solo lo
+  que usan: `SettingsContentView` recibe `makeReminderSheetViewModel` en vez de volver a leer
+  `\.settingsDependencies`.
+- **`XDependencies.preview`** (`static let`) es solo para previews. `CoreDependencies.preview` no
+  es `live(...)`: usa un contenedor en memoria, `NoOpHabitNotificationScheduler`,
+  `InMemoryUserDefaultsRepository` (con permiso y avisos activados), permisos siempre concedidos
+  y `NoOpTodayProgressStore` (`Core/Data/Preview`), así que una preview no toca disco,
+  notificaciones, permisos ni el App Group. Las de las features se montan sobre él.
 - Intents y widgets no usan esto: corren fuera del árbol de vistas y siguen construyendo sus
   dependencias en línea.
 
@@ -415,7 +426,8 @@ Reglas:
   solo está disponible en `body`; así que una vista no puede crear su propio view model a partir
   del `@Entry`. Por eso la vista pública `XView` (sin parámetros) lee
   `@Environment(\.<paquete>Dependencies)` y en su `body` pinta
-  `XContentView(viewModel: dependencies.makeXViewModel())`; `XContentView` (interna) guarda el
+  `XContentView(viewModel: dependencies.makeXViewModel())` si hay dependencias inyectadas
+  (si no, `MissingDependenciesView`); `XContentView` (interna) guarda el
   `@State private var viewModel` y toda la UI. Aunque `body` cree un view model en cada pasada,
   `@State` solo conserva el primero. Hoy: `HabitsView`, `HabitFormView(editing:)`, `TodayView`,
   `SettingsView` y `SpeechToTextView`.
@@ -463,12 +475,15 @@ que por eso reciben sus dependencias por protocolo.
 
 ### Previews
 
+- **La inyección es explícita en cada preview**: como los `@Entry` son `nil` por defecto, una
+  vista raíz sin su contenedor cae en `MissingDependenciesView` y la preview se rompe.
 - **Vistas con queries** (`@HabitsQuery`, `@TodayHabitsQuery`…): `#Preview(traits: .moldea)`.
   El trait (`MoldeaPreviewModifier`, en `Core/DI`) siembra una vez con `SampleDataSeeder` el
   contenedor de `CoreDependencies.preview` y aplica `.modelContainer` y `\.coreDependencies`.
-  Como los defaults de las features salen del mismo `CoreDependencies.preview`, todas ven esos
+  El de la feature se añade a mano: `HabitsView().environment(\.habitsDependencies, .preview)`.
+  Como los `.preview` de las features salen del mismo `CoreDependencies.preview`, todas ven esos
   datos.
-- **Vistas sin queries**: `#Preview { HabitFormView() }`, que usa el default del `@Entry`.
+- **Vistas sin queries**: `#Preview { HabitFormView().environment(\.habitsDependencies, .preview) }`.
 - **Una `XContentView` o un componente** que pida un view model:
   `XDependencies.preview.makeXViewModel()`.
 

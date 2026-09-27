@@ -13,7 +13,11 @@ public struct SpeechToTextView: View {
     public init() {}
 
     public var body: some View {
-        SpeechToTextContentView(viewModel: dependencies.makeSpeechToTextViewModel())
+        if let dependencies {
+            SpeechToTextContentView(viewModel: dependencies.makeSpeechToTextViewModel())
+        } else {
+            MissingDependenciesView(CoreDependencies.self)
+        }
     }
 }
 
@@ -48,18 +52,16 @@ struct SpeechToTextContentView: View {
         .navigationTitle(CoreTextsEnum.listening)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: isPresentingCommand) {
-            HabitCommandView(
-                transcript: viewModel.transcriptForAI,
-                createHabitUseCase: viewModel.createHabitUseCase,
-                deleteHabitUseCase: viewModel.deleteHabitUseCase,
-                completeHabitsUseCase: viewModel.completeHabitsUseCase,
-                getTodayHabitsUseCase: viewModel.getTodayHabitsUseCase,
-                onFinish: {
-                    viewModel.stop()
-                    dismiss()
-                },
-                parser: viewModel.parser
-            )
+            if let commandViewModel = viewModel.commandViewModel {
+                HabitCommandView(
+                    transcript: viewModel.transcriptForAI,
+                    viewModel: commandViewModel,
+                    onFinish: {
+                        viewModel.stop()
+                        dismiss()
+                    }
+                )
+            }
         }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -144,6 +146,6 @@ struct SpeechToTextContentView: View {
     }
 }
 
-#Preview {
+#Preview(traits: .moldea) {
     SpeechToTextView()
 }

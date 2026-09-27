@@ -13,7 +13,7 @@ Depende de `Core` (`.package(path: "../Core")`), de donde salen las entidades de
 
 ## Configuración
 
-- `swift-tools-version: 6.2`
+- `swift-tools-version: 6.4`
 - Plataforma mínima: `.iOS(.v26)`
 - `swiftSettings`: `.enableUpcomingFeature("ApproachableConcurrency")` en target y test target
 - Dependencia: `.package(path: "../Core")`
@@ -57,7 +57,8 @@ Es la misma estructura de tres capas que `Core` y que el resto de paquetes de fe
 `SettingsView` es el punto de entrada público del paquete: un `NavigationStack` con una `List`
 agrupada y el título de pantalla en grande. La compone el target `Moldea` en el caso `.settings`
 de `MainTabEnum` como `SettingsView()`: es `public init()`, lee `\.settingsDependencies` y pinta
-`SettingsContentView(viewModel:)` (patrón `XView` / `XContentView` del `CLAUDE.md` raíz).
+`SettingsContentView(viewModel:makeReminderSheetViewModel:)` (patrón `XView` / `XContentView`
+del `CLAUDE.md` raíz), o `MissingDependenciesView` si no hay inyección.
 
 `DI/SettingsDependencies.swift` recibe un `CoreDependencies` y construye los casos de uso propios
 del paquete a partir de sus repositorios: `makeSettingsViewModel()` con
@@ -65,8 +66,9 @@ del paquete a partir de sus repositorios: `makeSettingsViewModel()` con
 `GetIsNotificationPermissionAllowedUseCase`, `RequestNotificationAuthorizationUseCase` (de `Core`)
 y `DefaultSetHabitReminderEnabledUseCase` (que además de guardar el ajuste cancela y reprograma las
 notificaciones de ese hábito); y `makeHabitReminderSheetViewModel(habit:)` con
-`DefaultUpdateHabitReminderUseCase`, que `SettingsContentView` usa al abrir la hoja (lee el
-entorno en `body`). Así sus tipos de `Domain` siguen siendo `internal`.
+`DefaultUpdateHabitReminderUseCase`. `SettingsView` pasa esa factoría a `SettingsContentView`
+por `init`, que la usa al abrir la hoja; la subvista no lee el entorno. Así sus tipos de
+`Domain` siguen siendo `internal`.
 
 ## Permiso de notificaciones
 

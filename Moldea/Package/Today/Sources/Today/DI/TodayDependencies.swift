@@ -27,5 +27,5 @@ public struct TodayDependencies: Sendable {
 }
 
 extension EnvironmentValues {
-    @Entry public var todayDependencies = TodayDependencies.preview
+    @Entry public var todayDependencies: TodayDependencies? = nil
 }

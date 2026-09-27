@@ -55,5 +55,5 @@ public struct HabitsDependencies: Sendable {
 }
 
 extension EnvironmentValues {
-    @Entry public var habitsDependencies = HabitsDependencies.preview
+    @Entry public var habitsDependencies: HabitsDependencies? = nil
 }

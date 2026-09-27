@@ -69,19 +69,24 @@ public struct StatisticsView: View {
 
     @ViewBuilder
     private var filterContent: some View {
-        switch filterSelected {
-        case .day:
-            DayChartView(dayChartViewModel: dependencies.makeDayChartViewModel())
-        case .week:
-            WeekChartView(weekChartViewModel: dependencies.makeWeekChartViewModel())
-        case .month:
-            MonthChartView(monthChartViewModel: dependencies.makeMonthChartViewModel())
-        case .year:
-            YearChartView(yearChartViewModel: dependencies.makeYearChartViewModel())
+        if let dependencies {
+            switch filterSelected {
+            case .day:
+                DayChartView(dayChartViewModel: dependencies.makeDayChartViewModel())
+            case .week:
+                WeekChartView(weekChartViewModel: dependencies.makeWeekChartViewModel())
+            case .month:
+                MonthChartView(monthChartViewModel: dependencies.makeMonthChartViewModel())
+            case .year:
+                YearChartView(yearChartViewModel: dependencies.makeYearChartViewModel())
+            }
+        } else {
+            MissingDependenciesView(StatisticsDependencies.self)
         }
     }
 }
 
 #Preview(traits: .moldea) {
     StatisticsView()
+        .environment(\.statisticsDependencies, .preview)
 }

@@ -86,22 +86,45 @@ public struct CoreDependencies: Sendable {
     }
 
     public static let preview: Self = {
+        let container: ModelContainer
         do {
-            return live(container: try MoldeaSchema.makeModelContainer(inMemory: true))
+            container = try MoldeaSchema.makeModelContainer(inMemory: true)
         } catch {
             fatalError("Could not create the preview ModelContainer: \(error)")
         }
+        return CoreDependencies(
+            modelContainer: container,
+            habitRepository: SwiftDataHabitRepository(modelContainer: container),
+            todayHabitsRepository: SwiftDataTodayHabitsRepository(modelContainer: container),
+            userDefaultsRepository: InMemoryUserDefaultsRepository([
+                .isNotificationPermissionAllowed: true,
+                .isNotificationsEnabled: true
+            ]),
+            notificationScheduler: NoOpHabitNotificationScheduler(),
+            notificationPermissionRepository: GrantedNotificationPermissionRepository(),
+            microphonePermissionRepository: GrantedMicrophonePermissionRepository(),
+            todayProgressStore: NoOpTodayProgressStore()
+        )
     }()
 
     @MainActor func makeSpeechToTextViewModel() -> SpeechToTextViewModel {
-        SpeechToTextViewModel(
-            habitRepository: habitRepository,
-            todayHabitsRepository: todayHabitsRepository,
-            notificationScheduler: notificationScheduler
+        let parser = FoundationModelsHabitCommandParser()
+        return SpeechToTextViewModel(parser: parser) {
+            makeHabitCommandViewModel(parser: parser)
+        }
+    }
+
+    @MainActor func makeHabitCommandViewModel(parser: any HabitCommandParsing) -> HabitCommandViewModel {
+        HabitCommandViewModel(
+            parser: parser,
+            createHabitUseCase: createHabit,
+            deleteHabitUseCase: deleteHabit,
+            completeHabitsUseCase: completeHabits,
+            getTodayHabitsUseCase: getTodayHabits
         )
     }
 }
 
 extension EnvironmentValues {
-    @Entry public var coreDependencies = CoreDependencies.preview
+    @Entry public var coreDependencies: CoreDependencies? = nil
 }
