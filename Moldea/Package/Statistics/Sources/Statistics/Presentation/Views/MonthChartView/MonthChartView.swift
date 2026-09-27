@@ -21,11 +21,19 @@ struct MonthChartView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             ProgressSummaryHeader(
-                percentage: monthChartViewModel.totalProgress,
-                summary: StatisticsTextsEnum.monthChartSummary
+                percentage: monthChartViewModel.summaryPercentage,
+                summary: isFiltered ? StatisticsTextsEnum.selectionSummary : StatisticsTextsEnum.monthChartSummary,
+                interval: monthChartViewModel.summaryInterval,
+                onShowAll: isFiltered ? { monthChartViewModel.clearSelection(habits: monthlyHabits) } : nil
             )
 
-            ProgressBarChart(title: StatisticsTextsEnum.chartTitleMonth, statistics: monthChartViewModel.data)
+            ProgressBarChart(
+                title: StatisticsTextsEnum.chartTitleMonth,
+                statistics: monthChartViewModel.data,
+                selectedID: monthChartViewModel.selectedStatisticID
+            ) {
+                monthChartViewModel.select($0, habits: monthlyHabits)
+            }
 
             HabitProgressList(habits: monthChartViewModel.visibleHabits) {
                 monthChartViewModel.percentage(for: $0)
@@ -35,6 +43,10 @@ struct MonthChartView: View {
         .onChange(of: chartInput, initial: true) {
             monthChartViewModel.getMonthlyPercentages(habits: monthlyHabits)
         }
+    }
+
+    private var isFiltered: Bool {
+        monthChartViewModel.selectedStatisticID != nil
     }
 
     private var chartInput: [Int] {

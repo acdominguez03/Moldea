@@ -32,6 +32,10 @@ public enum StatisticsTextsEnum {
     // MARK: Habits List
     public static let habitsHeader = resource("statistics_habits_header")
 
+    // MARK: Chart Selection
+    public static let selectionSummary = resource("statistics_selection_summary")
+    public static let showAll = resource("statistics_show_all")
+
     // MARK: Day Chart
     public static let dayChartSummary = resource("statistics_day_chart_summary")
 

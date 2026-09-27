@@ -94,6 +94,8 @@ Claves actuales:
 | `statistics_empty_state` | There is no data to display yet | Todavía no hay datos que mostrar |
 | `statistics_habits_header` | By habit | Por hábito |
 | `statistics_day_chart_summary` | completed this day | cumplido este día |
+| `statistics_selection_summary` | completed on these days | cumplido en estos días |
+| `statistics_show_all` | Show all | Ver todo |
 
 Para añadir un texto: añade la entrada al `Localizable.xcstrings` (en `en` y `es`, con
 `"extractionState": "manual"`) y expón la constante en `StatisticsTextsEnum`. Las claves van en
@@ -134,6 +136,32 @@ La lógica está en `Domain/HabitOccurrencesBuilder`: convierte hábitos + tramo
 para los semanales). Esa lista se puntúa con `CalculateHabitsProgressUseCase` y `scope: .all`,
 que aplica `dailyTarget` o `weeklyTarget` según la frecuencia. El % total, el de cada barra y el
 de cada hábito salen de la misma llamada sobre subconjuntos distintos.
+
+## Filtrar por barra
+
+En Semana, Mes y Año, pulsar una barra filtra la pantalla a su intervalo: la cabecera pasa a
+mostrar el % de la barra con `statistics_selection_summary`, y la lista «Por hábito» solo enseña
+los hábitos con ocurrencias en ese intervalo, cada uno con su % dentro de él.
+
+- **Estado:** `selectedStatisticID` en cada view model (`nil` = periodo completo). Guarda el
+  `HabitStatistic.id` porque es el valor del eje X del `Chart` (lo que devuelve
+  `ChartProxy.value(atX:)` al tocar) y no cambia al recalcular, así que el filtro sobrevive al
+  `onChange(of: chartInput)`.
+- **Intervalo de cada barra:** `HabitStatistic.interval`, que rellena el view model al calcular
+  (día, semana para «Sem», tramo del mes o mes).
+- **Qué se cuenta:** barra de día en Semana → `occurrences(of:on:)` con `scope: .daily` (sin
+  `.weeklyCount`, como en Día); «Sem» → solo los `.weeklyCount`, `scope: .weekly`; tramo de Mes →
+  `occurrences(of:in:until:)`; mes de Año → `monthOccurrences(of:containing:until:)`.
+- **Quitar el filtro:** volver a pulsar la barra elegida o el botón «Ver todo»
+  (`statistics_show_all`), que `ProgressSummaryHeader` solo pinta si recibe `onShowAll`. Cambiar de
+  pestaña también lo quita, porque la vista se recrea.
+- Las barras que aún no han empezado (`interval.start > hoy`) no se pueden elegir.
+- Con selección, las demás barras se pintan al 40 % de opacidad y la etiqueta de la elegida en
+  `.primary` y `.semibold`.
+- **Fechas:** `ProgressSummaryHeader` pinta siempre, bajo el %, el `summaryInterval` del view model
+  (en Día, el día elegido): un día → `weekday(.wide).day().month(.abbreviated)`; varios meses
+  completos → intervalo `month(.abbreviated).year()`; el resto → intervalo `day().month(.abbreviated)`.
+  El fin del `DateInterval` es exclusivo, así que se formatea hasta el día anterior.
 
 ## Hábitos desactivados
 
@@ -178,14 +206,22 @@ en Semana/Mes/Año.
 Swift Testing (`import Testing`, `@Test`). `StatisticsTests.swift` cubre `HabitOccurrencesBuilder`
 (tramos de febrero y de un mes de 31 días, días futuros, objetivo de los semanales, los 10 últimos
 días cruzando de mes y los hábitos programados en un día) y los view models diario, mensual y
-anual, con un `Calendar` gregoriano en UTC.
+anual, con un `Calendar` gregoriano en UTC. `ChartSelectionTests` cubre el filtro por barra
+(seleccionar y deseleccionar, «Sem», barras futuras, `clearSelection`, tramos y meses).
 
 ## Accesibilidad
 
 `ProgressBarChart` recibe un título y publica un `ProgressChartDescriptor`
 (`AXChartDescriptorRepresentable`) para Audio Graphs; cada barra lee
 `HabitStatistic.accessibilityTitle` (nombre completo del día, semana o mes). Los tramos de color
-son `HabitStatistic.Tier`. En tamaños de accesibilidad `StatisticsView` pasa a `ScrollView` y
+son `HabitStatistic.Tier`.
+
+El toque sobre las barras lo recoge un `Rectangle` transparente en `.chartOverlay`, oculto a
+VoiceOver: las `BarMark` no admiten acciones de accesibilidad, así que se cuenta con que el doble
+toque de VoiceOver sobre una barra llegue a ese gesto en el centro de la barra (sin comprobar en
+dispositivo). En `ProgressSummaryHeader`, %, resumen y fechas forman un solo elemento `.isHeader`;
+el botón «Ver todo» queda fuera para que VoiceOver lo trate como botón propio. En tamaños de
+accesibilidad `StatisticsView` pasa a `ScrollView` y
 `HabitProgressList` a `LazyVStack`.
 
 Las reglas comunes están en el `CLAUDE.md` raíz, en _Accesibilidad_.

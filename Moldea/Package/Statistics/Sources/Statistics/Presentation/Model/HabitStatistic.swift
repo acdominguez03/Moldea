@@ -25,6 +25,7 @@ struct HabitStatistic: Identifiable {
     let accessibilityTitle: String
     var percentage: Int
     var kind: Kind = .day
+    var interval: DateInterval?
 
     var tier: Tier {
         switch kind {

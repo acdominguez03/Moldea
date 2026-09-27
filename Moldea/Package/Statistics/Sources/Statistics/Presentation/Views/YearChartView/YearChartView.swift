@@ -21,11 +21,19 @@ struct YearChartView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             ProgressSummaryHeader(
-                percentage: yearChartViewModel.totalProgress,
-                summary: StatisticsTextsEnum.yearChartSummary
+                percentage: yearChartViewModel.summaryPercentage,
+                summary: isFiltered ? StatisticsTextsEnum.selectionSummary : StatisticsTextsEnum.yearChartSummary,
+                interval: yearChartViewModel.summaryInterval,
+                onShowAll: isFiltered ? { yearChartViewModel.clearSelection(habits: yearlyHabits) } : nil
             )
 
-            ProgressBarChart(title: StatisticsTextsEnum.chartTitleYear, statistics: yearChartViewModel.data)
+            ProgressBarChart(
+                title: StatisticsTextsEnum.chartTitleYear,
+                statistics: yearChartViewModel.data,
+                selectedID: yearChartViewModel.selectedStatisticID
+            ) {
+                yearChartViewModel.select($0, habits: yearlyHabits)
+            }
 
             HabitProgressList(habits: yearChartViewModel.visibleHabits) {
                 yearChartViewModel.percentage(for: $0)
@@ -35,6 +43,10 @@ struct YearChartView: View {
         .onChange(of: chartInput, initial: true) {
             yearChartViewModel.getYearlyPercentages(habits: yearlyHabits)
         }
+    }
+
+    private var isFiltered: Bool {
+        yearChartViewModel.selectedStatisticID != nil
     }
 
     private var chartInput: [Int] {

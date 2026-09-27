@@ -18,6 +18,7 @@ final class DayChartViewModel {
     private(set) var dayHabits: [TodayHabit] = []
 
     private let calculateHabitProgressUseCase: CalculateHabitsProgressUseCaseProtocol
+    private let calendar: Calendar
     private let occurrencesBuilder: HabitOccurrencesBuilder
 
     init(
@@ -26,6 +27,7 @@ final class DayChartViewModel {
         today: Date = .now
     ) {
         self.calculateHabitProgressUseCase = calculateHabitProgressUseCase
+        self.calendar = calendar
         self.occurrencesBuilder = HabitOccurrencesBuilder(calendar: calendar)
         self.selectedDay = calendar.startOfDay(for: today)
         self.days = occurrencesBuilder.lastDays(Self.numberOfDays, until: today).map { date in
@@ -41,6 +43,10 @@ final class DayChartViewModel {
         let end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: today)) ?? today
         let start = calendar.date(byAdding: .day, value: -numberOfDays, to: end) ?? end
         return DateInterval(start: start, end: end)
+    }
+
+    var selectedInterval: DateInterval {
+        calendar.dateInterval(of: .day, for: selectedDay) ?? DateInterval(start: selectedDay, duration: 0)
     }
 
     func select(_ day: StatisticsDay, habits: [TodayHabit]) {

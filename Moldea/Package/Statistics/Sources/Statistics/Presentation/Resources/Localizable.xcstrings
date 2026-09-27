@@ -91,6 +91,42 @@
         }
       }
     },
+    "statistics_selection_summary" : {
+      "comment" : "Follows the percentage of the chart bar the user tapped, as in \"45 % completed on these days\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "completed on these days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cumplido en estos días"
+          }
+        }
+      }
+    },
+    "statistics_show_all" : {
+      "comment" : "Button that removes the chart bar filter and shows the whole period again.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show all"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver todo"
+          }
+        }
+      }
+    },
     "statistics_day_chart_summary" : {
       "comment" : "Follows the overall percentage of the selected day, as in \"45 % completed this day\".",
       "extractionState" : "manual",

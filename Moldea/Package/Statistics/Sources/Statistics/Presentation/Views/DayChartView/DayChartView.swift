@@ -46,7 +46,8 @@ struct DayChartView: View {
 
             ProgressSummaryHeader(
                 percentage: dayChartViewModel.totalProgress,
-                summary: StatisticsTextsEnum.dayChartSummary
+                summary: StatisticsTextsEnum.dayChartSummary,
+                interval: dayChartViewModel.selectedInterval
             )
 
             HabitProgressList(habits: dayChartViewModel.dayHabits) {

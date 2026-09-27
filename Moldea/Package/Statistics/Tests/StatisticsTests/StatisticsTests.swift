@@ -140,6 +140,116 @@ struct InactivePeriodOccurrencesTests {
     }
 }
 
+struct ChartSelectionTests {
+    private let useCase = CalculateHabitsProgressUseCase()
+
+    @Test func selectingADayFiltersTheWeekAndSelectingItAgainRestoresIt() throws {
+        let today = date(2026, 9, 10)
+        let yesterday = date(2026, 9, 9)
+        let daily = makeTodayHabit(completedDays: [yesterday], referenceDay: today)
+        let otherDay = makeTodayHabit(
+            frequency: .fixedDays(weekdays: [calendar.component(.weekday, from: today)]),
+            referenceDay: today
+        )
+        let weekly = makeTodayHabit(frequency: .weeklyCount(timesPerWeek: 2), referenceDay: today)
+        let habits = [daily, otherDay, weekly]
+        let viewModel = WeekChartViewModel(calculateHabitProgressUseCase: useCase, calendar: calendar)
+        viewModel.getWeeklyPercentages(habits: habits, date: today)
+        let week = try #require(calendar.dateInterval(of: .weekOfYear, for: today))
+        let yesterdayBar = try #require(viewModel.data.first { $0.interval?.start == yesterday })
+
+        #expect(viewModel.summaryInterval == week)
+        #expect(viewModel.summaryPercentage == viewModel.totalProgress)
+
+        viewModel.select(yesterdayBar.id, habits: habits, date: today)
+
+        #expect(viewModel.selectedStatisticID == yesterdayBar.id)
+        #expect(viewModel.summaryInterval == calendar.dateInterval(of: .day, for: yesterday))
+        #expect(viewModel.summaryPercentage == 100)
+        #expect(viewModel.visibleHabits.map(\.id) == [daily.id])
+        #expect(viewModel.percentage(for: daily, date: today) == 100)
+
+        viewModel.select(yesterdayBar.id, habits: habits, date: today)
+
+        #expect(viewModel.selectedStatisticID == nil)
+        #expect(viewModel.summaryInterval == week)
+        #expect(viewModel.summaryPercentage == viewModel.totalProgress)
+        #expect(viewModel.visibleHabits.count == 3)
+    }
+
+    @Test func selectingTheWeeklyBarShowsOnlyWeeklyCountHabits() {
+        let today = date(2026, 9, 10)
+        let daily = makeTodayHabit(referenceDay: today)
+        let weekly = makeTodayHabit(frequency: .weeklyCount(timesPerWeek: 2), referenceDay: today)
+        let viewModel = WeekChartViewModel(calculateHabitProgressUseCase: useCase, calendar: calendar)
+        viewModel.getWeeklyPercentages(habits: [daily, weekly], date: today)
+
+        viewModel.select("weekly", habits: [daily, weekly], date: today)
+
+        #expect(viewModel.visibleHabits.map(\.id) == [weekly.id])
+
+        viewModel.clearSelection(habits: [daily, weekly], date: today)
+
+        #expect(viewModel.selectedStatisticID == nil)
+        #expect(viewModel.visibleHabits.count == 2)
+    }
+
+    @Test func futureDayCannotBeSelected() throws {
+        let today = date(2026, 9, 10)
+        let habit = makeTodayHabit(referenceDay: today)
+        let viewModel = WeekChartViewModel(calculateHabitProgressUseCase: useCase, calendar: calendar)
+        viewModel.getWeeklyPercentages(habits: [habit], date: today)
+        let tomorrowBar = try #require(viewModel.data.first { $0.interval?.start == date(2026, 9, 11) })
+
+        viewModel.select(tomorrowBar.id, habits: [habit], date: today)
+
+        #expect(viewModel.selectedStatisticID == nil)
+    }
+
+    @Test func selectingAMonthBucketUsesItsDays() {
+        let today = date(2026, 9, 10)
+        let habit = makeTodayHabit(completedDays: days(from: date(2026, 9, 1), count: 7), referenceDay: today)
+        let viewModel = MonthChartViewModel(calculateHabitProgressUseCase: useCase, calendar: calendar)
+        viewModel.getMonthlyPercentages(habits: [habit], date: today)
+
+        #expect(viewModel.summaryInterval == calendar.dateInterval(of: .month, for: today))
+
+        viewModel.select("week_2", habits: [habit], date: today)
+
+        #expect(viewModel.summaryInterval == DateInterval(start: date(2026, 9, 8), end: date(2026, 9, 15)))
+        #expect(viewModel.summaryPercentage == 0)
+        #expect(viewModel.percentage(for: habit, date: today) == 0)
+
+        viewModel.select("week_1", habits: [habit], date: today)
+
+        #expect(viewModel.summaryPercentage == 100)
+        #expect(viewModel.percentage(for: habit, date: today) == 100)
+
+        viewModel.select("week_3", habits: [habit], date: today)
+
+        #expect(viewModel.selectedStatisticID == "week_1")
+    }
+
+    @Test func selectingAMonthUsesItsOccurrences() {
+        let today = date(2026, 2, 28)
+        let habit = makeTodayHabit(completedDays: days(from: date(2026, 1, 1), count: 31), referenceDay: today)
+        let viewModel = YearChartViewModel(calculateHabitProgressUseCase: useCase, calendar: calendar)
+        viewModel.getYearlyPercentages(habits: [habit], date: today)
+
+        #expect(viewModel.summaryInterval == calendar.dateInterval(of: .year, for: today))
+
+        viewModel.select("month_1", habits: [habit], date: today)
+
+        #expect(viewModel.summaryInterval == DateInterval(start: date(2026, 1, 1), end: date(2026, 2, 1)))
+        #expect(viewModel.summaryPercentage == 100)
+        #expect(viewModel.percentage(for: habit, date: today) == 100)
+
+        viewModel.clearSelection(habits: [habit], date: today)
+
+        #expect(viewModel.summaryPercentage == 53)
+    }
+}
+
 struct MonthChartViewModelTests {
     @Test func weeksAndHabitShowMonthlyProgressUntilToday() {
         let today = date(2026, 9, 10)

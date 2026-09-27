@@ -21,12 +21,20 @@ struct WeekChartView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             ProgressSummaryHeader(
-                percentage: weekChartViewModel.totalProgress,
-                summary: StatisticsTextsEnum.weekChartSummary
+                percentage: weekChartViewModel.summaryPercentage,
+                summary: isFiltered ? StatisticsTextsEnum.selectionSummary : StatisticsTextsEnum.weekChartSummary,
+                interval: weekChartViewModel.summaryInterval,
+                onShowAll: isFiltered ? { weekChartViewModel.clearSelection(habits: weeklyHabits) } : nil
             )
 
-            ProgressBarChart(title: StatisticsTextsEnum.chartTitleWeek, statistics: weekChartViewModel.chartData)
-            
+            ProgressBarChart(
+                title: StatisticsTextsEnum.chartTitleWeek,
+                statistics: weekChartViewModel.chartData,
+                selectedID: weekChartViewModel.selectedStatisticID
+            ) {
+                weekChartViewModel.select($0, habits: weeklyHabits)
+            }
+
             HabitProgressList(habits: weekChartViewModel.visibleHabits) {
                 weekChartViewModel.percentage(for: $0)
             }
@@ -37,6 +45,10 @@ struct WeekChartView: View {
         }
     }
     
+    private var isFiltered: Bool {
+        weekChartViewModel.selectedStatisticID != nil
+    }
+
     private var chartInput: [Int] {
         weeklyHabits.map(\.completions.count)
             + weeklyHabits.map(\.habit.inactivePeriods.count)
