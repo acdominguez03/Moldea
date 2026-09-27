@@ -64,6 +64,9 @@ struct MoldeaApp: App {
                             .fittingSheetDetents()
                     }
                     .debugNotificationsOverlay()
+                    .task {
+                        await dependencies.core.requestNotificationAuthorization.execute()
+                    }
                 }
             }
             .environment(\.coreDependencies, dependencies.core)
@@ -71,9 +74,6 @@ struct MoldeaApp: App {
             .environment(\.todayDependencies, dependencies.today)
             .environment(\.statisticsDependencies, dependencies.statistics)
             .environment(\.settingsDependencies, dependencies.settings)
-            .task {
-                await dependencies.core.requestNotificationAuthorization.execute()
-            }
             .task {
                 MoldeaShortcuts.updateAppShortcutParameters()
             }
