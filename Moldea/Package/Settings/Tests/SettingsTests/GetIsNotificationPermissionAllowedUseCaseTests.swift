@@ -3,17 +3,17 @@ import Core
 @testable import Settings
 
 private final class FakeUserDefaultsRepository: UserDefaultsRepository, @unchecked Sendable {
-    private var values: [PreferenceKey: Bool]
+    private var values: [PreferenceKeyEnum: Bool]
 
-    init(values: [PreferenceKey: Bool] = [:]) {
+    init(values: [PreferenceKeyEnum: Bool] = [:]) {
         self.values = values
     }
 
-    func getBool(_ preferenceKey: PreferenceKey) -> Bool {
+    func getBool(_ preferenceKey: PreferenceKeyEnum) -> Bool {
         values[preferenceKey] ?? false
     }
 
-    func saveBool(_ preferenceKey: PreferenceKey, _ value: Bool) {
+    func saveBool(_ preferenceKey: PreferenceKeyEnum, _ value: Bool) {
         values[preferenceKey] = value
     }
 }

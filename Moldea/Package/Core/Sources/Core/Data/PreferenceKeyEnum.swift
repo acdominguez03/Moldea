@@ -1,11 +1,11 @@
 //
-//  PreferencesKey.swift
+//  PreferenceKeyEnum.swift
 //  Core
 //
 //  Created by Ismael Cordón Domínguez on 22/9/26.
 //
 
-public enum PreferenceKey: String {
+public enum PreferenceKeyEnum: String {
     case isNotificationsEnabled = "preferences.isNotificationsEnabled"
     case isDailySummaryEnabled = "preferences.isDailySummaryEnabled"
     case isNotificationPermissionAllowed = "preferences.isNotificationPermissionAllowed"

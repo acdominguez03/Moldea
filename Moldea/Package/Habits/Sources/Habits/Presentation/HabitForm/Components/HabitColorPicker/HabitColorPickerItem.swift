@@ -36,7 +36,7 @@ struct HabitColorPickerItem: View {
 
 #Preview("Unselected") {
     HabitColorPickerItem(
-        color: HabitPaletteColor.red.color,
+        color: HabitPaletteColorEnum.red.color,
         name: "Red",
         isSelected: false,
         action: {}
@@ -44,5 +44,5 @@ struct HabitColorPickerItem: View {
 }
 
 #Preview("Selected") {
-    HabitColorPickerItem(color: HabitPaletteColor.red.color, name: "Red", isSelected: true, action: {})
+    HabitColorPickerItem(color: HabitPaletteColorEnum.red.color, name: "Red", isSelected: true, action: {})
 }

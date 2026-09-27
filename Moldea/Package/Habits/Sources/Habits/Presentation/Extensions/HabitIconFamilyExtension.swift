@@ -1,5 +1,5 @@
 //
-//  HabitIconFamily+Name.swift
+//  HabitIconFamilyExtension.swift
 //  Habits
 //
 //  Created by Ismael Cordón Domínguez on 19/9/26.

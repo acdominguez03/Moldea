@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum HabitMappingError: Error, Equatable {
+enum HabitMappingErrorEnum: Error, Equatable {
     case missingSchedule(habitID: UUID)
     case missingTimesPerWeek(habitID: UUID)
     case missingFixedWeekdays(habitID: UUID)
@@ -16,7 +16,7 @@ enum HabitMappingError: Error, Equatable {
 enum HabitMapper {
     static func toDomain(_ entity: HabitEntity) throws -> Habit {
         guard let schedule = entity.schedule else {
-            throw HabitMappingError.missingSchedule(habitID: entity.id)
+            throw HabitMappingErrorEnum.missingSchedule(habitID: entity.id)
         }
         return Habit(
             id: entity.id,
@@ -105,12 +105,12 @@ enum HabitMapper {
             return .daily
         case .weeklyCount:
             guard let timesPerWeek = schedule.timesPerWeek else {
-                throw HabitMappingError.missingTimesPerWeek(habitID: habitID)
+                throw HabitMappingErrorEnum.missingTimesPerWeek(habitID: habitID)
             }
             return .weeklyCount(timesPerWeek: timesPerWeek)
         case .fixedDays:
             guard let weekdays = schedule.fixedWeekdays else {
-                throw HabitMappingError.missingFixedWeekdays(habitID: habitID)
+                throw HabitMappingErrorEnum.missingFixedWeekdays(habitID: habitID)
             }
             return .fixedDays(weekdays: Set(weekdays))
         }

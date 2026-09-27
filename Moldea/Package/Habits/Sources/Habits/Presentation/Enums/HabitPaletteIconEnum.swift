@@ -1,5 +1,5 @@
 //
-//  HabitPaletteIcon.swift
+//  HabitPaletteIconEnum.swift
 //  Habits
 //
 //  Created by Ismael Cordón Domínguez on 19/9/26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum HabitPaletteIcon: String, CaseIterable, Identifiable {
+enum HabitPaletteIconEnum: String, CaseIterable, Identifiable {
     case drop
     case book
     case bolt

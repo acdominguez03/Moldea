@@ -6,6 +6,6 @@
 //
 
 public protocol UserDefaultsRepository: Sendable {
-    func getBool(_ preferenceKey: PreferenceKey) -> Bool
-    func saveBool(_ preferenceKey: PreferenceKey, _ value: Bool)
+    func getBool(_ preferenceKey: PreferenceKeyEnum) -> Bool
+    func saveBool(_ preferenceKey: PreferenceKeyEnum, _ value: Bool)
 }

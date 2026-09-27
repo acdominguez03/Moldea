@@ -7,14 +7,14 @@
 
 import Foundation
 
-enum HabitCompletionMappingError: Error, Equatable {
+enum HabitCompletionMappingErrorEnum: Error, Equatable {
     case missingHabit(habitCompletionID: UUID)
 }
 
 enum HabitCompletionMapper {
     static func toDomain(_ completion: HabitCompletionEntity) throws -> HabitCompletion {
         guard let habit = completion.habit else {
-            throw HabitCompletionMappingError.missingHabit(habitCompletionID: completion.id)
+            throw HabitCompletionMappingErrorEnum.missingHabit(habitCompletionID: completion.id)
         }
         
         return HabitCompletion(

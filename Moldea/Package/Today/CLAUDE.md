@@ -39,7 +39,7 @@ Es la misma estructura de tres capas que `Core` y que el resto de paquetes de fe
 
 `TodayView` es el punto de entrada público del paquete: un `NavigationStack` con una `List`
 cuya cabecera lleva el selector de pestaña (`TodayTabEnum`: diaria / semanal) y el progreso, y
-cuyas filas son `TodayCardView`. La compone el target `Moldea` en el caso `.today` de `MainTab`.
+cuyas filas son `TodayCardView`. La compone el target `Moldea` en el caso `.today` de `MainTabEnum`.
 
 Los hábitos no los carga el view model: entran por `@TodayHabitsQuery` y `@WeeklyHabitsQuery`
 (de `Core`), que son `@Query` de SwiftData envueltos en un `propertyWrapper`. Por eso marcar una
@@ -97,7 +97,7 @@ Para añadir un texto: añade la entrada al `Localizable.xcstrings` (en `en` y `
 `snake_case` con el prefijo `today_`; las constantes, en `camelCase`.
 
 Los textos que acaben usándose desde más de un módulo se mueven a `CoreTextsEnum`. Ojo: el
-título de la pestaña ya vive en `Core` como `today_title` —lo consume `MainTab`—;
+título de la pestaña ya vive en `Core` como `today_title` —lo consume `MainTabEnum`—;
 `today_screen_title` es el título de la pantalla, no el de la pestaña.
 
 ## Tests

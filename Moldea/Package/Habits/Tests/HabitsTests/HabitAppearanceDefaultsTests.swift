@@ -4,10 +4,10 @@ import Core
 
 struct HabitAppearanceDefaultsTests {
     @Test func `The default color is the gray from the palette`() {
-        #expect(HabitAppearanceDefaultsEnum.colorHex == HabitPaletteColor.gray.hex)
+        #expect(HabitAppearanceDefaultsEnum.colorHex == HabitPaletteColorEnum.gray.hex)
     }
 
     @Test func `The default icon is the one the create screen starts with`() {
-        #expect(HabitAppearanceDefaultsEnum.icon == HabitPaletteIcon.drop.systemName)
+        #expect(HabitAppearanceDefaultsEnum.icon == HabitPaletteIconEnum.drop.systemName)
     }
 }

@@ -11,9 +11,9 @@ import SwiftUI
 
 public struct RootView<Content: View>: View {
     private var router: AppRouter
-    private var content: (AppFlow) -> Content
+    private var content: (AppFlowEnum) -> Content
     
-    public init(router: AppRouter, @ViewBuilder content: @escaping (AppFlow) -> Content) {
+    public init(router: AppRouter, @ViewBuilder content: @escaping (AppFlowEnum) -> Content) {
         self.router = router
         self.content = content
     }

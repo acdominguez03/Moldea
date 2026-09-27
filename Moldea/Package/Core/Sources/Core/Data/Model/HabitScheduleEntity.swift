@@ -10,13 +10,13 @@ import SwiftData
 @Model
 final class HabitScheduleEntity {
     var habit: HabitEntity?
-    var frequencyType: FrequencyType
+    var frequencyType: FrequencyTypeEnum
     var timesPerWeek: Int?
     var fixedWeekdays: [Int]?
     var repetitionsPerDay: Int
 
     init(
-        frequencyType: FrequencyType,
+        frequencyType: FrequencyTypeEnum,
         timesPerWeek: Int? = nil,
         fixedWeekdays: [Int]? = nil,
         repetitionsPerDay: Int = 1

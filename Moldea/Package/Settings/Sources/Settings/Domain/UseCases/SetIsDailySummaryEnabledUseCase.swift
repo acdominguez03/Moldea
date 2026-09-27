@@ -20,7 +20,7 @@ struct SetIsDailySummaryEnabledUseCase: SetIsDailySummaryEnabledUseCaseProtocol 
 
     /// Guarda la preferencia y sincroniza: el planificador decide si hoy toca el aviso.
     func execute(isEnabled: Bool) async {
-        repository.saveBool(PreferenceKey.isDailySummaryEnabled, isEnabled)
+        repository.saveBool(PreferenceKeyEnum.isDailySummaryEnabled, isEnabled)
         await notificationScheduler.syncReminders()
     }
 }

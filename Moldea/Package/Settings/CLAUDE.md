@@ -56,7 +56,7 @@ Es la misma estructura de tres capas que `Core` y que el resto de paquetes de fe
 
 `SettingsView` es el punto de entrada público del paquete: un `NavigationStack` con una `List`
 agrupada y el título de pantalla en grande. La compone el target `Moldea` en el caso `.settings`
-de `MainTab` como `SettingsView()`: es `public init()`, lee `\.settingsDependencies` y pinta
+de `MainTabEnum` como `SettingsView()`: es `public init()`, lee `\.settingsDependencies` y pinta
 `SettingsContentView(viewModel:)` (patrón `XView` / `XContentView` del `CLAUDE.md` raíz).
 
 `DI/SettingsDependencies.swift` recibe un `CoreDependencies` y construye los casos de uso propios
@@ -90,7 +90,7 @@ La sección de notificaciones se pinta de una forma u otra según
   sincronización, que programa los avisos de los hábitos y el de la noche.
 
 Estas dos preferencias son independientes por diseño (razonamiento completo en el `CLAUDE.md`
-de `Core`, en `PreferenceKey`): el permiso del sistema (`isNotificationPermissionAllowed`) no es
+de `Core`, en `PreferenceKeyEnum`): el permiso del sistema (`isNotificationPermissionAllowed`) no es
 lo mismo que "quiero avisos de mis hábitos" (`isNotificationsEnabled`).
 
 `isNotificationPermissionAllowed` se resincroniza con el sistema real, no solo con lo último
@@ -155,7 +155,7 @@ Para añadir un texto: añade la entrada al `Localizable.xcstrings` (en `en` y `
 `snake_case` con el prefijo `settings_`; las constantes, en `camelCase`.
 
 Los textos que acaben usándose desde más de un módulo se mueven a `CoreTextsEnum`. Ojo: el
-título de la pestaña ya vive en `Core` como `settings_title` —lo consume `MainTab`—;
+título de la pestaña ya vive en `Core` como `settings_title` —lo consume `MainTabEnum`—;
 `settings_screen_title` es el título de la pantalla, no el de la pestaña.
 
 Este paquete acumulará muchas etiquetas cortas (secciones, filas, pies de ayuda). Mantén el

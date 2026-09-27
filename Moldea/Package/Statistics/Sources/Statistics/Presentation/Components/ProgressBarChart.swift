@@ -56,10 +56,10 @@ struct ProgressBarChart: View {
             }
         }
         .chartForegroundStyleScale([
-            HabitStatistic.Tier.low.rawValue: tierColor(.low),
-            HabitStatistic.Tier.medium.rawValue: tierColor(.medium),
-            HabitStatistic.Tier.high.rawValue: tierColor(.high),
-            HabitStatistic.Tier.weekly.rawValue: Color.accentColor
+            HabitStatistic.TierEnum.low.rawValue: tierColor(.low),
+            HabitStatistic.TierEnum.medium.rawValue: tierColor(.medium),
+            HabitStatistic.TierEnum.high.rawValue: tierColor(.high),
+            HabitStatistic.TierEnum.weekly.rawValue: Color.accentColor
         ])
         .chartLegend(.hidden)
         .chartXAxis(.hidden)
@@ -101,7 +101,7 @@ struct ProgressBarChart: View {
         return statistic.id == selectedID ? .primary : .secondary
     }
 
-    private func tierColor(_ tier: HabitStatistic.Tier) -> Color {
+    private func tierColor(_ tier: HabitStatistic.TierEnum) -> Color {
         let hex: String
         switch (tier, colorScheme) {
         case (.low, .dark): hex = "#7C7C80"

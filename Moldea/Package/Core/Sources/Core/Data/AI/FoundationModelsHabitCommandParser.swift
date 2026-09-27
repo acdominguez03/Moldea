@@ -63,7 +63,7 @@ final class FoundationModelsHabitCommandParser: HabitCommandParsing {
 
     // MARK: - Etapas
 
-    private func intent(for phrase: String) async throws -> GenerableCommandIntent {
+    private func intent(for phrase: String) async throws -> GenerableCommandIntentEnum {
         let session = consumePreparedSession(
             instructions: HabitCommandInstructions.intentV1()
         )

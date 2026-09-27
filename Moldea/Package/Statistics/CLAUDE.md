@@ -50,7 +50,7 @@ Es la misma estructura de tres capas que `Core` y que el resto de paquetes de fe
 
 `StatisticsView` es el punto de entrada público del paquete: un `NavigationStack` con el título en
 grande, un `Picker` segmentado (`StatisticsFilterEnum`) y la vista de la pestaña elegida. La
-compone el target `Moldea` en el caso `.statistics` de `MainTab`.
+compone el target `Moldea` en el caso `.statistics` de `MainTabEnum`.
 
 **Dependencias:** `StatisticsView` lee `\.statisticsDependencies` (`DI/StatisticsDependencies.swift`)
 y construye el view model de la pestaña con `makeDayChartViewModel()`, `makeWeekChartViewModel()`,
@@ -88,21 +88,21 @@ bundle principal de la app y no en el del paquete. Xcode genera el bundle de rec
 
 Claves actuales:
 
-| Clave | en | es |
-|---|---|---|
-| `statistics_screen_title` | Statistics | Estadísticas |
-| `statistics_empty_state` | There is no data to display yet | Todavía no hay datos que mostrar |
-| `statistics_habits_header` | By habit | Por hábito |
-| `statistics_day_chart_summary` | completed this day | cumplido este día |
-| `statistics_selection_summary` | completed on these days | cumplido en estos días |
-| `statistics_show_all` | Show all | Ver todo |
+| Clave                          | en                              | es                               |
+| ------------------------------ | ------------------------------- | -------------------------------- |
+| `statistics_screen_title`      | Statistics                      | Estadísticas                     |
+| `statistics_empty_state`       | There is no data to display yet | Todavía no hay datos que mostrar |
+| `statistics_habits_header`     | By habit                        | Por hábito                       |
+| `statistics_day_chart_summary` | completed this day              | cumplido este día                |
+| `statistics_selection_summary` | completed on these days         | cumplido en estos días           |
+| `statistics_show_all`          | Show all                        | Ver todo                         |
 
 Para añadir un texto: añade la entrada al `Localizable.xcstrings` (en `en` y `es`, con
 `"extractionState": "manual"`) y expón la constante en `StatisticsTextsEnum`. Las claves van en
 `snake_case` con el prefijo `statistics_`; las constantes, en `camelCase`.
 
 Los textos que acaben usándose desde más de un módulo se mueven a `CoreTextsEnum`. Ojo: el
-título de la pestaña ya vive en `Core` como `statistics_title` —lo consume `MainTab`—;
+título de la pestaña ya vive en `Core` como `statistics_title` —lo consume `MainTabEnum`—;
 `statistics_screen_title` es el título de la pantalla, no el de la pestaña.
 
 Al formatear números, porcentajes o rangos de fechas, usa `.formatted(...)` con los estilos de
@@ -214,14 +214,13 @@ anual, con un `Calendar` gregoriano en UTC. `ChartSelectionTests` cubre el filtr
 `ProgressBarChart` recibe un título y publica un `ProgressChartDescriptor`
 (`AXChartDescriptorRepresentable`) para Audio Graphs; cada barra lee
 `HabitStatistic.accessibilityTitle` (nombre completo del día, semana o mes). Los tramos de color
-son `HabitStatistic.Tier`.
+son `HabitStatistic.TierEnum`. En tamaños de accesibilidad `StatisticsView` pasa a `ScrollView` y
+`HabitProgressList` a `LazyVStack`.
 
 El toque sobre las barras lo recoge un `Rectangle` transparente en `.chartOverlay`, oculto a
 VoiceOver: las `BarMark` no admiten acciones de accesibilidad, así que se cuenta con que el doble
 toque de VoiceOver sobre una barra llegue a ese gesto en el centro de la barra (sin comprobar en
 dispositivo). En `ProgressSummaryHeader`, %, resumen y fechas forman un solo elemento `.isHeader`;
-el botón «Ver todo» queda fuera para que VoiceOver lo trate como botón propio. En tamaños de
-accesibilidad `StatisticsView` pasa a `ScrollView` y
-`HabitProgressList` a `LazyVStack`.
+el botón «Ver todo» queda fuera para que VoiceOver lo trate como botón propio.
 
 Las reglas comunes están en el `CLAUDE.md` raíz, en _Accesibilidad_.

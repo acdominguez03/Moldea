@@ -21,7 +21,7 @@ struct SetIsNotificationsEnabledUseCase: SetIsNotificationsEnabledUseCaseProtoco
     }
 
     func execute(isEnabled: Bool) async throws {
-        repository.saveBool(PreferenceKey.isNotificationsEnabled, isEnabled)
+        repository.saveBool(PreferenceKeyEnum.isNotificationsEnabled, isEnabled)
         await notificationScheduler.cancelAllReminders()
         guard isEnabled else { return }
         await notificationScheduler.syncReminders()

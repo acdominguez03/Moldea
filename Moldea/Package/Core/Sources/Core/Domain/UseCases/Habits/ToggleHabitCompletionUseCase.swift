@@ -7,12 +7,12 @@
 
 import Foundation
 
-public enum ToggleHabitCompletionMode: Sendable {
+public enum ToggleHabitCompletionModeEnum: Sendable {
     case toggle
     case addOnly
 }
 
-public enum ToggleHabitCompletionResult: Sendable, Equatable {
+public enum ToggleHabitCompletionResultEnum: Sendable, Equatable {
     case progressed(done: Int, total: Int)
     case completed(total: Int)
     case alreadyCompleted(total: Int)
@@ -26,8 +26,8 @@ public protocol ToggleHabitCompletionUseCase: Sendable {
         day: Date,
         completedCount: Int,
         repetitionsPerDay: Int,
-        mode: ToggleHabitCompletionMode
-    ) async throws -> ToggleHabitCompletionResult
+        mode: ToggleHabitCompletionModeEnum
+    ) async throws -> ToggleHabitCompletionResultEnum
 }
 
 extension ToggleHabitCompletionUseCase {
@@ -37,7 +37,7 @@ extension ToggleHabitCompletionUseCase {
         day: Date,
         completedCount: Int,
         repetitionsPerDay: Int
-    ) async throws -> ToggleHabitCompletionResult {
+    ) async throws -> ToggleHabitCompletionResultEnum {
         try await execute(
             habitID: habitID,
             day: day,
@@ -72,8 +72,8 @@ public struct DefaultToggleHabitCompletionUseCase: ToggleHabitCompletionUseCase 
         day: Date,
         completedCount: Int,
         repetitionsPerDay: Int,
-        mode: ToggleHabitCompletionMode = .toggle
-    ) async throws -> ToggleHabitCompletionResult {
+        mode: ToggleHabitCompletionModeEnum = .toggle
+    ) async throws -> ToggleHabitCompletionResultEnum {
         let total = max(repetitionsPerDay, 1)
         let wasCompleted = completedCount >= total
 

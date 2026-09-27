@@ -9,11 +9,11 @@ import SwiftUI
 import Core
 
 public struct MainTabsView<Content: View, SheetContent: View>: View {
-    private let tabs: [MainTab] = [.today, .statistics, .habits, .settings]
+    private let tabs: [MainTabEnum] = [.today, .statistics, .habits, .settings]
 
-    private let tabContent: (MainTab) -> Content
+    private let tabContent: (MainTabEnum) -> Content
     private let sheetContent: () -> SheetContent
-    private let selection: Binding<MainTab>
+    private let selection: Binding<MainTabEnum>
     private let showsMicrophoneTab: Bool
     private let prepareSheet: () async -> Void
 
@@ -21,10 +21,10 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
     @State private var isPreparingSheet = false
 
     public init(
-        selection: Binding<MainTab>,
+        selection: Binding<MainTabEnum>,
         showsMicrophoneTab: Bool,
         prepareSheet: @escaping () async -> Void = {},
-        @ViewBuilder tabContent: @escaping (MainTab) -> Content,
+        @ViewBuilder tabContent: @escaping (MainTabEnum) -> Content,
         @ViewBuilder sheetContent: @escaping () -> SheetContent
     ) {
         self.selection = selection
@@ -46,10 +46,10 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
             }
 
             if showsMicrophoneTab {
-                Tab(value: MainTab.microphone, role: prominentRole) {
+                Tab(value: MainTabEnum.microphone, role: prominentRole) {
                     EmptyView()
                 } label: {
-                    Label(MainTab.microphone.description, systemImage: MainTab.microphone.icon)
+                    Label(MainTabEnum.microphone.description, systemImage: MainTabEnum.microphone.icon)
                         .environment(\.symbolVariants, .none)
                         .accessibilityHint(CoreTextsEnum.voiceInputHint)
                 }
@@ -76,7 +76,7 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
         #endif
     }
 
-    private var tabSelection: Binding<MainTab> {
+    private var tabSelection: Binding<MainTabEnum> {
         Binding {
             selection.wrappedValue
         } set: { newValue in

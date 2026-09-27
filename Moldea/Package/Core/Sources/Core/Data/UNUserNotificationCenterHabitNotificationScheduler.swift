@@ -178,10 +178,10 @@ public struct UNUserNotificationCenterHabitNotificationScheduler: HabitNotificat
     private func makeContent(for habit: Habit, weekday: Int/*, iconPNGData: Data?*/) -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
         content.title = "¡\(habit.name)!"
-        content.body = HabitReminderMessageBuilder.body(
+        content.body = String(localized: HabitReminderMessageBuilder.body(
             frequency: habit.schedule.frequency,
             repetitionsPerDay: habit.schedule.repetitionsPerDay
-        )
+        ))
         content.sound = .default
 
         /*if let iconPNGData, let attachment = makeIconAttachment(habitID: habit.id, weekday: weekday, pngData: iconPNGData) {

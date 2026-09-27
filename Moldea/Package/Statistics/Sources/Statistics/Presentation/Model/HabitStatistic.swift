@@ -8,12 +8,12 @@
 import Foundation
 
 struct HabitStatistic: Identifiable {
-    enum Kind {
+    enum KindEnum {
         case day
         case weekly
     }
 
-    enum Tier: String {
+    enum TierEnum: String {
         case low
         case medium
         case high
@@ -24,10 +24,10 @@ struct HabitStatistic: Identifiable {
     let title: String
     let accessibilityTitle: String
     var percentage: Int
-    var kind: Kind = .day
+    var kind: KindEnum = .day
     var interval: DateInterval?
 
-    var tier: Tier {
+    var tier: TierEnum {
         switch kind {
         case .weekly:
             return .weekly

@@ -1,17 +1,24 @@
 import Testing
+import Foundation
 @testable import Core
 
 struct HabitReminderMessageBuilderTests {
+    private func resolve(_ resource: LocalizedStringResource, locale: String = "es") -> String {
+        var resource = resource
+        resource.locale = Locale(identifier: locale)
+        return String(localized: resource)
+    }
+
     @Test func bodyForDailyWithOneRepetition() {
         let body = HabitReminderMessageBuilder.body(frequency: .daily, repetitionsPerDay: 1)
 
-        #expect(body == "Es tu momento de hoy. Márcalo cuando lo hagas.")
+        #expect(resolve(body) == "Es tu momento de hoy. Márcalo cuando lo hagas.")
     }
 
     @Test func bodyForDailyWithMultipleRepetitions() {
         let body = HabitReminderMessageBuilder.body(frequency: .daily, repetitionsPerDay: 3)
 
-        #expect(body == "Hoy son 3 veces. ¿Empezamos?")
+        #expect(resolve(body) == "Hoy son 3 veces. ¿Empezamos?")
     }
 
     @Test func bodyForWeeklyCount() {
@@ -20,7 +27,7 @@ struct HabitReminderMessageBuilderTests {
             repetitionsPerDay: 1
         )
 
-        #expect(body == "Tu objetivo es 4 veces esta semana. Si hoy te encaja, adelante.")
+        #expect(resolve(body) == "Tu objetivo es 4 veces esta semana. Si hoy te encaja, adelante.")
     }
 
     @Test func bodyForFixedDays() {
@@ -29,7 +36,7 @@ struct HabitReminderMessageBuilderTests {
             repetitionsPerDay: 1
         )
 
-        #expect(body == "Hoy es uno de tus días. Tú decides cuándo.")
+        #expect(resolve(body) == "Hoy es uno de tus días. Tú decides cuándo.")
     }
 
     @Test func weekdaysForDailyWithoutMutingWeekends() {

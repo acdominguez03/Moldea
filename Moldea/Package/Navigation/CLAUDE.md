@@ -17,11 +17,11 @@ Depende de `Core` (de donde salen los títulos localizados de las pestañas).
 
 ```
 Sources/
-├── AppFlow.swift        # enum: .splash | .tabView
+├── AppFlowEnum.swift        # enum: .splash | .tabView
 ├── AppRouter.swift      # @Observable, estado del flujo raíz
 ├── RootView.swift       # renderiza el flujo actual e inyecta el router en el entorno
 └── TabNavigation/
-    ├── MainTab.swift    # enum de pestañas + icono + título
+    ├── MainTabEnum.swift    # enum de pestañas + icono + título
     ├── TabRouter.swift  # @Observable, pestaña seleccionada
     └── MainTabsView.swift
 Tests/NavigationTests/
@@ -32,16 +32,16 @@ es puramente de presentación.
 
 ## Flujo raíz
 
-`AppRouter` es un `@Observable` que guarda un `AppFlow` (`.splash` o `.tabView`, por defecto
+`AppRouter` es un `@Observable` que guarda un `AppFlowEnum` (`.splash` o `.tabView`, por defecto
 `.tabView`). `flow` es `public private(set)`; se cambia con `navigate(value:)`, que es
 `internal` a propósito —el flujo se dirige desde dentro del paquete, no desde la app—.
 
-`RootView` recibe el router y un `@ViewBuilder (AppFlow) -> Content`, pinta el contenido del
+`RootView` recibe el router y un `@ViewBuilder (AppFlowEnum) -> Content`, pinta el contenido del
 flujo activo y publica el router con `.environment(router)`.
 
 ## Tab bar
 
-`MainTab` es el enum de pestañas (`today`, `statistics`, `habits`, `settings`). Cada caso
+`MainTabEnum` es el enum de pestañas (`today`, `statistics`, `habits`, `settings`). Cada caso
 aporta su `icon` (SF Symbol, `internal`) y su `description` (`LocalizedStringResource`,
 `public`), que viene de `CoreTextsEnum`. El orden de las pestañas en pantalla lo fija el array
 `tabs` de `MainTabsView`, no `CaseIterable`.

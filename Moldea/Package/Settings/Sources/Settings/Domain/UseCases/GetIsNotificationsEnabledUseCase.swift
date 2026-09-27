@@ -19,6 +19,6 @@ struct GetIsNotificationsEnabledUseCase: GetIsNotificationsEnabledUseCaseProtoco
     }
     
     func execute() -> Bool {
-        return repository.getBool(PreferenceKey.isNotificationsEnabled)
+        return repository.getBool(PreferenceKeyEnum.isNotificationsEnabled)
     }
 }

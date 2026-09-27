@@ -368,7 +368,7 @@ struct ChartAccessibilityTitleTests {
     }
 
     @Test func tierFollowsPercentageThresholds() {
-        func tier(_ percentage: Int) -> HabitStatistic.Tier {
+        func tier(_ percentage: Int) -> HabitStatistic.TierEnum {
             HabitStatistic(id: "x", title: "x", accessibilityTitle: "x", percentage: percentage).tier
         }
 

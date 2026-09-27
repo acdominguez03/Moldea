@@ -25,7 +25,7 @@ struct HabitColorPicker: View {
     }
 
     private var customColor: Color? {
-        guard !HabitPaletteColor.allCases.contains(where: { $0.hex == selectedHex }) else {
+        guard !HabitPaletteColorEnum.allCases.contains(where: { $0.hex == selectedHex }) else {
             return nil
         }
         return HexColorConverter.color(fromHex: selectedHex)
@@ -33,13 +33,13 @@ struct HabitColorPicker: View {
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(HabitPaletteColor.allCases) { presetItem(for: $0) }
+            ForEach(HabitPaletteColorEnum.allCases) { presetItem(for: $0) }
             nativeColorPicker
         }
         .padding(.vertical, 4)
     }
 
-    private func presetItem(for paletteColor: HabitPaletteColor) -> some View {
+    private func presetItem(for paletteColor: HabitPaletteColorEnum) -> some View {
         HabitColorPickerItem(
             color: paletteColor.color,
             name: paletteColor.name,
@@ -73,7 +73,7 @@ struct HabitColorPicker: View {
 }
 
 #Preview {
-    @Previewable @State var selectedHex = HabitPaletteColor.gray.hex
+    @Previewable @State var selectedHex = HabitPaletteColorEnum.gray.hex
 
     Form {
         HabitColorPicker(

@@ -82,7 +82,7 @@ struct HabitMapperTests {
     @Test func throwsWhenScheduleIsMissing() {
         let entity = makeEntity(schedule: nil)
 
-        #expect(throws: HabitMappingError.missingSchedule(habitID: entity.id)) {
+        #expect(throws: HabitMappingErrorEnum.missingSchedule(habitID: entity.id)) {
             try HabitMapper.toDomain(entity)
         }
     }
@@ -90,7 +90,7 @@ struct HabitMapperTests {
     @Test func throwsWhenWeeklyCountHasNoTimesPerWeek() {
         let entity = makeEntity(schedule: HabitScheduleEntity(frequencyType: .weeklyCount))
 
-        #expect(throws: HabitMappingError.missingTimesPerWeek(habitID: entity.id)) {
+        #expect(throws: HabitMappingErrorEnum.missingTimesPerWeek(habitID: entity.id)) {
             try HabitMapper.toDomain(entity)
         }
     }
@@ -98,7 +98,7 @@ struct HabitMapperTests {
     @Test func throwsWhenFixedDaysHasNoWeekdays() {
         let entity = makeEntity(schedule: HabitScheduleEntity(frequencyType: .fixedDays))
 
-        #expect(throws: HabitMappingError.missingFixedWeekdays(habitID: entity.id)) {
+        #expect(throws: HabitMappingErrorEnum.missingFixedWeekdays(habitID: entity.id)) {
             try HabitMapper.toDomain(entity)
         }
     }

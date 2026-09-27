@@ -3,13 +3,13 @@ import Core
 @testable import Habits
 
 struct HabitPaletteColorTests {
-    @Test(arguments: HabitPaletteColor.allCases)
-    func hexParsesToAColor(_ paletteColor: HabitPaletteColor) {
+    @Test(arguments: HabitPaletteColorEnum.allCases)
+    func hexParsesToAColor(_ paletteColor: HabitPaletteColorEnum) {
         #expect(HexColorConverter.color(fromHex: paletteColor.hex) != nil)
     }
 
-    @Test(arguments: HabitPaletteColor.allCases)
-    func hexIsUppercaseRRGGBB(_ paletteColor: HabitPaletteColor) {
+    @Test(arguments: HabitPaletteColorEnum.allCases)
+    func hexIsUppercaseRRGGBB(_ paletteColor: HabitPaletteColorEnum) {
         let hex = paletteColor.hex
 
         #expect(hex.count == 7)
@@ -18,12 +18,12 @@ struct HabitPaletteColorTests {
     }
 
     @Test func hexesAreUnique() {
-        let hexes = HabitPaletteColor.allCases.map(\.hex)
+        let hexes = HabitPaletteColorEnum.allCases.map(\.hex)
 
         #expect(Set(hexes).count == hexes.count)
     }
 
     @Test func paletteHasThirteenColors() {
-        #expect(HabitPaletteColor.allCases.count == 13)
+        #expect(HabitPaletteColorEnum.allCases.count == 13)
     }
 }

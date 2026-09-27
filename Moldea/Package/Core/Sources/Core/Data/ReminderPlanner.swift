@@ -6,12 +6,12 @@
 import Foundation
 
 struct PlannedReminder: Equatable, Sendable {
-    enum Kind: Equatable, Sendable {
+    enum KindEnum: Equatable, Sendable {
         case habit(Habit.ID)
         case summary
     }
 
-    let kind: Kind
+    let kind: KindEnum
     let identifier: String
     let fireDate: Date
 

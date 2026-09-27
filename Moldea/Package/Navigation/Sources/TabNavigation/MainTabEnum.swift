@@ -1,5 +1,5 @@
 //
-//  MainTab.swift
+//  MainTabEnum.swift
 //  Navigation
 //
 //  Created by Andrés on 18/09/2026.
@@ -8,7 +8,7 @@
 import Foundation
 import Core
 
-public enum MainTab: Hashable, CaseIterable {
+public enum MainTabEnum: Hashable, CaseIterable {
     case today
     case statistics
     case habits

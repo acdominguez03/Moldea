@@ -14,13 +14,13 @@ private actor FakeNotificationPermissionRepository: NotificationPermissionReposi
 }
 
 private final class FakeUserDefaultsRepository: UserDefaultsRepository, @unchecked Sendable {
-    private(set) var savedValues: [PreferenceKey: Bool] = [:]
+    private(set) var savedValues: [PreferenceKeyEnum: Bool] = [:]
 
-    func getBool(_ preferenceKey: PreferenceKey) -> Bool {
+    func getBool(_ preferenceKey: PreferenceKeyEnum) -> Bool {
         savedValues[preferenceKey] ?? false
     }
 
-    func saveBool(_ preferenceKey: PreferenceKey, _ value: Bool) {
+    func saveBool(_ preferenceKey: PreferenceKeyEnum, _ value: Bool) {
         savedValues[preferenceKey] = value
     }
 }

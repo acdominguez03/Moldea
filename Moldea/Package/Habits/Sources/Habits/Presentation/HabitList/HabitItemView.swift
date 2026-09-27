@@ -8,7 +8,7 @@
 import SwiftUI
 import Core
 
-struct HabitView: View {
+struct HabitItemView: View {
     let habit: Habit
     let onHabitClicked: () -> Void
     let onSetHabitActiveClicked: () -> Void
@@ -17,7 +17,7 @@ struct HabitView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var color: Color {
-        HexColorConverter.color(fromHex: habit.color) ?? HabitPaletteColor.gray.color
+        HexColorConverter.color(fromHex: habit.color) ?? HabitPaletteColorEnum.gray.color
     }
     
     private var summary: HabitScheduleSummaryEnum {
@@ -112,25 +112,25 @@ struct HabitView: View {
 
 #Preview {
     List {
-        HabitView(
+        HabitItemView(
             habit: .preview(name: "Beber agua", frequency: .daily),
             onHabitClicked: {},
             onSetHabitActiveClicked: {},
             onDelete: {}
         )
-        HabitView(
+        HabitItemView(
             habit: .preview(name: "Leer", icon: "book", color: "#3A6BC6", isActive: false, frequency: .daily, repetitionsPerDay: 3),
             onHabitClicked: {},
             onSetHabitActiveClicked: {},
             onDelete: {}
         )
-        HabitView(
+        HabitItemView(
             habit: .preview(name: "Gimnasio", icon: "dumbbell", color: "#C8372D", frequency: .fixedDays(weekdays: [2, 4, 6])),
             onHabitClicked: {},
             onSetHabitActiveClicked: {},
             onDelete: {}
         )
-        HabitView(
+        HabitItemView(
             habit: .preview(name: "Correr", icon: "figure.run", color: "#6E9440", frequency: .weeklyCount(timesPerWeek: 3)),
             onHabitClicked: {},
             onSetHabitActiveClicked: {},

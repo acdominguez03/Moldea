@@ -47,7 +47,7 @@ enum GenerableHabitMapper {
         }
     }
 
-    static func calendarWeekday(_ weekday: GenerableWeekday) -> Int {
+    static func calendarWeekday(_ weekday: GenerableWeekdayEnum) -> Int {
         switch weekday {
         case .sunday: 1
         case .monday: 2

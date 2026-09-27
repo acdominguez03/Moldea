@@ -15,8 +15,8 @@ final class HabitFormViewModel: BaseViewModel {
     let timesADayRange = 1...20
     let timesAWeekRange = 1...7
     
-    private(set) var selectedColorHex: String = HabitPaletteColor.gray.hex
-    private(set) var selectedIcon: String = HabitPaletteIcon.drop.systemName
+    private(set) var selectedColorHex: String = HabitPaletteColorEnum.gray.hex
+    private(set) var selectedIcon: String = HabitPaletteIconEnum.drop.systemName
     private(set) var name: String = ""
     private(set) var selectedFrequency: HabitFrequencyEnum = .everyDay
     private(set) var selectedTimesADay: Int = 1
@@ -42,8 +42,8 @@ final class HabitFormViewModel: BaseViewModel {
         id: Habit.ID? = nil,
         isActive: Bool = true,
         name: String = "",
-        color: String = HabitPaletteColor.gray.hex,
-        icon: String = HabitPaletteIcon.drop.systemName,
+        color: String = HabitPaletteColorEnum.gray.hex,
+        icon: String = HabitPaletteIconEnum.drop.systemName,
         frequency: HabitFrequency = .daily,
         repetitionsPerDay: Int = 1,
         createHabitUseCase: any CreateHabitUseCase,
@@ -138,7 +138,7 @@ final class HabitFormViewModel: BaseViewModel {
     }
     
     var selectedColor: Color {
-        HexColorConverter.color(fromHex: selectedColorHex) ?? HabitPaletteColor.gray.color
+        HexColorConverter.color(fromHex: selectedColorHex) ?? HabitPaletteColorEnum.gray.color
     }
 
     func selectColor(hex: String) {

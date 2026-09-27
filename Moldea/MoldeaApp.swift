@@ -102,7 +102,7 @@ struct MoldeaApp: App {
     }
 
     @ViewBuilder
-    private func tabContent(for tab: MainTab) -> some View {
+    private func tabContent(for tab: MainTabEnum) -> some View {
         switch tab {
         case .today:
             TodayView()

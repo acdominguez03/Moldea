@@ -44,8 +44,8 @@ Sources/Habits/
     │   ├── Model/WeekdayItem.swift
     │   └── Components/                  # HabitSummaryView, HabitIconPicker,
     │                                    # HabitColorPicker, HabitFrequencyPicker…
-    ├── Enums/                           # HabitsTextsEnum, HabitPaletteColor,
-    │                                    # HabitPaletteIcon, HabitFrequencyEnum…
+    ├── Enums/                           # HabitsTextsEnum, HabitPaletteColorEnum,
+    │                                    # HabitPaletteIconEnum, HabitFrequencyEnum…
     └── Resources/Localizable.xcstrings
 Tests/HabitsTests/
 ```
@@ -66,7 +66,7 @@ dentro de un `List`: envuelve `HabitCardView(habit:)` y le añade el chevron y l
 `HabitsView` es el punto de entrada público: un `NavigationStack` con la lista de hábitos —que
 lee con `@HabitsQuery`, de `Core`, y pinta con `HabitView`—, un `ContentUnavailableView` cuando
 no hay ninguno, el título en grande y un botón `+` que presenta `CreateHabitView` en una hoja.
-La compone el target `Moldea` en el caso `.habits` de `MainTab`.
+La compone el target `Moldea` en el caso `.habits` de `MainTabEnum`.
 
 `HabitsView` es `public init()`: lee `\.habitsDependencies` y pinta
 `HabitsContentView(viewModel: dependencies.makeHabitsViewModel())`, que es la lista (patrón
@@ -114,7 +114,7 @@ a un `HabitFrequency` (`makeFrequency()`).
 Contrato y razonamiento en el `CLAUDE.md` raíz, en _Colores de los hábitos_. Resumen de cómo lo
 aplica este paquete:
 
-- `HabitPaletteColor`: 13 casos (`red, orange, yellow, green, mint, teal, blue, indigo, purple,
+- `HabitPaletteColorEnum`: 13 casos (`red, orange, yellow, green, mint, teal, blue, indigo, purple,
 pink, gray, brown, stone`), cada uno con `hex`, `color` (derivado del hex con
   `HexColorConverter`, con `.gray` de red de seguridad) y `name` localizado. El orden de
   `allCases` es el del picker: 7 en la primera fila y los 6 restantes más el `ColorPicker`
@@ -163,7 +163,7 @@ Para añadir un texto: añade la entrada al `Localizable.xcstrings` (en `en` y `
 `"extractionState": "manual"`) y expón la constante en `HabitsTextsEnum`.
 
 Los textos que acaben usándose desde más de un módulo se mueven a `CoreTextsEnum`. Ojo: el
-título de la pestaña ya vive en `Core` como `habits_title` —lo consume `MainTab`—;
+título de la pestaña ya vive en `Core` como `habits_title` —lo consume `MainTabEnum`—;
 `habits_screen_title` es el título de la pantalla, no el de la pestaña. `Guardar` y `Cancelar`
 también vienen de `Core` (`CoreTextsEnum.save`, `.cancel`).
 
@@ -179,7 +179,7 @@ Swift Testing. Los repositorios y casos de uso falsos son `actor` (los protocolo
 `HabitScheduleSummaryTests` con el resumen.
 
 - `HabitAppearanceDefaultsTests`: ata `HabitAppearanceDefaultsEnum` (en `Core`) a
-  `HabitPaletteColor.gray.hex` y a `HabitPaletteIcon.drop.systemName`. Existe porque `Core` no
+  `HabitPaletteColorEnum.gray.hex` y a `HabitPaletteIconEnum.drop.systemName`. Existe porque `Core` no
   puede importar `Habits`, así que los valores por defecto de un hábito creado por voz están
   duplicados; este test es lo único que impide que se separen en silencio.
 - `CreateHabitViewModelTests`: color por defecto y selección (paleta, personalizado, hex

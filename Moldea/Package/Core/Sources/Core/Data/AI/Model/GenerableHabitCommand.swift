@@ -8,7 +8,7 @@
 import FoundationModels
 
 @Generable
-enum GenerableCommandIntent {
+enum GenerableCommandIntentEnum {
     case create
     case delete
     case complete
@@ -19,7 +19,7 @@ struct GenerableCommandDecision {
     var reasoning: String
 
     @Guide(description: "El comando, y nada más")
-    var command: GenerableCommandIntent
+    var command: GenerableCommandIntentEnum
 }
 
 @Generable
@@ -31,14 +31,14 @@ struct GenerableActivityMatch {
 }
 
 @Generable
-enum GenerableFrequencyKind {
+enum GenerableFrequencyKindEnum {
     case daily
     case timesPerWeek
     case fixedWeekdays
 }
 
 @Generable
-enum GenerableWeekday {
+enum GenerableWeekdayEnum {
     case monday
     case tuesday
     case wednesday
@@ -53,13 +53,13 @@ struct GenerableHabitDraft {
     @Guide(description: "Nombre corto del hábito, sin cantidades")
     var name: String
 
-    var frequency: GenerableFrequencyKind
+    var frequency: GenerableFrequencyKindEnum
 
     @Guide(description: "Veces por semana, de 1 a 7", .range(1...7))
     var timesPerWeek: Int
 
     @Guide(description: "Días de la semana que menciona la frase", .minimumCount(1))
-    var weekdays: [GenerableWeekday]
+    var weekdays: [GenerableWeekdayEnum]
 
     @Guide(description: "Veces al día", .range(1...20))
     var repetitionsPerDay: Int

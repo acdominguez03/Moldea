@@ -17,6 +17,6 @@ struct GetIsDailySummaryEnabledUseCase: GetIsDailySummaryEnabledUseCaseProtocol 
     }
 
     func execute() -> Bool {
-        repository.getBool(PreferenceKey.isDailySummaryEnabled)
+        repository.getBool(PreferenceKeyEnum.isDailySummaryEnabled)
     }
 }

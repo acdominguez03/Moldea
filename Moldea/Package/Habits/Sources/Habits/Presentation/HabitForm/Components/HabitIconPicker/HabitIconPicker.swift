@@ -21,12 +21,12 @@ struct HabitIconPicker: View {
     }
 
     private var customIcon: String? {
-        HabitPaletteIcon.allCases.contains { $0.systemName == selectedIcon } ? nil : selectedIcon
+        HabitPaletteIconEnum.allCases.contains { $0.systemName == selectedIcon } ? nil : selectedIcon
     }
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 10) {
-            ForEach(HabitPaletteIcon.allCases) { icon in
+            ForEach(HabitPaletteIconEnum.allCases) { icon in
                 HabitIconPickerItem(
                     systemName: icon.systemName,
                     name: String(localized: icon.name),
@@ -43,7 +43,7 @@ struct HabitIconPicker: View {
 }
 
 #Preview {
-    @Previewable @State var selectedIcon = HabitPaletteIcon.drop.systemName
+    @Previewable @State var selectedIcon = HabitPaletteIconEnum.drop.systemName
 
     Form {
         HabitIconPicker(

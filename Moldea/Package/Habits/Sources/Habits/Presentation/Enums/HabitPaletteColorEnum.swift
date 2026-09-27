@@ -1,5 +1,5 @@
 //
-//  HabitPaletteColor.swift
+//  HabitPaletteColorEnum.swift
 //  Habits
 //
 //  Created by Ismael Cordón Domínguez on 19/9/26.
@@ -8,7 +8,7 @@
 import SwiftUI
 import Core
 
-enum HabitPaletteColor: CaseIterable, Identifiable {
+enum HabitPaletteColorEnum: CaseIterable, Identifiable {
     case red
     case orange
     case yellow

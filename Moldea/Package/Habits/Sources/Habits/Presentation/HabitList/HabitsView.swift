@@ -52,7 +52,7 @@ struct HabitsContentView: View {
                     List {
                         Section {
                             ForEach(habits) { habit in
-                                HabitView(
+                                HabitItemView(
                                     habit: habit,
                                     onHabitClicked: {
                                         habitsViewModel.onHabitClicked(habit)

@@ -8,16 +8,16 @@
 import Foundation
 
 enum HabitReminderMessageBuilder {
-    static func body(frequency: HabitFrequency, repetitionsPerDay: Int) -> String {
+    static func body(frequency: HabitFrequency, repetitionsPerDay: Int) -> LocalizedStringResource {
         switch frequency {
         case .daily:
             return repetitionsPerDay > 1
-                ? String(localized: CoreTextsEnum.habitReminderDailyMultipleBody(repetitionsPerDay))
-                : String(localized: CoreTextsEnum.habitReminderDailySingleBody)
+                ? CoreTextsEnum.habitReminderDailyMultipleBody(repetitionsPerDay)
+                : CoreTextsEnum.habitReminderDailySingleBody
         case .weeklyCount(let timesPerWeek):
-            return String(localized: CoreTextsEnum.habitReminderWeeklyCountBody(timesPerWeek))
+            return CoreTextsEnum.habitReminderWeeklyCountBody(timesPerWeek)
         case .fixedDays:
-            return String(localized: CoreTextsEnum.habitReminderFixedDaysBody)
+            return CoreTextsEnum.habitReminderFixedDaysBody
         }
     }
 

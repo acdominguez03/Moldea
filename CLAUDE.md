@@ -194,7 +194,7 @@ target `Moldea`.
   eso pertenece a `Core`.
 - Solo el target `Moldea` importa features. `MoldeaApp` es el punto de composición: crea el
   `ModelContainer` y `AppDependencies`, inyecta las dependencias en el entorno, instancia los routers y decide qué vista va en cada
-  `MainTab`.
+  `MainTabEnum`.
 
 ### Las tres capas de un paquete
 
@@ -230,7 +230,7 @@ Core/
 │   └── Repository/    HabitRepository                        (protocolo)
 └── Data/
     ├── Model/         HabitEntity, HabitScheduleEntity,
-    │                  HabitCompletionEntity, FrequencyType   (@Model, internal)
+    │                  HabitCompletionEntity, FrequencyTypeEnum   (@Model, internal)
     ├── Mappers/       HabitMapper                             (Entity ⇄ dominio)
     ├── MoldeaSchema.swift
     └── SwiftDataHabitRepository.swift                         (@ModelActor)
@@ -246,9 +246,9 @@ Core/
 - **Frecuencia sin estados imposibles.** `HabitFrequency` es un enum con valores asociados
   (`.daily`, `.weeklyCount(timesPerWeek:)`, `.fixedDays(weekdays:)`), así que no se puede
   representar un `.daily` con `timesPerWeek`. `HabitScheduleEntity` guarda los campos sueltos
-  (`FrequencyType`, `timesPerWeek?`, `fixedWeekdays?`) y `HabitMapper` los convierte. Si los
+  (`FrequencyTypeEnum`, `timesPerWeek?`, `fixedWeekdays?`) y `HabitMapper` los convierte. Si los
   datos guardados son incoherentes (p. ej. `weeklyCount` sin `timesPerWeek`),
-  `HabitMapper.toDomain` lanza `HabitMappingError`; no rellena valores por defecto. El mapper
+  `HabitMapper.toDomain` lanza `HabitMappingErrorEnum`; no rellena valores por defecto. El mapper
   solo valida estructura, no reglas de negocio.
 - **`id` propio.** `HabitEntity.id` (`UUID`, único) es la identidad de dominio; nada depende
   del `PersistentIdentifier` de SwiftData.
@@ -344,13 +344,13 @@ Por qué hex y no otra cosa:
 
 - `Color` de SwiftUI **no es `Codable`**, así que SwiftData no puede guardarlo.
 - Guardar la clave de la paleta (`"blue"`) obligaría a `Today`, `Statistics` y los widgets a
-  conocer `HabitPaletteColor`, que es de `Habits`, y las features no se conocen entre sí.
+  conocer `HabitPaletteColorEnum`, que es de `Habits`, y las features no se conocen entre sí.
 - La pantalla de creación tiene un `ColorPicker` nativo que devuelve cualquier color; con hex
   no hay que distinguir entre colores de paleta y personalizados.
 
 Cómo funciona:
 
-- `HabitPaletteColor` (en `Habits`) es la paleta de 13 colores; cada caso lleva su `hex`, y
+- `HabitPaletteColorEnum` (en `Habits`) es la paleta de 13 colores; cada caso lleva su `hex`, y
   `color` se calcula a partir de él, así que el hex es la única fuente de verdad. Orden:
   `red, orange, yellow, green, mint, teal, blue, indigo, purple, pink, gray, brown, stone`. Los
   valores no son los colores del sistema, sino los definidos para la app.
@@ -361,7 +361,7 @@ Cómo funciona:
   con `@Environment(\.self)`). `Color.Resolved` usa sRGB de rango extendido, así que el
   componente se recorta a 0...1 antes de pasar a 0...255. Sin canal alfa.
 - Un color es "personalizado" si su hex no está en la paleta.
-- `HexColorConverter.color(fromHex:)` devuelve `nil` si el texto no es válido; `HabitPaletteColor`
+- `HexColorConverter.color(fromHex:)` devuelve `nil` si el texto no es válido; `HabitPaletteColorEnum`
   y el view model tienen `.gray` como red de seguridad. Un test garantiza que los 13 hex de la
   paleta parsean, así que el fallback no debería usarse nunca.
 - `CreateHabitUseCase` valida el formato: `#` más 6 dígitos hexadecimales **ASCII**.
@@ -430,8 +430,8 @@ Reglas:
 
 Dos niveles, ambos en `Navigation` y ambos con routers `@Observable`:
 
-- `AppRouter` / `AppFlow` — flujo raíz (`.splash`, `.tabView`), renderizado por `RootView`.
-- `TabRouter` / `MainTab` — pestaña seleccionada, renderizada por `MainTabsView`.
+- `AppRouter` / `AppFlowEnum` — flujo raíz (`.splash`, `.tabView`), renderizado por `RootView`.
+- `TabRouter` / `MainTabEnum` — pestaña seleccionada, renderizada por `MainTabsView`.
 
 Una feature no navega a otra feature por sí misma: publica la intención (callback o router del
 entorno) y decide el nivel de composición.

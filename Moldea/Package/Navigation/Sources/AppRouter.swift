@@ -11,13 +11,13 @@ import SwiftUI
 
 @Observable
 public class AppRouter {
-    public private(set) var flow: AppFlow
+    public private(set) var flow: AppFlowEnum
 
-    public init(initialFlow: AppFlow = .tabView) {
+    public init(initialFlow: AppFlowEnum = .tabView) {
         self.flow = initialFlow
     }
 
-    func navigate(value: AppFlow) {
+    func navigate(value: AppFlowEnum) {
         flow = value
     }
 }

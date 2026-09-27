@@ -110,8 +110,8 @@ struct HabitFormViewModelTests {
         id: Habit.ID? = nil,
         isActive: Bool = true,
         name: String = "",
-        color: String = HabitPaletteColor.gray.hex,
-        icon: String = HabitPaletteIcon.drop.systemName,
+        color: String = HabitPaletteColorEnum.gray.hex,
+        icon: String = HabitPaletteIconEnum.drop.systemName,
         frequency: HabitFrequency = .daily,
         repetitionsPerDay: Int = 1,
         useCase: FakeCreateHabitUseCase = FakeCreateHabitUseCase(),
@@ -144,7 +144,7 @@ struct HabitFormViewModelTests {
         let viewModel = makeViewModel(
             id: id,
             name: "Meditar",
-            color: HabitPaletteColor.mint.hex,
+            color: HabitPaletteColorEnum.mint.hex,
             icon: "leaf",
             frequency: .daily,
             repetitionsPerDay: 3
@@ -152,7 +152,7 @@ struct HabitFormViewModelTests {
 
         #expect(viewModel.isEditing)
         #expect(viewModel.name == "Meditar")
-        #expect(viewModel.selectedColorHex == HabitPaletteColor.mint.hex)
+        #expect(viewModel.selectedColorHex == HabitPaletteColorEnum.mint.hex)
         #expect(viewModel.selectedIcon == "leaf")
         #expect(viewModel.selectedTimesADay == 3)
         #expect(viewModel.selectedFrequency == .everyDay)
@@ -177,17 +177,17 @@ struct HabitFormViewModelTests {
     @Test func defaultColorIsGray() {
         let viewModel = makeViewModel()
 
-        #expect(viewModel.selectedColorHex == HabitPaletteColor.gray.hex)
-        #expect(viewModel.selectedColor == HabitPaletteColor.gray.color)
+        #expect(viewModel.selectedColorHex == HabitPaletteColorEnum.gray.hex)
+        #expect(viewModel.selectedColor == HabitPaletteColorEnum.gray.color)
     }
 
     @Test func selectingAPaletteColorStoresItsHex() {
         let viewModel = makeViewModel()
 
-        viewModel.selectColor(hex: HabitPaletteColor.blue.hex)
+        viewModel.selectColor(hex: HabitPaletteColorEnum.blue.hex)
 
         #expect(viewModel.selectedColorHex == "#3A6BC6")
-        #expect(viewModel.selectedColor == HabitPaletteColor.blue.color)
+        #expect(viewModel.selectedColor == HabitPaletteColorEnum.blue.color)
     }
 
     @Test func selectingACustomColorKeepsItsHex() {
@@ -204,7 +204,7 @@ struct HabitFormViewModelTests {
 
         viewModel.selectColor(hex: "not-a-color")
 
-        #expect(viewModel.selectedColor == HabitPaletteColor.gray.color)
+        #expect(viewModel.selectedColor == HabitPaletteColorEnum.gray.color)
     }
 
     // MARK: canSave
@@ -236,7 +236,7 @@ struct HabitFormViewModelTests {
         let useCase = FakeCreateHabitUseCase()
         let viewModel = makeViewModel(useCase: useCase)
         viewModel.onHabitNameChanged("Beber agua")
-        viewModel.selectColor(hex: HabitPaletteColor.blue.hex)
+        viewModel.selectColor(hex: HabitPaletteColorEnum.blue.hex)
         viewModel.selectIcon("figure.run")
         viewModel.onIncrementTimeADayClicked()
 
@@ -328,7 +328,7 @@ struct HabitFormViewModelTests {
             updateUseCase: updateUseCase
         )
         viewModel.onHabitNameChanged("Meditar cada día")
-        viewModel.selectColor(hex: HabitPaletteColor.blue.hex)
+        viewModel.selectColor(hex: HabitPaletteColorEnum.blue.hex)
         viewModel.selectIcon("leaf")
 
         await viewModel.save()

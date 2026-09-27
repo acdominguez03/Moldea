@@ -10,11 +10,11 @@ import Foundation
 
 @Observable
 public class TabRouter {
-    public var selectedTab: MainTab = .today
+    public var selectedTab: MainTabEnum = .today
     
     public init() {}
     
-    public func present(tab: MainTab) {
+    public func present(tab: MainTabEnum) {
         selectedTab = tab
     }
 }

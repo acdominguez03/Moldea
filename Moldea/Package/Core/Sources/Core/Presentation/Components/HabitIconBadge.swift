@@ -10,12 +10,12 @@ import SwiftUI
 /// Icono del hábito sobre un círculo de su color al 20 %. Lo comparten el resumen de la pantalla
 /// de creación y las filas de la lista para que se vean igual.
 public struct HabitIconBadge: View {
-    public enum Style: Sendable {
+    public enum StyleEnum: Sendable {
         case tinted
         case solid
     }
 
-    public enum Size: Sendable {
+    public enum SizeEnum: Sendable {
         case regular
         case large
 
@@ -36,10 +36,10 @@ public struct HabitIconBadge: View {
 
     private let color: Color
     private let icon: String
-    private let style: Style
-    private let size: Size
+    private let style: StyleEnum
+    private let size: SizeEnum
 
-    public init(color: Color, icon: String, style: Style = .tinted, size: Size = .regular) {
+    public init(color: Color, icon: String, style: StyleEnum = .tinted, size: SizeEnum = .regular) {
         self.color = color
         self.icon = icon
         self.style = style
@@ -53,7 +53,7 @@ public struct HabitIconBadge: View {
         }
     }
 
-    private var effectiveStyle: Style {
+    private var effectiveStyle: StyleEnum {
         guard style == .tinted else { return style }
         let ratio = ContrastingColor.contrastRatio(
             of: color,
@@ -75,14 +75,14 @@ public struct HabitIconBadge: View {
             .accessibilityHidden(true)
     }
 
-    private func glyphColor(for style: Style) -> Color {
+    private func glyphColor(for style: StyleEnum) -> Color {
         switch style {
         case .tinted: color
         case .solid: ContrastingColor.foreground(on: color, in: environment)
         }
     }
 
-    private func backgroundColor(for style: Style) -> Color {
+    private func backgroundColor(for style: StyleEnum) -> Color {
         switch style {
         case .tinted: color.opacity(Self.tintOpacity)
         case .solid: color

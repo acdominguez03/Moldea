@@ -19,6 +19,6 @@ struct GetIsNotificationPermissionAllowedUseCase: GetIsNotificationPermissionAll
     }
 
     func execute() -> Bool {
-        return repository.getBool(PreferenceKey.isNotificationPermissionAllowed)
+        return repository.getBool(PreferenceKeyEnum.isNotificationPermissionAllowed)
     }
 }

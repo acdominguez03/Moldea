@@ -50,7 +50,7 @@ Sources/Core/
 │   │   ├── HabitEntity.swift
 │   │   ├── HabitScheduleEntity.swift
 │   │   ├── HabitCompletionEntity.swift
-│   │   └── FrequencyType.swift
+│   │   └── FrequencyTypeEnum.swift
 │   ├── Mappers/
 │   │   └── HabitMapper.swift
 │   ├── AI/
@@ -68,7 +68,7 @@ Sources/Core/
 │   ├── HabitsQuery.swift
 │   ├── MoldeaSchema.swift
 │   ├── SwiftDataHabitRepository.swift
-│   ├── PreferencesKey.swift
+│   ├── PreferenceKeyEnum.swift
 │   ├── UserDefaultsRepositoryImpl.swift
 │   ├── UNUserNotificationCenterPermissionRepository.swift
 │   └── AVAudioApplicationMicrophonePermissionRepository.swift
@@ -130,7 +130,7 @@ las valida el caso de uso.
 - `NewHabitDraft`: `name`, `frequency` y `repetitionsPerDay`. **No lleva color ni icono**,
   porque al hablar no se dicen: los pone `HabitAppearanceDefaultsEnum`.
 - `HabitAppearanceDefaultsEnum`: `colorHex` (`#5B6470`) e `icon` (`drop`) con los que nace un hábito
-  creado por voz. Están duplicados respecto a `HabitPaletteColor`/`HabitPaletteIcon`, que viven
+  creado por voz. Están duplicados respecto a `HabitPaletteColorEnum`/`HabitPaletteIconEnum`, que viven
   en `Habits` y `Core` no puede importar; `HabitAppearanceDefaultsTests` (en `HabitsTests`) es lo
   que impide que se separen en silencio.
 
@@ -226,10 +226,10 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
 - **Entidades de SwiftData**: `HabitEntity` (`id` único, `active`, fechas, relaciones en
   cascada con el schedule y las completions), `HabitScheduleEntity` (guarda `frequencyType`,
   `timesPerWeek?`, `fixedWeekdays: [Int]?` y `repetitionsPerDay`) y `HabitCompletionEntity`
-  (`id` único, `day` con `#Index`). `FrequencyType` es la etiqueta de persistencia de la
+  (`id` único, `day` con `#Index`). `FrequencyTypeEnum` es la etiqueta de persistencia de la
   frecuencia; el dominio usa `HabitFrequency`.
 - **`HabitMapper`**: `makeEntity(from:)` (dominio → entidad) y `toDomain(_:) throws`, que lanza
-  `HabitMappingError` (`missingSchedule`, `missingTimesPerWeek`, `missingFixedWeekdays`, todos
+  `HabitMappingErrorEnum` (`missingSchedule`, `missingTimesPerWeek`, `missingFixedWeekdays`, todos
   con el `habitID`) si los datos son incoherentes. No rellena valores por defecto: ocultaría la
   corrupción. `apply(_:to:)` traduce un `HabitSchedule` a los campos de un
   `HabitScheduleEntity` existente o nuevo, con `fixedWeekdays` ordenado para que lo persistido
@@ -262,7 +262,7 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
   con `-inMemoryStore` (tests de UI). Es determinista (semilla fija) y los hábitos no llevan
   recordatorio. Escribe en consola cuánto ha tardado. Para volver a sembrar: borra la app. No lo
   usan los previews: esos siguen con `SampleDataSeeder`. Ya que vive en `Core`, en Release ni se compila.
-- **`PreferenceKey`** (`public enum`, raw `String`): claves de `UserDefaults`. Hoy tiene
+- **`PreferenceKeyEnum`** (`public enum`, raw `String`): claves de `UserDefaults`. Hoy tiene
   `isNotificationsEnabled` (preferencia de producto: "quiero que mis hábitos avisen", la que
   controla `Settings`), `isNotificationPermissionAllowed` (espejo del permiso real del
   sistema) e `isMicrophonePermissionAllowed` (ídem para el micrófono). Son independientes a propósito: el permiso del sistema puede estar concedido y el
@@ -332,7 +332,7 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
     real. El borrado de pendientes es asíncrono, y se espera (máximo 1 s) a verlo aplicado.
   - **Aviso de la noche** (`DailySummaryReminder`, 21:30 fijo, no configurable): un aviso extra con
     texto fijo ("Tienes hábitos pendientes por completar") que invita a entrar a revisarlos.
-    Se planifica con `includesDailySummary`, que sale de `PreferenceKey.isDailySummaryEnabled`, y
+    Se planifica con `includesDailySummary`, que sale de `PreferenceKeyEnum.isDailySummaryEnabled`, y
     solo hay uno por día con hábitos programados. Cuenta como pendiente lo mismo que la pestaña
     Diario de Today: hábitos activos que tocan ese día (`isScheduled(on:)`), así que los de "X
     veces por semana" no cuentan, y el aviso propio de cada hábito no influye. Hoy solo se
@@ -688,7 +688,7 @@ otros dos. **Lo encontró `HabitCommandPromptEvalTests`, no una revisión a ojo.
 
 ### Los días se piden por nombre, nunca por número
 
-`weekdays` es `[GenerableWeekday]`, un enum con los siete días, y la conversión a
+`weekdays` es `[GenerableWeekdayEnum]`, un enum con los siete días, y la conversión a
 `Calendar.weekday` la hace `GenerableHabitMapper.calendarWeekday(_:)` en Swift.
 
 Antes era `[Int]` con `@Guide(description: "1 domingo hasta 7 sábado", .element(.range(1...7)))`,
@@ -1068,7 +1068,7 @@ contexto, o el proceso de tests se cae. Los `*Entity` se ven con `@testable impo
   completions de más en base de datos no pasen del 100 %.
 - `GenerableHabitMapperTests`: draft → dominio con las tres frecuencias (ignorando los campos de
   las otras dos), nombre recortado, días duplicados, `timesPerWeek` fuera de rango y
-  `fixedWeekdays` vacío; **la tabla día a día de `GenerableWeekday` → `Calendar.weekday`**, que
+  `fixedWeekdays` vacío; **la tabla día a día de `GenerableWeekdayEnum` → `Calendar.weekday`**, que
   es lo que habría cazado el bug del desfase; nombre → `Habit.ID` ignorando mayúsculas y
   espacios, `.habitNotFound`, y nombre duplicado resuelto al primero.
 - `HabitCommandViewModelTests`: cubre **todas las transiciones de `HabitCommandPhaseEnum**`, que

@@ -5,9 +5,9 @@ import Foundation
 struct GenerableHabitMapperTests {
     private func makeGenerated(
         name: String = "Correr",
-        frequency: GenerableFrequencyKind = .daily,
+        frequency: GenerableFrequencyKindEnum = .daily,
         timesPerWeek: Int = 1,
-        weekdays: [GenerableWeekday] = [.monday],
+        weekdays: [GenerableWeekdayEnum] = [.monday],
         repetitionsPerDay: Int = 1
     ) -> GenerableHabitDraft {
         GenerableHabitDraft(
@@ -22,14 +22,14 @@ struct GenerableHabitMapperTests {
     // MARK: Draft
 
     @Test(arguments: [
-        (GenerableFrequencyKind.daily, 5, [GenerableWeekday.monday, .wednesday], HabitFrequency.daily),
+        (GenerableFrequencyKindEnum.daily, 5, [GenerableWeekdayEnum.monday, .wednesday], HabitFrequency.daily),
         (.timesPerWeek, 3, [.monday, .wednesday], .weeklyCount(timesPerWeek: 3)),
         (.fixedWeekdays, 5, [.monday, .wednesday, .friday], .fixedDays(weekdays: [2, 4, 6])),
     ])
     func `Maps every frequency kind ignoring the other fields`(
-        kind: GenerableFrequencyKind,
+        kind: GenerableFrequencyKindEnum,
         timesPerWeek: Int,
-        weekdays: [GenerableWeekday],
+        weekdays: [GenerableWeekdayEnum],
         expected: HabitFrequency
     ) throws {
         let draft = try GenerableHabitMapper.draft(
@@ -57,7 +57,7 @@ struct GenerableHabitMapperTests {
     }
 
     @Test(arguments: [
-        (GenerableWeekday.sunday, 1),
+        (GenerableWeekdayEnum.sunday, 1),
         (.monday, 2),
         (.tuesday, 3),
         (.wednesday, 4),
@@ -66,7 +66,7 @@ struct GenerableHabitMapperTests {
         (.saturday, 7),
     ])
     func `Maps each weekday to its Calendar value`(
-        weekday: GenerableWeekday,
+        weekday: GenerableWeekdayEnum,
         expected: Int
     ) throws {
         let draft = try GenerableHabitMapper.draft(

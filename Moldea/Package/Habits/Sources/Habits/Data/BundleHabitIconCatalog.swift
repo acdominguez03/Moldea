@@ -8,7 +8,7 @@
 import Foundation
 
 struct BundleHabitIconCatalog: HabitIconCatalog {
-    enum CatalogError: Error {
+    enum CatalogErrorEnum: Error {
         case resourceNotFound
     }
 
@@ -19,7 +19,7 @@ struct BundleHabitIconCatalog: HabitIconCatalog {
     @concurrent
     private static func readFamilies() async throws -> [HabitIconFamily] {
         guard let url = Bundle.module.url(forResource: "habit-icon-families", withExtension: "json") else {
-            throw CatalogError.resourceNotFound
+            throw CatalogErrorEnum.resourceNotFound
         }
         let data = try Data(contentsOf: url)
         let catalog = try JSONDecoder().decode(CatalogDTO.self, from: data)

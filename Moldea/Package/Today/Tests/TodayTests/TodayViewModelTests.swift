@@ -23,8 +23,8 @@ actor FakeToggleHabitCompletionUseCase: ToggleHabitCompletionUseCase {
         day: Date,
         completedCount: Int,
         repetitionsPerDay: Int,
-        mode: ToggleHabitCompletionMode
-    ) async throws -> ToggleHabitCompletionResult {
+        mode: ToggleHabitCompletionModeEnum
+    ) async throws -> ToggleHabitCompletionResultEnum {
         if let error { throw error }
         calls.append(
             ToggleCall(
