@@ -13,6 +13,7 @@ struct ChooseHabitIconView: View {
     @State private var searchText = ""
     @State private var selectedFamilyKey: String?
     @State private var scrollRequest: ScrollRequest?
+    @State private var lineWidth: CGFloat?
 
     private struct ScrollRequest: Equatable {
         let familyKey: String
@@ -26,8 +27,11 @@ struct ChooseHabitIconView: View {
     @ScaledMetric(relativeTo: .title2) private var minimumItemSize: CGFloat = 44
     @ScaledMetric(relativeTo: .title2) private var maximumItemSize: CGFloat = 52
 
-    private var columns: [GridItem] {
-        [GridItem(.adaptive(minimum: minimumItemSize, maximum: maximumItemSize), spacing: 10)]
+    private let itemSpacing: CGFloat = 10
+
+    private var columnCount: Int {
+        guard let lineWidth, lineWidth > 0 else { return 6 }
+        return max(1, Int((lineWidth + itemSpacing) / (minimumItemSize + itemSpacing)))
     }
 
     init(
@@ -91,21 +95,17 @@ struct ChooseHabitIconView: View {
             List {
                 ForEach(sections) { family in
                     Section {
-                        LazyVGrid(columns: columns, spacing: 10) {
-                            ForEach(family.symbols, id: \.self) { symbol in
-                                HabitIconPickerItem(
-                                    systemName: symbol,
-                                    name: symbol.replacingOccurrences(of: ".", with: " "),
-                                    isSelected: symbol == selectedIcon,
-                                    tint: tint,
-                                    action: {
-                                        onIconSelected(symbol)
-                                        dismiss()
-                                    }
-                                )
-                            }
+                        let lines = family.symbols.chunked(into: columnCount)
+                        ForEach(lines.indices, id: \.self) { index in
+                            let isFirst = index == 0
+                            let isLast = index == lines.count - 1
+                            iconLine(lines[index])
+                                .padding(.top, isFirst ? 4 : 0)
+                                .padding(.bottom, isLast ? 4 : 0)
+                                .listRowInsets(.top, isFirst ? nil : itemSpacing / 2)
+                                .listRowInsets(.bottom, isLast ? nil : itemSpacing / 2)
+                                .listRowSeparator(.hidden)
                         }
-                        .padding(.vertical, 4)
                     } header: {
                         Text(family.name)
                     }
@@ -117,6 +117,41 @@ struct ChooseHabitIconView: View {
                 guard let request else { return }
                 withAnimation { proxy.scrollTo(request.familyKey, anchor: .top) }
             }
+        }
+    }
+
+    private func iconLine(_ symbols: [String]) -> some View {
+        HStack(spacing: itemSpacing) {
+            ForEach(symbols, id: \.self) { symbol in
+                HabitIconPickerItem(
+                    systemName: symbol,
+                    name: symbol.replacingOccurrences(of: ".", with: " "),
+                    isSelected: symbol == selectedIcon,
+                    tint: tint,
+                    action: {
+                        onIconSelected(symbol)
+                        dismiss()
+                    }
+                )
+                .frame(maxWidth: maximumItemSize)
+                .frame(maxWidth: .infinity)
+            }
+            ForEach(symbols.count..<columnCount, id: \.self) { _ in
+                Color.clear.frame(maxWidth: .infinity)
+            }
+        }
+        .onGeometryChange(for: CGFloat.self) { geometry in
+            geometry.size.width
+        } action: { width in
+            lineWidth = width
+        }
+    }
+}
+
+private extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map { start in
+            Array(self[start..<Swift.min(start + size, count)])
         }
     }
 }

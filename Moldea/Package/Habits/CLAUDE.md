@@ -135,6 +135,26 @@ pink, gray, brown, stone`), cada uno con `hex`, `color` (derivado del hex con
 `ChooseHabitIconViewModel` lo consume y registra los fallos con `Logger`. El icono guardado en el
 hábito es el nombre del SF Symbol.
 
+**`ChooseHabitIconView`: una fila de la `List` por línea de iconos, nunca un `LazyVGrid` por fila.**
+Cada familia es una `Section` y cada fila es un `HStack` con los iconos de una línea. Una `List` es
+un `UICollectionView` que autodimensiona sus celdas y necesita alturas exactas. Un `LazyVGrid`
+«only calculates the geometry for subviews as they become visible» (_Creating performant
+scrollable stacks_), así que su altura es una estimación. Con la versión anterior (un `LazyVGrid`
+con toda la familia en una sola fila, hasta 923 iconos), el iPhone 15 Pro Max con iOS 26.6.2
+abortaba al abrir la pantalla con «stuck in a recursive layout loop». En los simuladores 26.x y en
+iOS 27 no fallaba.
+
+- Columnas con la misma regla que `GridItem(.adaptive(minimum:))`, a partir del ancho de una
+  línea medido con `onGeometryChange` (`lineWidth`). Hasta medirlo se usan 6.
+- Cada icono se limita a `maximumItemSize`, como el máximo de `.adaptive`.
+- La última línea se rellena con huecos (`Color.clear`) para que sus iconos no se estiren.
+- Márgenes: `listRowInsets(.top/.bottom, 5)` entre líneas, para que el espacio vertical sea el
+  mismo que el horizontal (10). En los bordes de la sección se deja el margen por defecto (`nil`)
+  más 4 pt de `padding`.
+
+`HabitIconPicker` (el del formulario) sí usa un `LazyVGrid` dentro de una fila del `Form`. Con 14
+iconos, todos visibles, su altura es exacta y no ha dado problemas.
+
 ## Textos y localización
 
 Un único catálogo por paquete —`Presentation/Resources/Localizable.xcstrings`— y un único
