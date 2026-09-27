@@ -18,7 +18,7 @@ import Settings
 @main
 struct MoldeaApp: App {
     @State private var tabRouter = TabRouter()
-    @State private var router = AppRouter(initialFlow: .tabView)
+    @State private var router = AppRouter(initialFlow: Self.usesInMemoryStore ? .tabView : .splash)
     @Environment(\.scenePhase) private var scenePhase
     private let modelContainer: ModelContainer
     private let dependencies: AppDependencies
@@ -34,7 +34,6 @@ struct MoldeaApp: App {
         }
     }
 
-    /// Los tests de UI lanzan la app con `-inMemoryStore` para no tocar los datos del simulador.
     private static var usesInMemoryStore: Bool {
         #if DEBUG
         ProcessInfo.processInfo.arguments.contains("-inMemoryStore")
@@ -48,8 +47,9 @@ struct MoldeaApp: App {
             RootView(router: router) { flow in
                 switch flow {
                 case .splash:
-                    //TODO: Crear la pantalla de splash
-                    EmptyView()
+                    SplashView {
+                        router.finishSplash()
+                    }
                 case .tabView:
                     MainTabsView(
                         selection: $tabRouter.selectedTab,
@@ -74,25 +74,19 @@ struct MoldeaApp: App {
             .task {
                 await dependencies.core.requestNotificationAuthorization.execute()
             }
-            /*.task {
-                try? SampleDataSeeder.seed(in: modelContainer)
-            }*/
             .task {
                 MoldeaShortcuts.updateAppShortcutParameters()
             }
             #if DEBUG
             .task {
-                // Los tests de UI usan un almacén en memoria y esperan que esté vacío.
                 guard !Self.usesInMemoryStore else { return }
-                try? await DebugHistorySeeder(modelContainer: modelContainer).seedIfNeeded()
+                _ = try? await DebugHistorySeeder(modelContainer: modelContainer).seedIfNeeded()
             }
             #endif
             .onChange(of: scenePhase, initial: true) { _, phase in
                 if phase == .background {
                     MoldeaShortcuts.updateAppShortcutParameters()
                 }
-                // Repone las notificaciones de los próximos días y recoge lo que haya hecho el
-                // widget mientras la app estaba cerrada.
                 if phase == .active {
                     Task { await dependencies.core.notificationScheduler.syncReminders() }
                 }

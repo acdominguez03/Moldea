@@ -34,7 +34,17 @@ es puramente de presentación.
 
 `AppRouter` es un `@Observable` que guarda un `AppFlowEnum` (`.splash` o `.tabView`, por defecto
 `.tabView`). `flow` es `public private(set)`; se cambia con `navigate(value:)`, que es
-`internal` a propósito —el flujo se dirige desde dentro del paquete, no desde la app—.
+`internal` a propósito —el flujo se dirige desde dentro del paquete, no desde la app—. Desde
+fuera solo se expresan intenciones: `finishSplash()` pasa a `.tabView` dentro de un
+`withAnimation`, así el cambio de flujo se hace con el fundido por defecto de SwiftUI.
+
+`MoldeaApp` arranca en `.splash` (salvo con `-inMemoryStore`, que usan los tests de UI, donde
+arranca en `.tabView` para no esperar). La pantalla es `SplashView`, que vive en el target
+`Moldea` y no aquí porque el icono (`SplashIcon.imageset`, copia de los PNG claro y oscuro del
+`AppIcon`: un `.appiconset` no se puede cargar con `Image`) y la marca son de la app. Anima el
+icono (escala con spring) y luego el nombre (sube y aparece), espera ≈ 1,5 s en total y llama
+a su `onFinished`, que `MoldeaApp` conecta con `router.finishSplash()`. Con _Reduce Motion_
+solo hay fundidos. El nombre usa `Text(verbatim:)` porque es la marca y no se traduce.
 
 `RootView` recibe el router y un `@ViewBuilder (AppFlowEnum) -> Content`, pinta el contenido del
 flujo activo y publica el router con `.environment(router)`.

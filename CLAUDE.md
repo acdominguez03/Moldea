@@ -442,7 +442,7 @@ Reglas:
 
 Dos niveles, ambos en `Navigation` y ambos con routers `@Observable`:
 
-- `AppRouter` / `AppFlowEnum` — flujo raíz (`.splash`, `.tabView`), renderizado por `RootView`.
+- `AppRouter` / `AppFlowEnum` — flujo raíz (`.splash`, `.tabView`), renderizado por `RootView`. La app arranca en `.splash` (`SplashView`, en el target `Moldea`).
 - `TabRouter` / `MainTabEnum` — pestaña seleccionada, renderizada por `MainTabsView`.
 
 Una feature no navega a otra feature por sí misma: publica la intención (callback o router del

@@ -17,6 +17,12 @@ public class AppRouter {
         self.flow = initialFlow
     }
 
+    public func finishSplash() {
+        withAnimation(.easeInOut(duration: 0.4)) {
+            navigate(value: .tabView)
+        }
+    }
+
     func navigate(value: AppFlowEnum) {
         flow = value
     }
