@@ -980,7 +980,6 @@ Claves actuales:
 | `transcription_stage_audio_format`              | Analyzer audio format                                     | Formato de audio del analizador                                  |
 | `transcription_stage_audio_engine`              | Audio engine                                              | Motor de audio                                                   |
 | `transcription_stage_analysis`                  | Speech analysis                                           | Análisis de voz                                                  |
-| `ai_check_response_button`                      | Check AI response                                         | Comprobar respuesta de la IA                                     |
 | `ai_no_habits_recognized`                       | No habits from your list were mentioned.                  | No se ha mencionado ningún hábito de tu lista.                   |
 | `ai_error_device_not_eligible`                  | This device doesn't support Apple Intelligence.           | Este dispositivo no es compatible con Apple Intelligence.        |
 | `ai_error_not_enabled`                          | Apple Intelligence is turned off in Settings.             | Apple Intelligence está desactivado en Ajustes.                  |

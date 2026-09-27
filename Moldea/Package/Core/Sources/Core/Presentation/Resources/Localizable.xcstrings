@@ -320,6 +320,96 @@
         }
       }
     },
+    "ai_error_assets_unavailable" : {
+      "comment" : "Error cuando los recursos del modelo de lenguaje no están disponibles en el dispositivo.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model resources aren’t available yet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los recursos del modelo aún no están disponibles."
+          }
+        }
+      }
+    },
+    "ai_error_context_size_exceeded" : {
+      "comment" : "Error cuando la conversación supera la ventana de contexto del modelo.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The conversation is too long for the model. Start a new one."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La conversación es demasiado larga para el modelo. Empieza una nueva."
+          }
+        }
+      }
+    },
+    "ai_error_device_not_eligible" : {
+      "comment" : "Error cuando el dispositivo no es compatible con Apple Intelligence.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device doesn’t support Apple Intelligence."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo no es compatible con Apple Intelligence."
+          }
+        }
+      }
+    },
+    "ai_error_generation_failed" : {
+      "comment" : "Error genérico cuando el modelo no consigue generar la respuesta.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The response couldn’t be generated. Please try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha podido generar la respuesta. Inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "ai_error_guardrail_violation" : {
+      "comment" : "Error cuando la petición activa las medidas de seguridad del modelo.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The request triggered the safety guardrails. Try rephrasing it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La petición ha activado las medidas de seguridad. Prueba a reformularla."
+          }
+        }
+      }
+    },
     "ai_error_habit_not_found" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -354,6 +444,78 @@
         }
       }
     },
+    "ai_error_locale_not_supported" : {
+      "comment" : "Error cuando el modelo no admite el idioma del usuario.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model doesn’t support your current language."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El modelo no admite tu idioma actual."
+          }
+        }
+      }
+    },
+    "ai_error_model_load_failed" : {
+      "comment" : "Error cuando el modelo de lenguaje no se puede cargar.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model couldn’t be loaded."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha podido cargar el modelo."
+          }
+        }
+      }
+    },
+    "ai_error_model_not_ready" : {
+      "comment" : "Error cuando el modelo todavía se está descargando o el sistema está ocupado.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model isn’t ready yet: it’s still downloading or the system is busy."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El modelo aún no está listo: se está descargando o el sistema está ocupado."
+          }
+        }
+      }
+    },
+    "ai_error_not_enabled" : {
+      "comment" : "Error cuando Apple Intelligence está desactivado en Ajustes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence is turned off in Settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence está desactivado en Ajustes."
+          }
+        }
+      }
+    },
     "ai_error_not_understood" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -367,6 +529,96 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No hemos entendido lo que has pedido. Prueba a decirlo otra vez."
+          }
+        }
+      }
+    },
+    "ai_error_rate_limited" : {
+      "comment" : "Error cuando se han hecho demasiadas peticiones al modelo en poco tiempo.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too many requests in a short time. Try again in a moment."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demasiadas peticiones en poco tiempo. Inténtalo de nuevo en un momento."
+          }
+        }
+      }
+    },
+    "ai_error_refusal" : {
+      "comment" : "Error cuando el modelo se niega a responder a la petición.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model declined to answer this request."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El modelo no ha querido responder a esta petición."
+          }
+        }
+      }
+    },
+    "ai_error_session_unavailable" : {
+      "comment" : "Error cuando no se puede crear la sesión con el modelo de lenguaje.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The session with the model couldn’t be created."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha podido crear la sesión con el modelo."
+          }
+        }
+      }
+    },
+    "ai_error_unavailable_unknown" : {
+      "comment" : "Error cuando el modelo no está disponible por un motivo que la app no conoce.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model is unavailable for an unknown reason."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El modelo no está disponible por un motivo desconocido."
+          }
+        }
+      }
+    },
+    "ai_error_unsupported_capability" : {
+      "comment" : "Error cuando el modelo no admite una función que la app ha pedido.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model doesn’t support this feature."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El modelo no admite esta función."
           }
         }
       }

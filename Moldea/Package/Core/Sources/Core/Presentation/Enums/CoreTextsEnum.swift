@@ -52,7 +52,6 @@ public enum CoreTextsEnum {
     }
 
     //MARK: Habits Recognizer Texts
-    public static let aiCheckResponseButton = resource("ai_check_response_button")
     public static let aiNoHabitsRecognized = resource("ai_no_habits_recognized")
 
     public static let summaryEveryDay = resource("habits_summary_every_day")

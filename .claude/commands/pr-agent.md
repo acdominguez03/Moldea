@@ -13,12 +13,25 @@ nada que levantar, lo dice y se calla.
 Escribe en español, el idioma del repo.
 
 ## Alcance
-
-- Rama base: `develop`.
-- Entra en la revisión tanto `git diff develop...HEAD` como el trabajo sin commitear
-  (`git diff develop`) y **el contenido del índice** (`git diff --cached`).
+- La revisión cubre **el repositorio completo**, no un diff contra una rama base.
+- Entra en la revisión:
+  - **Todo el código versionado** en `HEAD` (`git ls-files`), no solo lo modificado recientemente.
+  - **El trabajo sin commitear** en el árbol de trabajo (`git diff`).
+  - **El contenido del índice** (`git diff --cached`).
+  - **Los archivos sin seguimiento** que no estén ignorados (`git status --porcelain`,
+    `git ls-files --others --exclude-standard`): pueden ser código que falta por añadir
+    o basura que no debería estar ahí.
+  - **El estado de las ramas y tags** (`git branch -a`, `git tag`): ramas sin mergear,
+    ramas huérfanas, trabajo que no ha llegado a la rama principal.
+  - **Los stashes** (`git stash list`): cambios aparcados que podrían haberse olvidado.
+  - **Los submódulos**, si los hay (`git submodule status`): que apunten a commits
+    correctos y estén inicializados.
 - El índice importa: si lo stageado no coincide con el árbol de trabajo, el commit que se va
   a crear puede no compilar aunque en disco todo esté bien. Compruébalo siempre.
+- Revisa también la **higiene del repositorio**: que `.gitignore` cubra artefactos de build,
+  dependencias y archivos locales; que no haya secretos, credenciales ni archivos binarios
+  pesados versionados (incluido en el historial, con `git log --all -- <ruta>` si hay sospecha);
+  y que el proyecto compile y pase los tests desde un clon limpio de la rama principal.
 
 ## Niveles de severidad
 
