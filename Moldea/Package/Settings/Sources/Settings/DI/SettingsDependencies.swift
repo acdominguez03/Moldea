@@ -40,7 +40,11 @@ public struct SettingsDependencies: Sendable {
                 userDefaultsRepository: core.userDefaultsRepository,
                 notificationScheduler: core.notificationScheduler
             ),
-            requestNotificationAuthorizationUseCase: core.requestNotificationAuthorization
+            requestNotificationAuthorizationUseCase: core.requestNotificationAuthorization,
+            getMicrophonePermissionStatusUseCase: GetMicrophonePermissionStatusUseCase(
+                microphonePermissionRepository: core.microphonePermissionRepository
+            ),
+            isVoiceInputAvailable: FoundationModelsDeviceEligibility.isDeviceEligible
         )
     }
 

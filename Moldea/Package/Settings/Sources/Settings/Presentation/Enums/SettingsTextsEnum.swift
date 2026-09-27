@@ -61,6 +61,11 @@ public enum SettingsTextsEnum {
     public static let notificationsPermissionDisabledTitle = resource("settings_notifications_permission_disabled_title")
     public static let notificationsPermissionDisabledDescription = resource("settings_notifications_permission_disabled_description")
 
+    // MARK: Microphone Permission Denied
+    public static let voiceCommands = resource("settings_voice_commands")
+    public static let microphonePermissionDisabledTitle = resource("settings_microphone_permission_disabled_title")
+    public static let microphonePermissionDisabledDescription = resource("settings_microphone_permission_disabled_description")
+
     // MARK: Accessibility
     public static let editReminder = resource("settings_edit_reminder")
     public static let opensSystemSettings = resource("settings_opens_system_settings")

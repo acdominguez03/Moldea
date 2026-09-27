@@ -11,6 +11,10 @@ private actor FakeMicrophonePermissionRepository: MicrophonePermissionRepository
     func requestAuthorization() async -> Bool {
         isAllowed
     }
+
+    nonisolated func authorizationStatus() -> MicrophonePermissionStatusEnum {
+        isAllowed ? .granted : .denied
+    }
 }
 
 private final class FakeUserDefaultsRepository: UserDefaultsRepository, @unchecked Sendable {

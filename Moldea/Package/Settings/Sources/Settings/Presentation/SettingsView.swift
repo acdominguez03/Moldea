@@ -50,7 +50,12 @@ struct SettingsContentView: View {
         guard let url = URL(string: urlString) else { return }
         openURL(url)
     }
-    
+
+    private func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        openURL(url)
+    }
+
     private var activeHabits: [Habit] {
         habits.filter(\.isActive)
     }
@@ -120,9 +125,27 @@ struct SettingsContentView: View {
                     }
                 } else {
                     Section {
-                        NotificationPermissionDisabledRow(onRowTapped: openNotificationSettings)
+                        PermissionDisabledRow(
+                            icon: "bell.slash.fill",
+                            title: SettingsTextsEnum.notificationsPermissionDisabledTitle,
+                            description: SettingsTextsEnum.notificationsPermissionDisabledDescription,
+                            onRowTapped: openNotificationSettings
+                        )
                     } header: {
                         Text(SettingsTextsEnum.notifications)
+                    }
+                }
+
+                if settingsViewModel.showsMicrophonePermissionRow {
+                    Section {
+                        PermissionDisabledRow(
+                            icon: "mic.slash.fill",
+                            title: SettingsTextsEnum.microphonePermissionDisabledTitle,
+                            description: SettingsTextsEnum.microphonePermissionDisabledDescription,
+                            onRowTapped: openAppSettings
+                        )
+                    } header: {
+                        Text(SettingsTextsEnum.voiceCommands)
                     }
                 }
             }
@@ -138,6 +161,7 @@ struct SettingsContentView: View {
             }
             .onChange(of: scenePhase) { _, newPhase in
                 if newPhase == .active {
+                    settingsViewModel.refreshMicrophonePermissionStatus()
                     Task {
                         await settingsViewModel.refreshNotificationPermissionStatus()
                     }

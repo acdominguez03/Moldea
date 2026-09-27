@@ -1,5 +1,5 @@
 //
-//  NotificationPermissionDisabledRow.swift
+//  PermissionDisabledRow.swift
 //  Settings
 //
 //  Created by Ismael Cordón Domínguez on 23/9/26.
@@ -8,7 +8,10 @@
 import SwiftUI
 import Core
 
-struct NotificationPermissionDisabledRow: View {
+struct PermissionDisabledRow: View {
+    let icon: String
+    let title: LocalizedStringResource
+    let description: LocalizedStringResource
     let onRowTapped: () -> Void
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -22,13 +25,13 @@ struct NotificationPermissionDisabledRow: View {
     var body: some View {
         Button(action: onRowTapped) {
             layout {
-                HabitIconBadge(color: .red, icon: "bell.slash.fill")
+                HabitIconBadge(color: .red, icon: icon)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(SettingsTextsEnum.notificationsPermissionDisabledTitle)
+                    Text(title)
                         .foregroundStyle(.primary)
 
-                    Text(SettingsTextsEnum.notificationsPermissionDisabledDescription)
+                    Text(description)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -41,6 +44,17 @@ struct NotificationPermissionDisabledRow: View {
 
 #Preview {
     List {
-        NotificationPermissionDisabledRow(onRowTapped: {})
+        PermissionDisabledRow(
+            icon: "bell.slash.fill",
+            title: SettingsTextsEnum.notificationsPermissionDisabledTitle,
+            description: SettingsTextsEnum.notificationsPermissionDisabledDescription,
+            onRowTapped: {}
+        )
+        PermissionDisabledRow(
+            icon: "mic.slash.fill",
+            title: SettingsTextsEnum.microphonePermissionDisabledTitle,
+            description: SettingsTextsEnum.microphonePermissionDisabledDescription,
+            onRowTapped: {}
+        )
     }
 }

@@ -81,6 +81,11 @@ fijan aquí: un `presentationDetents` aplicado por encima gana sobre el que decl
 inyectado, así que es `sheetContent` quien decide el tamaño. Hoy lo hace `MoldeaApp`, que pasa
 `SpeechToTextView()` de `Core` con `.presentationDetents([.medium, .large])`.
 
+Antes de presentar la hoja, `MainTabsView` espera a `prepareSheet: () async -> Void` (por
+defecto vacío). `MoldeaApp` lo usa para pedir el permiso de micrófono, así la alerta del sistema
+sale antes que el sheet y no encima de él. Mientras se espera, `isPreparingSheet` ignora los
+toques repetidos en la pestaña.
+
 ## Convenciones
 
 - Routers: clases `@Observable` con `init()` público e intención expresada en métodos

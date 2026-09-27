@@ -342,6 +342,40 @@
         }
       }
     },
+    "settings_microphone_permission_disabled_description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow microphone access to create and manage habits with your voice."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite el acceso al micrófono para crear y gestionar hábitos con la voz."
+          }
+        }
+      }
+    },
+    "settings_microphone_permission_disabled_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone disabled"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Micrófono deshabilitado"
+          }
+        }
+      }
+    },
     "settings_notifications_permission_disabled_description" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -407,6 +441,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajustes"
+          }
+        }
+      }
+    },
+    "settings_voice_commands" : {
+      "comment" : "Cabecera de la sección de Ajustes que avisa de que el micrófono está desactivado.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice commands"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comandos de voz"
           }
         }
       }

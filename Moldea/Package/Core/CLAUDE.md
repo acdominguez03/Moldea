@@ -267,11 +267,19 @@ Todo lo de `Model/` y `Mappers/` es `internal`: los `@Model` no salen de `Core`.
 - **`AVAudioApplicationMicrophonePermissionRepository`** (`public struct`): el mismo patrón
   para el micrófono, sobre `AVAudioApplication.requestRecordPermission()` (no lanza).
   `DefaultRequestMicrophoneAuthorizationUseCase` guarda el resultado en
-  `isMicrophonePermissionAllowed`, como su equivalente de notificaciones.
-- **Los dos permisos se piden al arrancar**, en un único `.task` de `MoldeaApp`, uno detrás de
-  otro (el sistema no muestra dos alertas a la vez). `LiveTranscriptionModel` ya no pide el
-  permiso al abrir el sheet: solo comprueba `AVAudioApplication.shared.recordPermission ==
-  .granted`, que no muestra alerta, y si no lo está lanza `microphoneNotAuthorized`.
+  `isMicrophonePermissionAllowed`, como su equivalente de notificaciones. Además expone
+  `authorizationStatus() -> MicrophonePermissionStatusEnum` (`notDetermined` / `denied` /
+  `granted`), que lee `AVAudioApplication.shared.recordPermission` **sin mostrar alerta**; lo
+  usa `Settings` para saber si pintar la fila de micrófono denegado.
+- **Cuándo se pide cada permiso.** El de notificaciones, al arrancar, en el `.task` de
+  `MoldeaApp`. El de micrófono, **solo si la IA está disponible y justo antes de abrir el sheet de
+  voz**: `MoldeaApp` pasa `requestMicrophoneAuthorization.execute()` como `prepareSheet` de
+  `MainTabsView`, que lo espera antes de presentar la hoja. Como la pestaña del micrófono solo
+  existe si `FoundationModelsDeviceEligibility.isDeviceEligible`, en un dispositivo no compatible
+  nunca se pide. Si el usuario ya respondió, `requestRecordPermission()` devuelve al instante sin
+  alerta. `LiveTranscriptionModel` no pide el permiso: solo comprueba
+  `AVAudioApplication.shared.recordPermission == .granted` y, si no lo está, lanza
+  `microphoneNotAuthorized`, que el sheet muestra como aviso.
 
 ## Dependencias: `DI/`
 

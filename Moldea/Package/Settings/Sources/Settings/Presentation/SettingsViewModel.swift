@@ -18,7 +18,14 @@ final class SettingsViewModel: BaseViewModel {
     private(set) var isNotificationsEnabled: Bool
     private(set) var isNotificationPermissionAllowed: Bool
     private(set) var isDailySummaryEnabled: Bool
+    private(set) var isMicrophonePermissionDenied: Bool
 
+    var showsMicrophonePermissionRow: Bool {
+        isVoiceInputAvailable && isMicrophonePermissionDenied
+    }
+
+    private let isVoiceInputAvailable: Bool
+    private let getMicrophonePermissionStatusUseCase: GetMicrophonePermissionStatusUseCase
     private let setHabitReminderEnabledUseCase: any SetHabitReminderEnabledUseCase
     private let getIsNotificationsEnabledUseCase: GetIsNotificationsEnabledUseCase
     private let setIsNotificationsEnabledUseCase: SetIsNotificationsEnabledUseCase
@@ -33,8 +40,12 @@ final class SettingsViewModel: BaseViewModel {
         getIsNotificationPermissionAllowedUseCase: GetIsNotificationPermissionAllowedUseCase,
         getIsDailySummaryEnabledUseCase: GetIsDailySummaryEnabledUseCase,
         setIsDailySummaryEnabledUseCase: SetIsDailySummaryEnabledUseCase,
-        requestNotificationAuthorizationUseCase: any RequestNotificationAuthorizationUseCase
+        requestNotificationAuthorizationUseCase: any RequestNotificationAuthorizationUseCase,
+        getMicrophonePermissionStatusUseCase: GetMicrophonePermissionStatusUseCase,
+        isVoiceInputAvailable: Bool
     ) {
+        self.getMicrophonePermissionStatusUseCase = getMicrophonePermissionStatusUseCase
+        self.isVoiceInputAvailable = isVoiceInputAvailable
         self.setHabitReminderEnabledUseCase = setHabitReminderEnabledUseCase
         self.getIsNotificationsEnabledUseCase = getIsNotificationsEnabledUseCase
         self.setIsNotificationsEnabledUseCase = setIsNotificationsEnabledUseCase
@@ -45,10 +56,15 @@ final class SettingsViewModel: BaseViewModel {
         isNotificationsEnabled = getIsNotificationsEnabledUseCase.execute()
         isNotificationPermissionAllowed = getIsNotificationPermissionAllowedUseCase.execute()
         isDailySummaryEnabled = getIsDailySummaryEnabledUseCase.execute()
+        isMicrophonePermissionDenied = getMicrophonePermissionStatusUseCase.execute() == .denied
     }
 
     func refreshNotificationPermissionStatus() async {
         isNotificationPermissionAllowed = await requestNotificationAuthorizationUseCase.execute()
+    }
+
+    func refreshMicrophonePermissionStatus() {
+        isMicrophonePermissionDenied = getMicrophonePermissionStatusUseCase.execute() == .denied
     }
 
     func setLoading(_ isLoading: Bool) {

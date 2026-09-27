@@ -53,7 +53,10 @@ struct MoldeaApp: App {
                 case .tabView:
                     MainTabsView(
                         selection: $tabRouter.selectedTab,
-                        showsMicrophoneTab: isDeviceEligibleForAppleIntelligence
+                        showsMicrophoneTab: isDeviceEligibleForAppleIntelligence,
+                        prepareSheet: {
+                            await dependencies.core.requestMicrophoneAuthorization.execute()
+                        }
                     ) { tab in
                         tabContent(for: tab)
                     } sheetContent: {
@@ -70,7 +73,6 @@ struct MoldeaApp: App {
             .environment(\.settingsDependencies, dependencies.settings)
             .task {
                 await dependencies.core.requestNotificationAuthorization.execute()
-                await dependencies.core.requestMicrophoneAuthorization.execute()
             }
             /*.task {
                 try? SampleDataSeeder.seed(in: modelContainer)

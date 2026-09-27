@@ -13,4 +13,17 @@ public struct AVAudioApplicationMicrophonePermissionRepository: MicrophonePermis
     public func requestAuthorization() async -> Bool {
         await AVAudioApplication.requestRecordPermission()
     }
+
+    public func authorizationStatus() -> MicrophonePermissionStatusEnum {
+        switch AVAudioApplication.shared.recordPermission {
+        case .granted:
+            .granted
+        case .denied:
+            .denied
+        case .undetermined:
+            .notDetermined
+        @unknown default:
+            .notDetermined
+        }
+    }
 }

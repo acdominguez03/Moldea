@@ -37,6 +37,22 @@ private actor FakeRequestNotificationAuthorizationUseCase: RequestNotificationAu
     }
 }
 
+private final class FakeMicrophonePermissionRepository: MicrophonePermissionRepository, @unchecked Sendable {
+    var status: MicrophonePermissionStatusEnum
+
+    init(status: MicrophonePermissionStatusEnum) {
+        self.status = status
+    }
+
+    func requestAuthorization() async -> Bool {
+        status == .granted
+    }
+
+    func authorizationStatus() -> MicrophonePermissionStatusEnum {
+        status
+    }
+}
+
 private actor FakeHabitNotificationScheduler: HabitNotificationScheduler {
     private(set) var scheduledHabits: [Habit] = []
     private(set) var cancelledHabitIDs: [Habit.ID] = []
@@ -68,7 +84,9 @@ struct SettingsViewModelTests {
         isNotificationsEnabledAtLaunch: Bool = false,
         isDailySummaryEnabledAtLaunch: Bool = false,
         notificationScheduler: FakeHabitNotificationScheduler = FakeHabitNotificationScheduler(),
-        userDefaultsRepository: FakeUserDefaultsRepository = FakeUserDefaultsRepository()
+        userDefaultsRepository: FakeUserDefaultsRepository = FakeUserDefaultsRepository(),
+        microphonePermissionRepository: FakeMicrophonePermissionRepository = FakeMicrophonePermissionRepository(status: .granted),
+        isVoiceInputAvailable: Bool = true
     ) -> (SettingsViewModel, FakeRequestNotificationAuthorizationUseCase) {
         userDefaultsRepository.saveBool(.isNotificationPermissionAllowed, isNotificationPermissionAllowedAtLaunch)
         userDefaultsRepository.saveBool(.isNotificationsEnabled, isNotificationsEnabledAtLaunch)
@@ -94,7 +112,11 @@ struct SettingsViewModelTests {
                 userDefaultsRepository: userDefaultsRepository,
                 notificationScheduler: notificationScheduler
             ),
-            requestNotificationAuthorizationUseCase: requestUseCase
+            requestNotificationAuthorizationUseCase: requestUseCase,
+            getMicrophonePermissionStatusUseCase: GetMicrophonePermissionStatusUseCase(
+                microphonePermissionRepository: microphonePermissionRepository
+            ),
+            isVoiceInputAvailable: isVoiceInputAvailable
         )
 
         return (viewModel, requestUseCase)
@@ -209,5 +231,43 @@ struct SettingsViewModelTests {
 
         #expect(viewModel.isNotificationsEnabled == true)
         #expect(defaults.getBool(.isNotificationsEnabled) == true)
+    }
+
+    // MARK: Permiso de micrófono
+
+    @Test func theMicrophoneRowShowsWhenThePermissionIsDeniedOnAnEligibleDevice() {
+        let (viewModel, _) = makeViewModel(
+            microphonePermissionRepository: FakeMicrophonePermissionRepository(status: .denied)
+        )
+
+        #expect(viewModel.showsMicrophonePermissionRow == true)
+    }
+
+    @Test(arguments: [MicrophonePermissionStatusEnum.notDetermined, .granted])
+    func theMicrophoneRowIsHiddenUnlessThePermissionIsDenied(status: MicrophonePermissionStatusEnum) {
+        let (viewModel, _) = makeViewModel(
+            microphonePermissionRepository: FakeMicrophonePermissionRepository(status: status)
+        )
+
+        #expect(viewModel.showsMicrophonePermissionRow == false)
+    }
+
+    @Test func theMicrophoneRowIsHiddenWhenVoiceInputIsUnavailable() {
+        let (viewModel, _) = makeViewModel(
+            microphonePermissionRepository: FakeMicrophonePermissionRepository(status: .denied),
+            isVoiceInputAvailable: false
+        )
+
+        #expect(viewModel.showsMicrophonePermissionRow == false)
+    }
+
+    @Test func refreshMicrophonePermissionStatusReadsTheCurrentState() {
+        let microphone = FakeMicrophonePermissionRepository(status: .denied)
+        let (viewModel, _) = makeViewModel(microphonePermissionRepository: microphone)
+
+        microphone.status = .granted
+        viewModel.refreshMicrophonePermissionStatus()
+
+        #expect(viewModel.showsMicrophonePermissionRow == false)
     }
 }

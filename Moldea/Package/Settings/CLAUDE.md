@@ -31,6 +31,7 @@ Sources/Settings/
 │       ├── GetIsDailySummaryEnabledUseCase.swift
 │       ├── SetIsDailySummaryEnabledUseCase.swift
 │       ├── GetIsNotificationPermissionAllowedUseCase.swift
+│       ├── GetMicrophonePermissionStatusUseCase.swift
 │       ├── SetHabitReminderEnabledUseCase.swift
 │       └── UpdateHabitReminderUseCase.swift
 └── Presentation/
@@ -40,7 +41,7 @@ Sources/Settings/
     ├── HabitReminderSheetViewModel.swift
     ├── Components/
     │   ├── HabitReminderRow.swift
-    │   └── NotificationPermissionDisabledRow.swift
+    │   └── PermissionDisabledRow.swift
     ├── Enums/
     │   └── SettingsTextsEnum.swift
     └── Resources/
@@ -75,7 +76,7 @@ La sección de notificaciones se pinta de una forma u otra según
 - **Permiso concedido**: el `Toggle` de "Permitir avisos" (preferencia de producto,
   `isNotificationsEnabled` en `Core`) y, si hay hábitos con recordatorio activo, la lista de
   `HabitReminderRow` por hábito.
-- **Permiso denegado**: en su lugar, una única fila —`NotificationPermissionDisabledRow`—
+- **Permiso denegado**: en su lugar, una única fila —`PermissionDisabledRow`—
   con el icono `bell.slash.fill` dentro de `HabitIconBadge` (de `Core`, en rojo), el título
   "Notificaciones deshabilitadas" y una descripción que invita a tocarla. Al tocarla, abre
   `UIApplication.openNotificationSettingsURLString` con `@Environment(\.openURL)`.
@@ -101,6 +102,25 @@ solo devuelve el estado actual. **Importante:** no basta con releer `UserDefault
 (`GetIsNotificationPermissionAllowedUseCase`) al refrescar, porque ese valor solo se actualiza
 la primera vez que se pide el permiso, al arrancar la app (`MoldeaApp`); hay que volver a
 consultar `UNUserNotificationCenter` de verdad.
+
+## Permiso de micrófono
+
+Si el usuario deniega el micrófono al abrir el sheet de voz (ver _Cuándo se pide cada permiso_ en
+el `CLAUDE.md` de `Core`), además del aviso del sheet aparece en Ajustes una sección «Comandos de
+voz» con una `PermissionDisabledRow` (`mic.slash.fill`). Es la misma fila que la de
+notificaciones, parametrizada con icono, título y descripción.
+
+- Solo se pinta si `settingsViewModel.showsMicrophonePermissionRow`: el dispositivo es compatible
+  con Apple Intelligence (`isVoiceInputAvailable`, que `SettingsDependencies` rellena con
+  `FoundationModelsDeviceEligibility.isDeviceEligible`, el mismo criterio que la pestaña del
+  micrófono) **y** el estado es `.denied`. Con `.notDetermined` no sale: el usuario aún no ha
+  abierto el sheet y no se le ha preguntado.
+- Al tocarla abre `UIApplication.openSettingsURLString` (la página de la app en Ajustes, donde
+  está el interruptor del micrófono), no la de notificaciones.
+- El estado se lee con `GetMicrophonePermissionStatusUseCase` → `authorizationStatus()`, que no
+  muestra alerta. Por eso el refresco al pasar a `.active`
+  (`refreshMicrophonePermissionStatus()`) es síncrono y, a diferencia del de notificaciones, no
+  vuelve a pedir el permiso: pedirlo aquí sacaría la alerta en Ajustes si aún no se ha decidido.
 
 ## Textos y localización
 
@@ -154,6 +174,11 @@ métodos síncronos.
 - `SettingsViewModelTests`: el `init` refleja el último valor guardado (no el real del
   sistema), y `refreshNotificationPermissionStatus()` sí vuelve a consultar el
   `RequestNotificationAuthorizationUseCase` inyectado, en ambos sentidos (concede y deniega).
+  La fila de micrófono solo sale con `.denied` en un dispositivo compatible, y
+  `refreshMicrophonePermissionStatus()` refleja el cambio del repositorio. El fake de
+  `MicrophonePermissionRepository` es una `final class @unchecked Sendable` con `status` mutable,
+  porque `authorizationStatus()` es síncrono.
+- `GetMicrophonePermissionStatusUseCaseTests`: devuelve el estado del repositorio.
 
 `Tests/SettingsTests/SettingsTests.swift` es todavía la plantilla generada.
 

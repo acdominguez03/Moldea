@@ -15,17 +15,21 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
     private let sheetContent: () -> SheetContent
     private let selection: Binding<MainTab>
     private let showsMicrophoneTab: Bool
+    private let prepareSheet: () async -> Void
 
     @State private var isSheetPresented = false
+    @State private var isPreparingSheet = false
 
     public init(
         selection: Binding<MainTab>,
         showsMicrophoneTab: Bool,
+        prepareSheet: @escaping () async -> Void = {},
         @ViewBuilder tabContent: @escaping (MainTab) -> Content,
         @ViewBuilder sheetContent: @escaping () -> SheetContent
     ) {
         self.selection = selection
         self.showsMicrophoneTab = showsMicrophoneTab
+        self.prepareSheet = prepareSheet
         self.tabContent = tabContent
         self.sheetContent = sheetContent
     }
@@ -77,10 +81,20 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
             selection.wrappedValue
         } set: { newValue in
             if newValue == .microphone {
-                isSheetPresented = true
+                presentSheet()
             } else {
                 selection.wrappedValue = newValue
             }
+        }
+    }
+
+    private func presentSheet() {
+        guard !isPreparingSheet else { return }
+        isPreparingSheet = true
+        Task {
+            await prepareSheet()
+            isPreparingSheet = false
+            isSheetPresented = true
         }
     }
 }

@@ -7,4 +7,5 @@
 
 public protocol MicrophonePermissionRepository: Sendable {
     func requestAuthorization() async -> Bool
+    func authorizationStatus() -> MicrophonePermissionStatusEnum
 }
