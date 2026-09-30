@@ -69,6 +69,23 @@
         }
       }
     },
+    "habits_announce_with_daily_summary" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of %lld habits and a reminder at the end of the day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld de %lld hábitos y aviso al final del día"
+          }
+        }
+      }
+    },
     "notifications" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -151,6 +168,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Resumen del día"
+          }
+        }
+      }
+    },
+    "only_daily_summary_announce" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder at the end of the day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aviso al final del día"
           }
         }
       }
