@@ -76,6 +76,7 @@ struct HabitsContentView: View {
                         }
                     }
                     .listStyle(.insetGrouped)
+                    .readableContentWidth()
                     .alert(
                         HabitsTextsEnum.deleteHabitAlertTitle,
                         isPresented: isShowingDeleteAlert,

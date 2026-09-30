@@ -170,6 +170,7 @@ struct SettingsContentView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .readableContentWidth()
             .navigationTitle(SettingsTextsEnum.screenTitle)
             .navigationBarTitleDisplayMode(.large)
             .sheet(item: $habitToEditReminder) { habit in
