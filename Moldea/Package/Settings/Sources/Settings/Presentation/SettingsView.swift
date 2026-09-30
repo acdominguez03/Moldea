@@ -79,7 +79,23 @@ struct SettingsContentView: View {
     private var activeRemindersCount: Int {
         activeHabits.count(where: \.hasActiveReminder)
     }
-    
+
+    private var allowAnnouncementsSubtitle: LocalizedStringResource {
+        guard settingsViewModel.isNotificationsEnabled else {
+            return SettingsTextsEnum.everythingMuted
+        }
+
+        switch (activeRemindersCount > 0, settingsViewModel.isDailySummaryEnabled) {
+        case (false, false):
+            return SettingsTextsEnum.everythingMuted
+        case (false, true):
+            return SettingsTextsEnum.onlyDailySummaryAnnounce
+        case (true, true):
+            return SettingsTextsEnum.habitThatAnnounceWithDailySummary(activeHabits.count, activeRemindersCount)
+        case (true, false):
+            return SettingsTextsEnum.habitThatAnnounce(activeHabits.count, activeRemindersCount)
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -91,15 +107,7 @@ struct SettingsContentView: View {
                             label: {
                                 Text(SettingsTextsEnum.allowAnnouncements)
 
-                                Text(
-                                    settingsViewModel.isNotificationsEnabled || activeRemindersCount == 0 ?
-                                        SettingsTextsEnum
-                                            .habitThatAnnounce(
-                                                activeHabits.count,
-                                                activeRemindersCount,
-                                            )
-                                    : SettingsTextsEnum.everythingMuted
-                                )
+                                Text(allowAnnouncementsSubtitle)
                             }
                         )
                     } header: {

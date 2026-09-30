@@ -54,7 +54,17 @@ public enum SettingsTextsEnum {
             bundle: .atURL(Bundle.module.bundleURL)
         )
     }
-    
+
+    public static func habitThatAnnounceWithDailySummary(_ totalHabits: Int, _ habitsWithAnnouncement: Int) -> LocalizedStringResource {
+        LocalizedStringResource(
+            "habits_announce_with_daily_summary",
+            defaultValue: "\(habitsWithAnnouncement) of \(totalHabits) habits and a reminder at the end of the day",
+            bundle: .atURL(Bundle.module.bundleURL)
+        )
+    }
+
+    public static let onlyDailySummaryAnnounce = resource("only_daily_summary_announce")
+
     public static let everythingMuted = resource("everything_muted")
 
     // MARK: Notification Permission Denied
