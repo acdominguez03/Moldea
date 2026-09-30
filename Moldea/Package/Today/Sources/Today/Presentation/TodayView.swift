@@ -6,22 +6,44 @@
 //
 
 import SwiftUI
+import Foundation
 import Core
 
 public struct TodayView: View {
     @Environment(\.todayDependencies) private var dependencies
+    @Environment(\.scenePhase) private var scenePhase
+
+    @State private var referenceDate: Date = .now
 
     public init() {}
 
     public var body: some View {
         if let dependencies {
-            TodayContentView(viewModel: dependencies.makeTodayViewModel())
+            TodayContentView(
+                viewModel: dependencies.makeTodayViewModel(),
+                referenceDate: referenceDate
+            )
+            .id(referenceDate)
+            .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+                refreshReferenceDateIfNeeded()
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    refreshReferenceDateIfNeeded()
+                }
+            }
         } else {
             MissingDependenciesView(TodayDependencies.self)
         }
     }
-}
 
+    private func refreshReferenceDateIfNeeded() {
+        let now = Date.now
+        if !Calendar.current.isDate(now, inSameDayAs: referenceDate) {
+            referenceDate = now
+        }
+    }
+}
 struct TodayContentView: View {
 
     @TodayHabitsQuery private var dailyHabits: [TodayHabit]
@@ -42,11 +64,13 @@ struct TodayContentView: View {
             set: { if !$0 { todayViewModel.onErrorDismissed() } }
         )
     }
-
-    init(viewModel: TodayViewModel) {
+    
+    init(viewModel: TodayViewModel, referenceDate: Date) {
         _todayViewModel = State(initialValue: viewModel)
+        _dailyHabits = TodayHabitsQuery(date: referenceDate)
+        _weeklyHabits = WeeklyHabitsQuery(date: referenceDate)
     }
-
+    
     private var habits: [TodayHabit] {
         switch todayViewModel.selectedTab {
         case .daily:
@@ -55,15 +79,15 @@ struct TodayContentView: View {
             weeklyHabits
         }
     }
-
+    
     private var progress: HabitsProgress {
         todayViewModel.progress(for: habits)
     }
-
+    
     private var dailyProgress: HabitsProgress {
         todayViewModel.dailyProgress(for: dailyHabits)
     }
-
+    
     var body: some View {
         NavigationStack {
             List {
@@ -78,7 +102,7 @@ struct TodayContentView: View {
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
-
+                
                 Section {
                     ProgressView(value: progress.fraction) {
                         Text(
@@ -94,13 +118,13 @@ struct TodayContentView: View {
                         )
                     }
                 }
-
+                
                 Section {
                     if habits.isEmpty {
                         Text(TodayTextsEnum.emptyState)
                             .foregroundStyle(.secondary)
                     }
-
+                    
                     ForEach(habits, id: \.id) { todayHabit in
                         TodayCardView(todayHabit: todayHabit) {
                             Task { await todayViewModel.onToggleCompletion(todayHabit) }
@@ -123,6 +147,7 @@ struct TodayContentView: View {
         }
     }
 }
+
 
 #Preview(traits: .moldea) {
     TodayView()
