@@ -133,6 +133,7 @@ struct TodayContentView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .readableContentWidth()
             .navigationTitle(todayViewModel.selectedTab == .daily ? TodayTextsEnum.screenTitle : TodayTextsEnum.tabWeekly)
             .navigationBarTitleDisplayMode(.large)
             .alert(TodayTextsEnum.errorTitle, isPresented: isShowingError) {
@@ -150,6 +151,11 @@ struct TodayContentView: View {
 
 
 #Preview(traits: .moldea) {
+    TodayView()
+        .environment(\.todayDependencies, .preview)
+}
+
+#Preview("WIDE_TMP", traits: .moldea, .fixedLayout(width: 1100, height: 700)) {
     TodayView()
         .environment(\.todayDependencies, .preview)
 }

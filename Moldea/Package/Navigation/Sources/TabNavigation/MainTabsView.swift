@@ -55,6 +55,7 @@ public struct MainTabsView<Content: View, SheetContent: View>: View {
                 }
             }
         }
+        .tabViewStyle(.sidebarAdaptable)
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $isSheetPresented) {
             NavigationStack {

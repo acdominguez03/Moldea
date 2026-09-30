@@ -46,6 +46,7 @@ public struct StatisticsView: View {
                     .padding(20)
                 }
             }
+            .readableContentWidth()
             .navigationTitle(StatisticsTextsEnum.screenTitle)
             .navigationBarTitleDisplayMode(.large)
         }
