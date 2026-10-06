@@ -1,0 +1,64 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Moldea"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Moldea"
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To control your habits by voice, Moldea needs access to the microphone. Your speech is converted to text and interpreted with Apple Intelligence directly on your device, without being sent to our servers or to third parties, to create habits, delete them, or mark them as completed. For example, you can say \"I want to run three times a week\". The microphone is only used while the voice recognition sheet is open."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para controlar tus hábitos por voz, Moldea necesita acceder al micrófono. Tu voz se convierte en texto y se interpreta con Apple Intelligence directamente en tu dispositivo, sin enviarse a servidores propios ni de terceros, para crear hábitos, eliminarlos o marcarlos como completados. Por ejemplo, puedes decir «Quiero correr tres veces a la semana». El micrófono solo se utiliza mientras la hoja de reconocimiento de voz está abierta."
+          }
+        }
+      }
+    },
+    "NSSpeechRecognitionUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speech recognition converts what you say into text so the on-device AI can interpret your commands to create habits, delete them, or mark them as completed. For example, saying \"I want to read 20 minutes every night\" is transcribed and used to create that habit with the frequency you indicated. Audio is only processed while the voice recognition sheet is open, and everything is processed on your device."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reconocimiento de voz convierte lo que dices en texto para que la IA de tu dispositivo pueda interpretar tus órdenes y crear hábitos, eliminarlos o marcarlos como completados. Por ejemplo, si dices «Quiero leer 20 minutos cada noche», se transcribe y se usa para crear ese hábito con la frecuencia indicada. El audio solo se procesa mientras la hoja de reconocimiento de voz está abierta y todo se procesa en tu dispositivo."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

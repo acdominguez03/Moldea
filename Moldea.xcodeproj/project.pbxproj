@@ -780,8 +780,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Moldea/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Moldea;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Permisos de audio";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Permisos de reconocimiento de texto";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To control your habits by voice, Moldea needs access to the microphone. Your speech is converted to text and interpreted with Apple Intelligence directly on your device, without being sent to our servers or to third parties, to create habits, delete them, or mark them as completed. For example, you can say \"I want to run three times a week\". The microphone is only used while the voice recognition sheet is open.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Speech recognition converts what you say into text so the on-device AI can interpret your commands to create habits, delete them, or mark them as completed. For example, saying \"I want to read 20 minutes every night\" is transcribed and used to create that habit with the frequency you indicated. Audio is only processed while the voice recognition sheet is open, and everything is processed on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -822,8 +822,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Moldea/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Moldea;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Permisos de audio";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Permisos de reconocimiento de texto";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "To control your habits by voice, Moldea needs access to the microphone. Your speech is converted to text and interpreted with Apple Intelligence directly on your device, without being sent to our servers or to third parties, to create habits, delete them, or mark them as completed. For example, you can say \"I want to run three times a week\". The microphone is only used while the voice recognition sheet is open.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Speech recognition converts what you say into text so the on-device AI can interpret your commands to create habits, delete them, or mark them as completed. For example, saying \"I want to read 20 minutes every night\" is transcribed and used to create that habit with the frequency you indicated. Audio is only processed while the voice recognition sheet is open, and everything is processed on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
